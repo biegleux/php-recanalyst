@@ -1,4 +1,4 @@
-d<?php
+<?php
 /**
  * Defines configuration constants used for RecAnalyst.
  *
