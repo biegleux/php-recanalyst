@@ -1,0 +1,30 @@
+INFORMATION:
+------------
+
+	recAnalyst is an OO package written in PHP for analyzing AOC recorded games
+
+	(c) 2007-2008 biegleux <biegleux@gmail.com>
+
+	latest release: recAnalyst v0.9.0 2008/11/07
+
+	project's homepage: 		http://recanalyst.sourceforge.net/
+	project's documentation:	http://sourceforge.net/docman/?group_id=244381
+
+
+LICENSE:
+--------
+
+	For license information read COPYING.
+
+
+INSTALLATION:
+-------------
+
+	For installation instructions read INSTALL.
+
+
+REQUIREMENTS:
+-------------
+	recAnalyst requires web server running PHP 5 with gd library installed
+	as well as zlib extension support enabled
+
