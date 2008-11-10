@@ -1,0 +1,26 @@
+1)	Download recAnalyst.
+	You can obtain the latest recAnalyst release from http://recanalyst.sourceforge.net/.
+
+   This will create a new directory drupal-x.x/ containing all Drupal files
+   and directories. Move the contents of that directory into a directory within
+   your web server's document root or your public HTML directory:
+
+2)	Extract recAnalyst archive to a local directory on your system.
+	The files are in .7z format and can be extracted using a tool 7-Zip.
+
+2)	Upload all files contained in this archive (retaining the directory structure)
+	to a web accessible directory on your server or hosting account.
+
+3)	Open file recAnalyst.config.php and edit following configuration constants:
+	RA__MAPS_DIR			point to directory where you wish to save generated maps
+	RA__RESEARCHES_DIR		point to to directory where you wish to save generated research timelines
+	RA__RESOURCES_DIR		point to directory where you store resources required for recAnalyst
+	(Feel free to modify other configuration constants to suit your needs.)
+
+4)	Create directories described in previous step if don't exist and change the
+	permission to be writeable by all (777 or -rwxrwxrwx within your FTP client)
+	on the directories defined in RA__MAPS_DIR, RA__RESEARCHES_DIR configuration
+	constants.
+	
+5)	If you wish to display analyzed results I recommend you to download the resource pack
+	located at project's homepage.

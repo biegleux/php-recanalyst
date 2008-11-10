@@ -1,4 +1,4 @@
-<?php
+d<?php
 /**
  * Defines configuration constants used for RecAnalyst.
  *
@@ -13,16 +13,21 @@
  */
 
 /**
- * Defines an absolute or relative directory where we wish to save generated maps.
+ * Defines a path (absolute or relative) to directory where we wish to save generated maps.
  * Write permission is required.
  */
-define ('RA__MAPS_DIR',				'c:/xampp/htdocs/_ra/maps/');
+define ('RA__MAPS_DIR',				'/www/htdocs/.../');
 
 /**
- * Defines an absolute or relative directory where we wish to save generated research timelines.
+ * Defines a path (absolute or relative) to directory where we wish to save generated research timelines.
  * Write permission is required.
  */
-define ('RA__RESEARCHES_DIR',		'c:/xampp/htdocs/_ra/researches/');
+define ('RA__RESEARCHES_DIR',		'/www/htdocs/.../');
+
+/**
+ * Defines a path (absolute or relative) to directory where we store resources required for generating research timelines.
+ */
+define ('RA__RESOURCES_DIR',		'/www/htdocs/.../');
 
 /**
  * Defines a width of the map image we wish to generate.
@@ -35,11 +40,6 @@ define ('RA__MAP_WIDTH',			204);
  *
  */
 define ('RA__MAP_HEIGHT',			102);
-
-/**
- * Defines an absolute or relative directory where we store resources required for generating research timelines.
- */
-define ('RA__RESOURCES_DIR',		'c:/xampp/htdocs/_ra/resources/');
 
 // following configuration constants are applied for research timelines image
 /**
