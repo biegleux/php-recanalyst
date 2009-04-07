@@ -91,6 +91,13 @@ class GameSettings
 	public $inGameCoop;
 
 	/**
+	 * Reveal Map setting.
+	 * 
+	 * @var string
+	 */
+	public $revealMap;
+
+	/**
 	 * Constructor.
 	 *
 	 */
@@ -106,6 +113,7 @@ class GameSettings
 		$this->isScenario = false;
 		$this->inGameCoop = false;
 		$this->playTime = 0;
+		$this->revealMap = '';
 	}
 }
 ?>
