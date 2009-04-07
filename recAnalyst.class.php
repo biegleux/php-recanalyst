@@ -196,11 +196,11 @@ class RecAnalyst
 	public $buildings;
 
 	/**
-	 * An associative multi-dimesional array containing information about trading.
+	 * An associative multi-dimesional array containing information about tributing.
 	 *
 	 * @var array
 	 */
-	public $trading;
+	public $tributing;
 
 	/**
 	 * Constructor.
@@ -222,7 +222,7 @@ class RecAnalyst
 		$this->buildings = array ();
 		$this->mapData = array ();
 		$this->mapWidth = $this->mapHeight = 0;
-		$this->trading = array ();
+		$this->tributing = array ();
 	}
 
 	/**
@@ -1196,7 +1196,9 @@ obtaining Achievement data should be called after knowing num_player as it is re
 	 */
 	private function analyzeBodyStream ()
 	{
-		$time_cnt = $pos = $trading_cnt = 0;
+		global $RA__REVEAL_SETTINGS;
+
+		$time_cnt = $pos = $tributing_cnt = 0;
 		$m_body_len = strlen ($this->bodyStream);
 		$age_flag = array (0, 0, 0, 0, 0, 0, 0, 0);
 
@@ -1215,16 +1217,28 @@ obtaining Achievement data should be called after knowing num_player as it is re
 				printf (nl2br ("type: %d\n"), $type);
 			}
 
+			// ope_data types: 4(Game_start or Chat), 2(Sync), or 1(Command)
 			switch ($type)
 			{
+				// Game_start or Chat command
 				case 4:
 					$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
 					$unpacked_data = unpack ("V", $packed_data);
 					$command = $unpacked_data[1];
 					if ($command == 0x01F4)
 					{
-						// Game_start
-						$pos += 20;
+						// skip unknown
+						$pos+=8;
+
+						// 'Map Reveal' data
+						$packed_data = substr ($this->bodyStream, $pos, 4); $pos+=4;
+						$unpacked_data = unpack ("V", $packed_data);
+						$reveal_map = $unpacked_data[1];
+
+						$this->gameSettings->revealMap = $RA__REVEAL_SETTINGS[$reveal_map];
+
+						// skip unknown
+						$pos+=8;
 					}
 					elseif ($command == -1)
 					{
@@ -1272,8 +1286,8 @@ obtaining Achievement data should be called after knowing num_player as it is re
 						}
 					}
 					break;
+				// Sync
 				case 2:
-					// Sync
 					$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
 					$unpacked_data = unpack ("V", $packed_data);
 					$time_cnt += $unpacked_data[1]; // time_cnt is in miliseconds
@@ -1286,8 +1300,8 @@ obtaining Achievement data should be called after knowing num_player as it is re
 					}
 					$pos += 12;
 					break;
+				// Command
 				case 1:
-					// Command
 					$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
 					$unpacked_data = unpack ("V", $packed_data);
 					$length = $unpacked_data[1];
@@ -1321,7 +1335,7 @@ obtaining Achievement data should be called after knowing num_player as it is re
 
 					switch ($command)
 					{
-						case 0x0B:
+						case 0x0B: // player resign
 							$pos += 1;
 							$packed_data = substr ($this->bodyStream, $pos, 1); $pos += 1;
 							$unpacked_data = unpack ("C", $packed_data);
@@ -1458,7 +1472,7 @@ obtaining Achievement data should be called after knowing num_player as it is re
 
 							$pos += ($length - 14);
 							break;
-						case 0x6c: // trading
+						case 0x6c: // tributing
 							$pos += 1;
 							// player_id_from
 							$packed_data = substr ($this->bodyStream, $pos, 1); $pos += 1;
@@ -1472,26 +1486,30 @@ obtaining Achievement data should be called after knowing num_player as it is re
 							$packed_data = substr ($this->bodyStream, $pos, 1); $pos += 1;
 							$unpacked_data = unpack ("C", $packed_data);
 							$resource_id = $unpacked_data[1];
+							// amount_tributed
+							$packed_data = substr ($this->bodyStream, $pos, 4);// $pos += 4 Throws off commands if you change the position here
+							$unpacked_data = unpack ("f", $packed_data);
+							$amount_tributed = floor ($unpacked_data[1]);
 
-							$this->trading[$trading_cnt++] = array (
+							$this->tributing[$tributing_cnt++] = array (
 																'from'	=>	$player_id_from,
 																'to'	=>	$player_id_to,
 																'rid'	=>	$resource_id,
+																'amount'=>  $amount_tributed,
 																'time'	=>	$time_cnt
 							);
 
 							if (defined ('RA__DEBUG'))
 							{
-								$format = nl2br ("(%s) %d -> %d: player %s sent %s to %s\n");
+								$format = nl2br ("(%s) %d -> %d: player %s sent %d %s to %s\n");
 								$player1 = $this->playerList->getPlayerByIndex ($player_id_from);
 								$player2 = $this->playerList->getPlayerByIndex ($player_id_to);
 								if ($player1 && $player2)
 								{
-									printf ($format, self::gameTimeToString ($time_cnt), $player_id_from, $player_id_to, $player1->name, $RA__RESOURCES[$resource_id], $player2->name);
+									printf ($format, self::gameTimeToString ($time_cnt), $player_id_from, $player_id_to, $player1->name, $amount_tributed, $RA__RESOURCES[$resource_id], $player2->name);
 								}
 							}
 
-							// any idea how to decode amount of resources sent?
 							$pos += $length - 4;
 							break;
 							/*
