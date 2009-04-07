@@ -11,6 +11,12 @@
  * @filesource
  */
 
+$RA__REVEAL_SETTINGS = array (
+	0 => 'Normal',
+	1 => 'Explored',
+	2 => 'All Visible'
+);
+
 $RA__MAPS = array (
      9 => array ('Arabia',			'arabia.gif'),
     10 => array ('Archipelago',		'archipelago.gif'),
@@ -94,13 +100,13 @@ $RA__CIVS = array (
 );
 
 $RA__COLORS = array (
-	0x00 => '#6ea6eb',
-	0x01 => '#ff6464',
+	0x00 => '#0000ff',
+	0x01 => '#ff0000',
 	0x02 => '#00ff00',
 	0x03 => '#ffff00',
 	0x04 => '#00ffff',
-	0x05 => '#f16ce8',
-	0x06 => '#dfdfdf',
+	0x05 => '#ff00ff',
+	0x06 => '#b9b9b9',
 	0x07 => '#ff8201'
 );
 
