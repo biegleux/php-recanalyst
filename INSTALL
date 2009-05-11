@@ -7,15 +7,17 @@
 2)	Upload all files contained in this archive (retaining the directory structure)
 	to a web accessible directory on your server or hosting account.
 
-3)	Open file recAnalyst.config.php and edit following configuration constants:
-	RA__MAPS_DIR			point to directory where you wish to save generated maps
-	RA__RESEARCHES_DIR		point to to directory where you wish to save generated research timelines
-	RA__RESOURCES_DIR		point to directory where you store resources required for recAnalyst
+3)	You need to edit these configuration constants (you can edit them runtime or
+	in RecAnalystConfig.php file):	
+	$mapsDir			point to directory where you wish to save generated maps
+	$researchesDir		point to to directory where you wish to save generated research timelines
+	$resourcesDir		point to directory where you store resources required for recAnalyst
+	$researchBackgroundImage point to image file used as a background for research timelines image
 	(Feel free to modify other configuration constants to suit your needs.)
 
 4)	Create directories described in previous step if don't exist and change the
 	permission to be writeable by all (777 or -rwxrwxrwx within your FTP client)
-	on the directories defined in RA__MAPS_DIR, RA__RESEARCHES_DIR configuration
+	on the directories defined in $mapsDir, $researchesDir configuration
 	constants.
 	
 5)	If you wish to display analyzed results I recommend you to download the resource pack
