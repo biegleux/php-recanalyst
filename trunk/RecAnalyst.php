@@ -6,7 +6,7 @@
  *    copyright        : (c) 2007-2009 biegleux
  *    email            : biegleux(at)gmail(dot)com
  *
- *    recAnalyst v0.9.0 2008/11/07
+ *    recAnalyst v1.0.1 2009/05/14
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -41,9 +41,8 @@
  * @todo namespaces support for >= PHP 5.3
  */
 
-
 /**
- * RecAnalyst class
+ * Class RecAnalyst.
  *
  * RecAnalyst implements analyzing of recorded games.
  *
@@ -198,7 +197,7 @@ class RecAnalyst
 	private $viewPositions;
 
 	/**
-	 * Constructor.
+	 * Class constructor.
 	 *
 	 */
 	public function __construct ()
@@ -254,7 +253,7 @@ class RecAnalyst
 	/**
 	 * Returns code of the recent error.
 	 *
-	 * @return int
+	 * @return int error code
 	 */
 	public function getLastError ()
 	{
@@ -341,7 +340,7 @@ class RecAnalyst
 	/**
 	 * Extracts header and body streams from an archive.
 	 *
-	 * @return bool
+	 * @return bool true, if the streams were successfully extracted, false otherwise
 	 */
 	private function extractStreamsFromArchive ()
 	{
@@ -486,7 +485,7 @@ class RecAnalyst
 	/**
 	 * Uncompresses header stream.
 	 *
-	 * @return string|bool uncompressed stream or false if an error occured
+	 * @return string|bool uncompressed stream or false if an error has occured
 	 */
 	private function uncompressHeaderStream ()
 	{
@@ -512,7 +511,7 @@ class RecAnalyst
 	/**
 	 * Analyzes header stream.
 	 *
-	 * @return bool true if analyzed successfully, otherwise false
+	 * @return bool true if the stream was analyzed successfully, false otherwise
 	 */
 	private function analyzeHeaderStream ()
 	{
@@ -1155,7 +1154,7 @@ obtaining Achievement data should be called after knowing num_player as it is re
 	/**
 	 * Analyzes body stream.
 	 *
-	 * @return bool true if successfully analyzed, otherwise false
+	 * @return bool true if the stream was successfully analyzed, false otherwise
 	 */
 	private function analyzeBodyStream ()
 	{
@@ -1204,20 +1203,20 @@ obtaining Achievement data should be called after knowing num_player as it is re
 								continue;
 							}
 
-							if ($player->feudalTime != 0 && $player->feudalTime < $time_cnt && $age_flag[$i] == 0)
+							if ($player->feudalTime != 0 && $player->feudalTime < $time_cnt && $age_flag[$i] < 1)
 							{
 								$this->ingameChat[] = sprintf ('%d@#0%s advanced to Feudal Age', $player->feudalTime, $player->name);
 								$age_flag[$i] = 1;
 							}
-							if ($player->castleTime != 0 && $player->castleTime < $time_cnt && $age_flag[$i] == 0)
+							if ($player->castleTime != 0 && $player->castleTime < $time_cnt && $age_flag[$i] < 2)
 							{
 								$this->ingameChat[] = sprintf ('%d@#0%s advanced to Castle Age', $player->castleTime, $player->name);
-								$age_flag[$i] = 1;
+								$age_flag[$i] = 2;
 							}
-							if ($player->imperialTime != 0 && $player->imperialTime < $time_cnt && $age_flag[$i] == 0)
+							if ($player->imperialTime != 0 && $player->imperialTime < $time_cnt && $age_flag[$i] < 3)
 							{
 								$this->ingameChat[] = sprintf ('%d@#0%s advanced to Imperial Age', $player->imperialTime, $player->name);
-								$age_flag[$i] = 1;
+								$age_flag[$i] = 3;
 							}
 						}
 
@@ -1553,9 +1552,9 @@ obtaining Achievement data should be called after knowing num_player as it is re
 			return false;
 		}
 
-		for ($x = 1; $x <= $this->mapWidth; $x++)
+		for ($x = 0; $x < $this->mapWidth; $x++)
 		{
-			for ($y = 1; $y <= $this->mapHeight; $y++)
+			for ($y = 0; $y < $this->mapHeight; $y++)
 			{
 				$terrain_id = $this->mapData[$x][$y]%1000;
 				$elevation = (int)(($this->mapData[$x][$y] - $terrain_id)/1000);
@@ -1707,12 +1706,12 @@ obtaining Achievement data should be called after knowing num_player as it is re
 
 		$degrees = 45;
 
-		$tc = imagecolortransparent ($gd);
-		imagefill ($gd, 0, 0, $tc);
+		//$tc = imagecolortransparent ($gd);
+		//imagefill ($gd, 0, 0, $tc);
 
 		$gd = imagerotate ($gd, $degrees, -1);
-		imagealphablending ($gd, true);
-		imagesavealpha ($gd, true);
+		//imagealphablending ($gd, true);
+		//imagesavealpha ($gd, true);
 
 		$width = imagesx ($gd);
 		$height = imagesy ($gd);
