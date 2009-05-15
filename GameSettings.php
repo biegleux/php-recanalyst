@@ -12,7 +12,7 @@
  */
 
 /**
- * GameSettings class
+ * Class GameSettings.
  *
  * GameSettings implements game information holder.
  *

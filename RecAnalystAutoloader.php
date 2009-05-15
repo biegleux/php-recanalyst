@@ -26,7 +26,6 @@ class RecAnalystAutoloader
 
 	protected function __construct ()
 	{
-		$this->baseDir = realpath (dirname (__FILE__).'/..').DIRECTORY_SEPARATOR;
 		$this->baseDir = realpath (dirname (__FILE__)) . DIRECTORY_SEPARATOR;
 	}
 
