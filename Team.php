@@ -41,6 +41,7 @@ class Team extends PlayerList
 	 * Adds a player to the team.
 	 *
 	 * @param Player $player the player we wish to add
+	 * @return void
 	 */
 	public function addPlayer (Player $player)
 	{
