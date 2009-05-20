@@ -48,6 +48,7 @@ class TList implements Iterator
 	 * Adds an item to the list.
 	 *
 	 * @param mixed $item the item we wish to add
+	 * @return void
 	 */
 	protected function addItem ($item)
 	{
