@@ -32,7 +32,7 @@ class RecAnalystAutoloader
 	/**
 	 * Retrieves the singleton instance of this class.
 	 *
-	 * @return RecAnalystAutoloader A RecAnalystAutoloader implementation instance.
+	 * @return RecAnalystAutoloader a RecAnalystAutoloader implementation instance
 	 */
 	static public function getInstance ()
 	{
@@ -45,7 +45,7 @@ class RecAnalystAutoloader
 	}
 
 	/**
-	 * Register RecAnalystAutoloader in spl autoloader.
+	 * Registers RecAnalystAutoloader in spl autoloader.
 	 *
 	 * @return void
 	 */
@@ -68,7 +68,7 @@ class RecAnalystAutoloader
 	}
 
 	/**
-	 * Unregister RecAnalystAutoloader from spl autoloader.
+	 * Unregisters RecAnalystAutoloader from spl autoloader.
 	 *
 	 * @return void
 	 */
@@ -83,9 +83,9 @@ class RecAnalystAutoloader
 	/**
 	 * Handles autoloading of classes.
 	 *
-	 * @param string $class A class name.
+	 * @param string $class a class name
 	 *
-	 * @return bool Returns true if the class has been loaded
+	 * @return bool true if the class has been loaded
 	 */
 	public function autoload ($class)
 	{
