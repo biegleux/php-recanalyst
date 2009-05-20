@@ -24,6 +24,7 @@ class PlayerList extends TList
 	 * Adds a player to the list.
 	 *
 	 * @param Player $player the player we wish to add
+	 * @return void
 	 */
 	public function addPlayer (Player $player)
 	{
