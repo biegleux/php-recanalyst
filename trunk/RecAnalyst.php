@@ -740,7 +740,10 @@ obtaining Achievement data should be called after knowing num_player as it is re
 		if (array_key_exists ($map_id, RecAnalystConst::$MAPS))
 		{
 			$this->gameSettings->map = RecAnalystConst::$MAPS[$map_id][0];
-			$this->gameSettings->gameStyle = RecAnalystConst::$GAME_STYLES[0];
+			if ($map_id >= 34 && $map_id <= 43) // real world maps
+				$this->gameSettings->gameStyle = RecAnalystConst::$GAME_STYLES[1];
+			else
+				$this->gameSettings->gameStyle = RecAnalystConst::$GAME_STYLES[0];
 		}
 		else
 		{
@@ -820,7 +823,11 @@ obtaining Achievement data should be called after knowing num_player as it is re
 			$unpacked_data = unpack ("V", $packed_data);
 			$reveal_map = $unpacked_data[1];
 
-			$pos += 8;
+			$pos += 4;
+
+			$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
+			$unpacked_data = unpack ("V", $packed_data);
+			$map_size = $unpacked_data[1];
 
 			$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
 			$unpacked_data = unpack ("V", $packed_data);
@@ -838,6 +845,11 @@ obtaining Achievement data should be called after knowing num_player as it is re
 			$this->gameSettings->gameType = RecAnalystConst::$GAME_TYPES[$game_type];
 			$this->gameSettings->lockDiplomacy = ($lock_diplomacy == 0x01);
 			$this->gameSettings->revealMap = RecAnalystConst::$REVEAL_SETTINGS[$reveal_map];
+
+			if (array_key_exists ($map_size, RecAnalystConst::$MAP_SIZES))
+			{
+				$this->gameSettings->mapSize = RecAnalystConst::$MAP_SIZES[$map_size];
+			}
 
 			// here comes pre-game chat
 			$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
@@ -946,11 +958,6 @@ obtaining Achievement data should be called after knowing num_player as it is re
 		$unpacked_data = unpack ("V", $packed_data);
 		$map_size_y = $unpacked_data[1];
 		$this->mapHeight = $map_size_y;
-
-		if (array_key_exists ($this->mapWidth, RecAnalystConst::$MAP_SIZE))
-		{
-			$this->gameSettings->mapSize = RecAnalystConst::$MAP_SIZE[$this->mapWidth];
-		}
 
 		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
 		$unpacked_data = unpack ("V", $packed_data);
@@ -1538,14 +1545,13 @@ obtaining Achievement data should be called after knowing num_player as it is re
 
 		if (!isset ($this->mapData))
 			return false;
-
-		// maximum map dimension is 240 (giant map)
-		if ($this->mapWidth > 240 || $this->mapHeight > 240)
+		/*
+		if ($this->mapWidth > 255 || $this->mapHeight > 255)
 		{
 			unset ($this->mapData, $this->mapWidth, $this->mapHeight);
 			return false;
 		}
-
+		*/
 		if (!($gd = imagecreatetruecolor ($this->mapWidth, $this->mapHeight)))
 		{
 			unset ($this->mapData, $this->mapWidth, $this->mapHeight);
@@ -1562,7 +1568,7 @@ obtaining Achievement data should be called after knowing num_player as it is re
 				switch ($terrain_id)
 				{
 					case 0x00: // grass
-						if ($elevation == 0 || $elevation == 1 || $elevation == 7)
+						if (!$config->useElevationColors || $elevation == 0 || $elevation == 1 || $elevation == 7)
 							$c = imagecolorallocate ($gd, 0x33, 0x97, 0x27);
 						else
 							$c = imagecolorallocate ($gd, 0x00, 141, 0x00);
@@ -1586,7 +1592,7 @@ obtaining Achievement data should be called after knowing num_player as it is re
 						$c = imagecolorallocate ($gd, 0xe4, 0xa2, 0x52);
 						break;
 					case 0x09: // grass3
-						if ($elevation == 0 || $elevation == 1 || $elevation == 7)
+						if (!$config->useElevationColors || $elevation == 0 || $elevation == 1 || $elevation == 7)
 							$c = imagecolorallocate ($gd, 0x33, 0x97, 0x27);
 						else
 							$c = imagecolorallocate ($gd, 0x00, 141, 0x00);
