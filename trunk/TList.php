@@ -91,6 +91,7 @@ class TList implements Iterator
 	 * Rewinds internal array pointer.
 	 * This method is required by the interface Iterator.
 	 *
+	 * @return void
 	 */
 	public function rewind ()
 	{
@@ -143,7 +144,7 @@ class TList implements Iterator
 	 * Returns whether there is an item at current position.
 	 * This method is required by the interface Iterator.
 	 *
-	 * @return bool
+	 * @return bool true if there is a item at current position, false otherwise
 	 */
 	public function valid ()
 	{
