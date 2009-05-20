@@ -28,7 +28,7 @@ class Team extends PlayerList
 	private $index;
 
 	/**
-	 * Constructor.
+	 * Class constructor.
 	 *
 	 */
 	public function __construct ()
