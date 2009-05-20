@@ -21,32 +21,42 @@
 final class RecAnalystConst
 {
 	public static $MAPS = array (
-	     9 => array ('Arabia',			'arabia.gif'),
-    	10 => array ('Archipelago',		'archipelago.gif'),
-    	11 => array ('Baltic',			'baltic.gif'),
-	    12 => array ('Black Forest',	'black_forest.gif'),
-    	13 => array ('Coastal',			'coastal.gif'),
-	    14 => array ('Continental',		'continental.gif'),
-    	15 => array ('Crater Lake',		'crater_lake.gif'),
-    	16 => array ('Fortress',		'fortress.gif'),
-    	17 => array ('Gold Rush',		'gold_rush.gif'),
-    	18 => array ('Highland',		'highland.gif'),
-    	19 => array ('Islands',			'islands.gif'),
-    	20 => array ('Mediterranean',	'mediterranean.gif'),
-    	21 => array ('Migration',		'migration.gif'),
-    	22 => array ('Rivers',			'rivers.gif'),
-	    23 => array ('Team Islands',	'team_islands.gif'),
-	    24 => array ('Random',			'random.gif'),
-    	25 => array ('Scandinavia',		'scandinavia.gif'),
-    	26 => array ('Mongolia',		'mongolia.gif'),
-	    27 => array ('Yucatan',			'yucatan.gif'),
-    	28 => array ('Salt Marsh',		'salt_marsh.gif'),
-    	29 => array ('Arena',			'arena.gif'),
-	    30 => array ('Oasis',			'oasis.gif'),
-    	31 => array ('Ghost Lake',		'ghost_lake.gif'),
-    	32 => array ('Random Land Map',	'random_land_map.gif'),
-	    33 => array ('Nomad',			'nomad.gif'),
-	    48 => array ('Blind Random',	'blind_random.gif'),
+	     9 => array ('Arabia',					'arabia.gif'),
+    	10 => array ('Archipelago',				'archipelago.gif'),
+    	11 => array ('Baltic',					'baltic.gif'),
+	    12 => array ('Black Forest',			'black_forest.gif'),
+    	13 => array ('Coastal',					'coastal.gif'),
+	    14 => array ('Continental',				'continental.gif'),
+    	15 => array ('Crater Lake',				'crater_lake.gif'),
+    	16 => array ('Fortress',				'fortress.gif'),
+    	17 => array ('Gold Rush',				'gold_rush.gif'),
+    	18 => array ('Highland',				'highland.gif'),
+    	19 => array ('Islands',					'islands.gif'),
+    	20 => array ('Mediterranean',			'mediterranean.gif'),
+    	21 => array ('Migration',				'migration.gif'),
+    	22 => array ('Rivers',					'rivers.gif'),
+	    23 => array ('Team Islands',			'team_islands.gif'),
+	    24 => array ('Random',					'random.gif'),
+    	25 => array ('Scandinavia',				'scandinavia.gif'),
+    	26 => array ('Mongolia',				'mongolia.gif'),
+	    27 => array ('Yucatan',					'yucatan.gif'),
+    	28 => array ('Salt Marsh',				'salt_marsh.gif'),
+    	29 => array ('Arena',					'arena.gif'),
+	    30 => array ('Oasis',					'oasis.gif'),
+    	31 => array ('Ghost Lake',				'ghost_lake.gif'),
+    	32 => array ('Random Land Map',			'random_land_map.gif'),
+	    33 => array ('Nomad',					'nomad.gif.png'),
+	    34 => array ('Iberia',					'iberia.png.png'),
+		35 => array ('Britain',					'britain.png.png'),
+		36 => array ('Mideast',					'mideast.png'),
+		37 => array ('Texas',					'texas.png'),
+		38 => array ('Italy',					'italy.png'),
+		39 => array ('Central America',			'central_america.png'),
+		40 => array ('France',					'france.png'),
+		41 => array ('Norse Lands',				'norse_lands.png'),
+		42 => array ('Sea of Japan (East Sea)',	'sea_of_japan.png'),
+		43 => array ('Byzantinum',				'byzantinum.png'),
+	    48 => array ('Blind Random',			'blind_random.gif'),
 	);
 
 	public static $GAME_STYLES = array (
@@ -126,13 +136,13 @@ final class RecAnalystConst
 		0x03 => 'gold'
 	);
 
-	public static $MAP_SIZE = array (
-		120 => 'for 2 players',
-		144 => 'for 3 players',
-		168 => 'for 4 players',
-		200 => 'for 6 players',
-		220 => 'for 8 players',
-		240 => 'Giant'
+	public static $MAP_SIZES = array (
+		0x00 => 'Tiny (2 players)',
+		0x01 => 'Small (3 players)',
+		0x02 => 'Medium (4 players)',
+		0x03 => 'Normal (6 players)',
+		0x04 => 'Large (8 players)',
+		0x05 => 'Giant'
 	);
 
 	public static $RESEARCHES = array (
