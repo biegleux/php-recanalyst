@@ -136,6 +136,13 @@ class RecAnalystConfig
 	public $useSnowColors;
 
 	/**
+	 * Determines if to use elevation colors in map generation.
+	 *
+	 * @var bool true if it is desirable to use elevation colors, false otherwise
+	 */
+	public $useElevationColors;
+
+	/**
 	 * Private class constructor.
 	 *
 	 */
@@ -155,6 +162,7 @@ class RecAnalystConfig
 		$this->researchIAColor = array (0x99, 0x66, 0x00, 0x50);
 		$this->showPositions = true;
 		$this->useSnowColors = true;
+		$this->useElevationColors = true;
 	}
 
 	/**
