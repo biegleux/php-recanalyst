@@ -797,93 +797,136 @@ obtaining Achievement data should be called after knowing num_player as it is re
 		$unpacked_data = unpack ("V", $packed_data);
 		$num_trigger = $unpacked_data[1];
 
-		if ($num_trigger == 0)
+		if ($num_trigger != 0)
 		{
-			$this->gameSettings->isScenario = false;
-
-			// Other_data
-			for ($i = 0; $i <= 7; $i++)
+			// skip Trigger_info data
+			for ($i = 0; $i < $num_trigger; $i++)
 			{
-				$packed_data = substr ($this->headerStream, $pos, 1); $pos += 1;
-				$unpacked_data = unpack ("C", $packed_data);
-				$team = $unpacked_data[1];
-
-				if (($i + 1) <= $this->playerList->getCount ())
-				{
-					if ($player = $this->playerList->getPlayer ($i))
-					{
-						$player->team = $team - 1;
-					}
-				}
-			}
-
-			$pos++;
-
-			$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-			$unpacked_data = unpack ("V", $packed_data);
-			$reveal_map = $unpacked_data[1];
-
-			$pos += 4;
-
-			$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-			$unpacked_data = unpack ("V", $packed_data);
-			$map_size = $unpacked_data[1];
-
-			$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-			$unpacked_data = unpack ("V", $packed_data);
-			$pop_limit = $unpacked_data[1];
-
-			$packed_data = substr ($this->headerStream, $pos, 1); $pos += 1;
-			$unpacked_data = unpack ("C", $packed_data);
-			$game_type = $unpacked_data[1];
-
-			$packed_data = substr ($this->headerStream, $pos, 1); $pos += 1;
-			$unpacked_data = unpack ("C", $packed_data);
-			$lock_diplomacy = $unpacked_data[1];
-
-			$this->gameSettings->popLimit = $pop_limit;
-			$this->gameSettings->gameType = RecAnalystConst::$GAME_TYPES[$game_type];
-			$this->gameSettings->lockDiplomacy = ($lock_diplomacy == 0x01);
-			$this->gameSettings->revealMap = RecAnalystConst::$REVEAL_SETTINGS[$reveal_map];
-
-			if (array_key_exists ($map_size, RecAnalystConst::$MAP_SIZES))
-			{
-				$this->gameSettings->mapSize = RecAnalystConst::$MAP_SIZES[$map_size];
-			}
-
-			// here comes pre-game chat
-			$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-			$unpacked_data = unpack ("V", $packed_data);
-			$num_chat = $unpacked_data[1];
-			for ($i = 0; $i < $num_chat; $i++)
-			{
+				$pos += 18;		// different from mgx description (14)
 				$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
 				$unpacked_data = unpack ("V", $packed_data);
-				$chat_len = $unpacked_data[1];
+				$desc_len = $unpacked_data[1];
+				$pos += $desc_len;
+				$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
+				$unpacked_data = unpack ("V", $packed_data);
+				$name_len = $unpacked_data[1];
+				$pos += $name_len;
+				$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
+				$unpacked_data = unpack ("V", $packed_data);
+				$num_effect = $unpacked_data[1];
 
-				// 0-length chat exists
-				if ($chat_len == 0)
+				for ($j = 0; $j < $num_effect; $j++)
 				{
-					continue;
+					$pos += 24;
+					$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
+					$unpacked_data = unpack ("V", $packed_data);
+					$num_selected_object = $unpacked_data[1];
+					if ($num_selected_object == -1)
+					{
+						$num_selected_object = 0;
+					}
+					$pos += 72;
+					$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
+					$unpacked_data = unpack ("V", $packed_data);
+					$text_len = $unpacked_data[1];
+					$pos += $text_len;
+					$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
+					$unpacked_data = unpack ("V", $packed_data);
+					$sound_len = $unpacked_data[1];
+					$pos += $sound_len;
+					$pos += $num_selected_object * 4;
 				}
 
-				$chat = substr ($this->headerStream, $pos, $chat_len); $pos += $chat_len;
-
-				if ($chat[0] == '@' && $chat[1] == '#' && $chat[2] >= '1' && $chat[2] <= '8')
-				{
-					$chat = rtrim ($chat); // throw null-termination character
-					$this->pregameChat[] = $chat;
-				}
+				$pos += ($num_effect * 4);
+				$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
+				$unpacked_data = unpack ("V", $packed_data);
+				$num_condition = $unpacked_data[1];
+				$pos += 72 * $num_condition;
+				$pos += 4 * $num_condition;
 			}
-			unset ($chat);
-		}
-		else
-		{
+			$pos += 4 * $num_trigger;
+
 			$this->gameSettings->isScenario = true;
 			$this->gameSettings->map = '';
 			$this->gameSettings->gameType = RecAnalystConst::$GAME_TYPES[3];
 			$this->gameSettings->gameStyle = RecAnalystConst::$GAME_STYLES[2];
 		}
+
+		// Other_data
+		for ($i = 0; $i < 8; $i++)
+		{
+			$packed_data = substr ($this->headerStream, $pos, 1); $pos += 1;
+			$unpacked_data = unpack ("C", $packed_data);
+			$team = $unpacked_data[1];
+
+			if (($i + 1) <= $this->playerList->getCount ())
+			{
+				if ($player = $this->playerList->getPlayer ($i))
+				{
+					$player->team = $team - 1;
+				}
+			}
+		}
+
+		$pos++;
+
+		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
+		$unpacked_data = unpack ("V", $packed_data);
+		$reveal_map = $unpacked_data[1];
+
+		$pos += 4;
+
+		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
+		$unpacked_data = unpack ("V", $packed_data);
+		$map_size = $unpacked_data[1];
+
+		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
+		$unpacked_data = unpack ("V", $packed_data);
+		$pop_limit = $unpacked_data[1];
+
+		$packed_data = substr ($this->headerStream, $pos, 1); $pos += 1;
+		$unpacked_data = unpack ("C", $packed_data);
+		$game_type = $unpacked_data[1];
+
+		$packed_data = substr ($this->headerStream, $pos, 1); $pos += 1;
+		$unpacked_data = unpack ("C", $packed_data);
+		$lock_diplomacy = $unpacked_data[1];
+
+		$this->gameSettings->popLimit = $pop_limit;
+		$this->gameSettings->gameType = RecAnalystConst::$GAME_TYPES[$game_type];
+		$this->gameSettings->lockDiplomacy = ($lock_diplomacy == 0x01);
+		$this->gameSettings->revealMap = RecAnalystConst::$REVEAL_SETTINGS[$reveal_map];
+
+		if (array_key_exists ($map_size, RecAnalystConst::$MAP_SIZES))
+		{
+			$this->gameSettings->mapSize = RecAnalystConst::$MAP_SIZES[$map_size];
+		}
+
+		// here comes pre-game chat
+		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
+		$unpacked_data = unpack ("V", $packed_data);
+		$num_chat = $unpacked_data[1];
+		for ($i = 0; $i < $num_chat; $i++)
+		{
+			$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
+			$unpacked_data = unpack ("V", $packed_data);
+			$chat_len = $unpacked_data[1];
+
+			// 0-length chat exists
+			if ($chat_len == 0)
+			{
+				continue;
+			}
+
+			$chat = substr ($this->headerStream, $pos, $chat_len); $pos += $chat_len;
+
+			if ($chat[0] == '@' && $chat[1] == '#' && $chat[2] >= '1' && $chat[2] <= '8')
+			{
+				$chat = rtrim ($chat); // throw null-termination character
+				$this->pregameChat[] = $chat;
+			}
+		}
+		unset ($chat);
 
 		// skip AI_info if exists
 		$pos = 0x0C;
@@ -1822,6 +1865,7 @@ obtaining Achievement data should be called after knowing num_player as it is re
 		}
 
 		// fill gd with background
+		// TODO: fciu volat podla koncovky
 		if (!($bkgim = imagecreatefromjpeg ($config->researchBackgroundImage)))
 		{
 			imagedestroy ($gd);
