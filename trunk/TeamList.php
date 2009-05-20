@@ -24,6 +24,7 @@ class TeamList extends TList
 	 * Adds a team to the list
 	 *
 	 * @param Team $team the team we wish to add
+	 * @return void
 	 */
 	public function addTeam (Team $team)
 	{
