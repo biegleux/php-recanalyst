@@ -120,7 +120,7 @@ class Player
 	public $researches;
 
 	/**
-	 * Constructor.
+	 * Class constructor.
 	 *
 	 */
 	public function __construct ()
