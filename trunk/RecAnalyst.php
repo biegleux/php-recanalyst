@@ -89,42 +89,42 @@ class RecAnalyst
 	 *
 	 * @var string
 	 */
-	private $headerStream;
+	protected $headerStream;
 
 	/**
 	 * Internal stream containing body information.
 	 *
 	 * @var string
 	 */
-	private $bodyStream;
+	protected $bodyStream;
 
 	/**
 	 * Holds a code of the recent error.
 	 *
 	 * @var int
 	 */
-	private $lastError;
+	protected $lastError;
 
 	/**
 	 * An array containing map data.
 	 *
 	 * $var array
 	 */
-	private $mapData;
+	protected $mapData;
 
 	/**
 	 * Map width.
 	 *
 	 * @var int
 	 */
-	private $mapWidth;
+	protected $mapWidth;
 
 	/**
 	 * Map height.
 	 *
 	 * @var int
 	 */
-	private $mapHeight;
+	protected $mapHeight;
 
 	/**
 	 * Game settings information.
@@ -234,6 +234,7 @@ class RecAnalyst
 	 *
 	 * @param mixed $nm
 	 * @param mixed $val
+	 * @return void
 	 */
 	public function __set ($nm, $val)
 	{
@@ -244,6 +245,7 @@ class RecAnalyst
 	 * Callback method for getting a property.
 	 *
 	 * @param mixed $nm
+	 * @return mixed
 	 */
 	public function __get ($nm)
 	{
@@ -342,7 +344,7 @@ class RecAnalyst
 	 *
 	 * @return bool true, if the streams were successfully extracted, false otherwise
 	 */
-	private function extractStreamsFromArchive ()
+	protected function extractStreamsFromArchive ()
 	{
 		if (!$this->fileName)
 		{
@@ -487,7 +489,7 @@ class RecAnalyst
 	 *
 	 * @return string|bool uncompressed stream or false if an error has occured
 	 */
-	private function uncompressHeaderStream ()
+	protected function uncompressHeaderStream ()
 	{
 		if (!$this->headerStream)
 		{
@@ -513,7 +515,7 @@ class RecAnalyst
 	 *
 	 * @return bool true if the stream was analyzed successfully, false otherwise
 	 */
-	private function analyzeHeaderStream ()
+	protected function analyzeHeaderStream ()
 	{
 		// initialize variables
 		$constant2      = pack ('c*', 0x9A, 0x99, 0x99, 0x99, 0x99, 0x99, 0xF9, 0x3F);
@@ -779,7 +781,7 @@ obtaining Achievement data should be called after knowing num_player as it is re
 			// sometimes very rarely index is 1
 			if ($human == 0x01)
 				continue;
-			if ($human != 0x00 && $i != 0)
+			if ($i != 0)
 			{
 				$player = new Player ();
 				$player->name  = $playername;
@@ -957,7 +959,7 @@ obtaining Achievement data should be called after knowing num_player as it is re
 				$unpacked_data = unpack ("v", $packed_data);
 				$num_rule = $unpacked_data[1];
 				$pos += 4;
-				$pos = $pos + (400 * $num_rule);
+				$pos += 400 * $num_rule;
 			}
 			$pos += 5544;
 		}
@@ -985,10 +987,7 @@ obtaining Achievement data should be called after knowing num_player as it is re
 			$player->owner = true;
 		}
 
-		if ($num_player < $this->playerList->getCount ())
-		{
-			$this->gameSettings->inGameCoop = true;
-		}
+		$this->gameSettings->inGameCoop = ($num_player < $this->playerList->getCount ());
 
 		// getting map
 		$pos += 62;
@@ -1206,7 +1205,7 @@ obtaining Achievement data should be called after knowing num_player as it is re
 	 *
 	 * @return bool true if the stream was successfully analyzed, false otherwise
 	 */
-	private function analyzeBodyStream ()
+	protected function analyzeBodyStream ()
 	{
 		$pos = $tributing_cnt = 0;
 		$time_cnt = (int) array_search ($this->gameSettings->speed, RecAnalystConst::$GAME_SPEEDS);
@@ -1539,7 +1538,7 @@ obtaining Achievement data should be called after knowing num_player as it is re
 	/**
 	 * Analyzes recorded game.
 	 *
-	 * @return bool true if successfully analyzed, otherwise false
+	 * @return bool true if successfully analyzed, false otherwise
 	 */
 	public function analyze ()
 	{
@@ -1580,7 +1579,7 @@ obtaining Achievement data should be called after knowing num_player as it is re
 	 * Note: We can generate map only once, after that map data will be discarded to save memory.
 	 *
 	 * @param string $mapFileName map filename
-	 * @return bool true if the map is successfully generated, otherwise false
+	 * @return bool true if the map is successfully generated, false otherwise
 	 */
 	public function generateMap ($mapFileName)
 	{
@@ -1784,7 +1783,7 @@ obtaining Achievement data should be called after knowing num_player as it is re
 	 * Generates a research timelines image.
 	 *
 	 * @param string $researchesFileName image filename
-	 * @return bool true if the image is successfully generated, otherwise false
+	 * @return bool true if the image is successfully generated, false otherwise
 	 * @todo make colors for particular ages as configurable constants
 	 * @todo implement use of custom fonts
 	 * @todo jpg, gif output support
