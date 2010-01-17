@@ -6,7 +6,7 @@
  *    copyright        : (c) 2007-2009 biegleux
  *    email            : biegleux(at)gmail(dot)com
  *
- *    recAnalyst v1.0.1 2009/05/14
+ *    recAnalyst v1.1.0 2009/05/21
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -499,7 +499,7 @@ class RecAnalyst
 
 		//TODO: getMemoryLimit ()
 		// 4194304 (4MB) is not enough if the map size is giant
-		$this->headerStream = @gzinflate ($this->headerStream, 8388608); // 4MB
+		$this->headerStream = @gzinflate ($this->headerStream, 8388608); // 8MB
 
 		if (!$this->headerStream)
 		{
@@ -579,152 +579,6 @@ class RecAnalyst
 			return false;
 		}
 
-/***************************************************************************************
-note:	Victory & Achievement data not found as described in mgx format description
-obtaining Achievement data should be called after knowing num_player as it is required
-
-		// getting Victory position, first is Disables
-		$pos -= 8;
-		$victory_pos = 0;
-		$separator_first_pos = 0;
-		$buff = substr ($this->headerStream, $pos, $len); $pos += $len;
-		while ($pos > 0)
-		{
-			if (strcmp ($buff, $separator) == 0)
-			break;
-			$pos -= $len + 1;
-			$buff = substr ($this->headerStream, $pos, $len); $pos += $len;
-		}
-		if ($pos != 0)
-		{
-			$pos -= 8;
-			$buff = substr ($this->headerStream, $pos, $len); $pos += $len;
-			while ($pos > 0)
-			{
-				if (strcmp ($buff, $separator) == 0)
-				{
-					$victory_pos = $pos;
-					break;
-				}
-				$pos -= $len + 1;
-				$buff = substr ($this->headerStream, $pos, $len); $pos += $len;
-			}
-		}
-		if ($victory_pos != 0)
-		{
-			$pos -= 8;
-			$buff = substr ($this->headerStream, $pos, $len); $pos += $len;
-			while ($pos > 0)
-			{
-				if (strcmp ($buff, $separator) == 0)
-				{
-					$separator_first_pos = $pos;
-				break;
-				}
-				$pos -= $len + 1;
-				$buff = substr ($this->headerStream, $pos, $len); $pos += $len;
-			}
-
-			$pos = $victory_pos;
-
-			// here should be victory condition, but isn't
-			$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-			$unpacked_data = unpack ("V", $packed_data);
-			$conquest = $unpacked_data[1];
-			if (conquest == 0)
-			{
-				$this->gameSettings->victory = 'custom';
-				$pos += 4;
-
-				$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-				$unpacked_data = unpack ("V", $packed_data);
-				$relics = $unpacked_data[1];
-				$pos += 4;
-				$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-				$unpacked_data = unpack ("V", $packed_data);
-				$explored = $unpacked_data[1];
-				$pos += 4;
-				$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-				$unpacked_data = unpack ("V", $packed_data);
-				$all = $unpacked_data[1];
-				$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-				$unpacked_data = unpack ("V", $packed_data);
-				$mode = $unpacked_data[1];
-				$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-				$unpacked_data = unpack ("V", $packed_data);
-				$score = $unpacked_data[1];
-				$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-				$unpacked_data = unpack ("V", $packed_data);
-				$time = $unpacked_data[1];
-
-				if ($relics != 0)
-				{
-					$this->gameSettings->victory = sprintf ('Gain %d relics', $relics);
-				}
-				elseif ($explored != 0)
-				{
-					$this->gameSettings->victory = sprintf ('Percentage of explored map: %d', $explored);
-				}
-				else
-				{
-					switch ($mode)
-					{
-						case 0:
-							$this->gameSettings->victory = 'Normal';
-							break;
-						case 1:
-							$this->gameSettings->victory = 'Conquest';
-							break;
-						case 2:
-							$this->gameSettings->victory = sprintf ('Score Limit: %d', $score);
-							break;
-						case 3:
-							$this->gameSettings->victory = sprintf ('Time Limit: %d', $time);
-							break;
-					}
-				}
-
-			}
-			elseif ($condition == 1)
-			{
-				$this->gameSettings->victory = 'Conquest';
-			}
-		}
-		if ($separator_first_pos != 0)
-		{
-			$string_id_pos = 0;
-			$len = strlen ($string_id);
-			$pos = $separator_first_pos - $len;
-			$buff = substr ($this->headerStream, $pos, $len); $pos += $len;
-			while ($pos > 0)
-			{
-				if (strcmp ($buff, $string_id) == 0)
-				{
-					$string_id_pos = $pos;
-					break;
-				}
-				$pos -= $len + 1;
-				$buff = substr ($this->headerStream, $pos, $len); $pos += $len;
-			}
-			if ($string_id_pos != 0)
-			{
-				$pos = $string_id_pos - $len;
-				$pos -= 4096;
-				$pos -= 4;
-				$pos -= 4;
-
-				// num_player is not known till now, need to be called after obtaining it
-				$pos -= 1473 * $num_player;
-				// here should start Achievement, but doesn't :-(
-				$pos += 13;
-				$packed_data = substr ($this->headerStream, $pos, 4);
-				$unpacked_data = unpack ("V", $packed_data);
-				$total_point = $unpacked_data[1];
-				//...
-			}
-		}
-***************************************************************************************/
-
 		// getting Game_Settings data
 		// skip negative[2]
 		$pos = $game_setting_pos + 8;
@@ -743,13 +597,13 @@ obtaining Achievement data should be called after knowing num_player as it is re
 		{
 			$this->gameSettings->map = RecAnalystConst::$MAPS[$map_id][0];
 			if ($map_id >= 34 && $map_id <= 43) // real world maps
-				$this->gameSettings->gameStyle = RecAnalystConst::$GAME_STYLES[1];
+				$this->gameSettings->mapStyle = RecAnalystConst::$MAP_STYLES[1];
 			else
-				$this->gameSettings->gameStyle = RecAnalystConst::$GAME_STYLES[0];
+				$this->gameSettings->mapStyle = RecAnalystConst::$MAP_STYLES[0];
 		}
 		else
 		{
-			$this->gameSettings->gameStyle = RecAnalystConst::$GAME_STYLES[2];
+			$this->gameSettings->mapStyle = RecAnalystConst::$MAP_STYLES[2];
 		}
 
 		if (array_key_exists ($difficulty, RecAnalystConst::$DIFFICULTY_LEVELS))
@@ -851,7 +705,7 @@ obtaining Achievement data should be called after knowing num_player as it is re
 			$this->gameSettings->isScenario = true;
 			$this->gameSettings->map = '';
 			$this->gameSettings->gameType = RecAnalystConst::$GAME_TYPES[3];
-			$this->gameSettings->gameStyle = RecAnalystConst::$GAME_STYLES[2];
+			$this->gameSettings->mapStyle = RecAnalystConst::$MAP_STYLES[2];
 		}
 
 		// Other_data
@@ -1191,7 +1045,7 @@ obtaining Achievement data should be called after knowing num_player as it is re
 				$buff = substr ($this->headerStream, $pos, 2); $pos += 2;
 			} // endwhile
 
-			$this->gameSettings->map = ($mapFound) ? $mapName : RecAnalystConst::$GAME_STYLES[2];
+			$this->gameSettings->map = ($mapFound) ? $mapName : RecAnalystConst::$MAP_STYLES[2];
 		} // endif
 
 		// build teams
