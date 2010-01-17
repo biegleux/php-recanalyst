@@ -28,11 +28,11 @@ class GameSettings
 	public $gameType;
 
 	/**
-	 * Game style.
+	 * Map style.
 	 *
 	 * @var string
 	 */
-	public $gameStyle;
+	public $mapStyle;
 
 	/**
 	 * Map.
@@ -105,7 +105,7 @@ class GameSettings
 	public $mapSize;
 
 	/**
-	 * Constructor.
+	 * Class constructor.
 	 *
 	 */
 	public function __construct ()
@@ -116,7 +116,7 @@ class GameSettings
 		$this->map = '';
 		$this->difficultyLevel = '';
 		$this->gameType = '';
-		$this->gameStyle = '';
+		$this->mapStyle = '';
 		$this->isScenario = false;
 		$this->inGameCoop = false;
 		$this->playTime = 0;
