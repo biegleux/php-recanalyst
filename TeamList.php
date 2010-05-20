@@ -5,7 +5,7 @@
  * @package recAnalyst
  * @version $Id$
  * @author biegleux <biegleux[at]gmail[dot]com>
- * @copyright copyright (c) 2008-2009 biegleux
+ * @copyright copyright (c) 2008-2010 biegleux
  * @license http://www.opensource.org/licenses/gpl-3.0.html GNU General Public License version 3 (GPLv3)
  * @link http://recanalyst.sourceforge.net/
  * @filesource
@@ -15,20 +15,19 @@
  * Class TeamList.
  *
  * TeamList implements a list of teams in the game.
- *
  * @package recAnalyst
  */
-class TeamList extends TList
-{
+class TeamList extends TList {
+
 	/**
 	 * Adds a team to the list
 	 *
 	 * @param Team $team the team we wish to add
 	 * @return void
 	 */
-	public function addTeam (Team $team)
-	{
-		parent::addItem ($team);
+	public function addTeam(Team $team) {
+
+		parent::addItem($team);
 	}
 
 	/**
@@ -37,9 +36,9 @@ class TeamList extends TList
 	 * @param int $index an index of the team
 	 * @return Team|bool the team or false if the index is out of the range
 	 */
-	public function getTeam ($index)
-	{
-		return parent::getItem ($index);
+	public function getTeam($index) {
+
+		return parent::getItem($index);
 	}
 
 	/**
@@ -48,15 +47,13 @@ class TeamList extends TList
 	 * @param int $index team's index
 	 * @return Team|bool the team or false if no team has been found
 	 */
-	public function getTeamByIndex ($index)
-	{
-		for ($i = 0; $i < $this->count; $i++)
-		{
-			if ($this->list[$i]->getIndex () == $index)
-			{
-				return $this->list[$i];
-			}
+	public function getTeamByIndex($index) {
+
+		for ($i = 0; $i < $this->_count; $i++) {
+			if ($this->_list[$i]->getIndex() == $index)
+				return $this->_list[$i];
 		}
+
 		return false;
 	}
 }

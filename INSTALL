@@ -19,6 +19,4 @@
 	permission to be writeable by all (777 or -rwxrwxrwx within your FTP client)
 	on the directories defined in $mapsDir, $researchesDir configuration
 	constants.
-	
-5)	If you wish to display analyzed results I recommend you to download the resource pack
-	located at project's homepage.
+
