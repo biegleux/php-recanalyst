@@ -5,7 +5,7 @@
  * @package recAnalyst
  * @version $Id$
  * @author biegleux <biegleux[at]gmail[dot]com>
- * @copyright copyright (c) 2008-2009 biegleux
+ * @copyright copyright (c) 2008-2010 biegleux
  * @license http://www.opensource.org/licenses/gpl-3.0.html GNU General Public License version 3 (GPLv3)
  * @link http://recanalyst.sourceforge.net/
  * @filesource
@@ -18,108 +18,204 @@
  *
  * @package recAnalyst
  */
-final class RecAnalystConst
-{
-	public static $MAPS = array (
-		 9 => array ('Arabia',					'arabia.gif'),
-		10 => array ('Archipelago',				'archipelago.gif'),
-		11 => array ('Baltic',					'baltic.gif'),
-		12 => array ('Black Forest',			'black_forest.gif'),
-		13 => array ('Coastal',					'coastal.gif'),
-		14 => array ('Continental',				'continental.gif'),
-		15 => array ('Crater Lake',				'crater_lake.gif'),
-		16 => array ('Fortress',				'fortress.gif'),
-		17 => array ('Gold Rush',				'gold_rush.gif'),
-		18 => array ('Highland',				'highland.gif'),
-		19 => array ('Islands',					'islands.gif'),
-		20 => array ('Mediterranean',			'mediterranean.gif'),
-		21 => array ('Migration',				'migration.gif'),
-		22 => array ('Rivers',					'rivers.gif'),
-		23 => array ('Team Islands',			'team_islands.gif'),
-		24 => array ('Random',					'random.gif'),
-		25 => array ('Scandinavia',				'scandinavia.gif'),
-		26 => array ('Mongolia',				'mongolia.gif'),
-		27 => array ('Yucatan',					'yucatan.gif'),
-		28 => array ('Salt Marsh',				'salt_marsh.gif'),
-		29 => array ('Arena',					'arena.gif'),
-		30 => array ('King of the Hill',		''),
-		31 => array ('Oasis',					'oasis.gif'),
-		32 => array ('Ghost Lake',				'ghost_lake.gif'),
-		33 => array ('Nomad',					'nomad.gif.png'),
-		34 => array ('Iberia',					'iberia.png.png'),
-		35 => array ('Britain',					'britain.png.png'),
-		36 => array ('Mideast',					'mideast.png'),
-		37 => array ('Texas',					'texas.png'),
-		38 => array ('Italy',					'italy.png'),
-		39 => array ('Central America',			'central_america.png'),
-		40 => array ('France',					'france.png'),
-		41 => array ('Norse Lands',				'norse_lands.png'),
-		42 => array ('Sea of Japan (East Sea)',	'sea_of_japan.png'),
-		43 => array ('Byzantinum',				'byzantinum.png'),
-		44 => array ('Custom',					''),
-		48 => array ('Blind Random',			'blind_random.gif'),
+final class RecAnalystConst {
+
+	const IMG_EXT = '.gif';
+
+	/**
+	 * Map strings. Can be localized.
+	 * @var array
+	 */
+	public static $MAPS = array(
+		Map::ARABIA			=> array('Arabia',					'arabia'),
+		Map::ARCHIPELAGO	=> array('Archipelago',				'archipelago'),
+		Map::BALTIC			=> array('Baltic',					'baltic'),
+		Map::BLACKFOREST	=> array('Black Forest',			'black_forest'),
+		Map::COASTAL		=> array('Coastal',					'coastal'),
+		Map::CONTINENTAL	=> array('Continental',				'continental'),
+		Map::CRATERLAKE		=> array('Crater Lake',				'crater_lake'),
+		Map::FORTRESS		=> array('Fortress',				'fortress'),
+		Map::GOLDRUSH		=> array('Gold Rush',				'gold_rush'),
+		Map::HIGHLAND		=> array('Highland',				'highland'),
+		Map::ISLANDS		=> array('Islands',					'islands'),
+		Map::MEDITERRANEAN	=> array('Mediterranean',			'mediterranean'),
+		Map::MIGRATION		=> array('Migration',				'migration'),
+		Map::RIVERS			=> array('Rivers',					'rivers'),
+		Map::TEAMISLANDS	=> array('Team Islands',			'team_islands'),
+		Map::RANDOM			=> array('Random',					'random'),
+		Map::SCANDINAVIA	=> array('Scandinavia',				'scandinavia'),
+		Map::MONGOLIA		=> array('Mongolia',				'mongolia'),
+		Map::YUCATAN		=> array('Yucatan',					'yucatan'),
+		Map::SALTMARSH		=> array('Salt Marsh',				'salt_marsh'),
+		Map::ARENA			=> array('Arena',					'arena'),
+		Map::KINGOFTHEHILL	=> array('King of the Hill',		''),
+		Map::OASIS			=> array('Oasis',					'oasis'),
+		Map::GHOSTLAKE		=> array('Ghost Lake',				'ghost_lake'),
+		Map::NOMAD			=> array('Nomad',					'nomad.png'),
+		Map::IBERIA			=> array('Iberia',					'iberia.png'),
+		Map::BRITAIN		=> array('Britain',					'britain.png'),
+		Map::MIDEAST		=> array('Mideast',					'mideast.png'),
+		Map::TEXAS			=> array('Texas',					'texas.png'),
+		Map::ITALY			=> array('Italy',					'italy.png'),
+		Map::CENTRALAMERICA	=> array('Central America',			'central_america.png'),
+		Map::FRANCE			=> array('France',					'france.png'),
+		Map::NORSELANDS		=> array('Norse Lands',				'norse_lands.png'),
+		Map::SEAOFJAPAN		=> array('Sea of Japan (East Sea)',	'sea_of_japan.png'),
+		Map::BYZANTINUM		=> array('Byzantinum',				'byzantinum.png'),
+		Map::CUSTOM			=> array('Custom',					''),
+		Map::BLINDRANDOM	=> array('Blind Random',			'blind_random'),
 	);
 
-	public static $MAP_STYLES = array (
-    	0 => 'Standard',
-    	1 => 'Real World',
-    	2 => 'Custom'
+	/**
+	 * Game version strings. Can be localized.
+	 * @var array
+	 */
+	public static $GAME_VERSIONS = array(
+		'Unknown',
+		'AOK',
+		'AOK Trial',
+		'AOK 2.0',
+		'AOK 2.0a',
+		'AOC',
+		'AOC Trial',
+		'AOC 1.0',
+		'AOC 1.0c'
 	);
 
-	public static $DIFFICULTY_LEVELS = array (
-    	0 => 'Hardest',
-    	1 => 'Hard',
-    	2 => 'Moderate',
-    	3 => 'Easy',
-    	4 => 'Easiest'
+	/**
+	 * Map style strings. Can be localized
+	 * @var array
+	 */
+	public static $MAP_STYLES = array(
+    	'Standard',
+    	'Real World',
+    	'Custom'
 	);
 
-	public static $GAME_TYPES = array (
-    	0 => 'Random map',
-	    1 => 'Regicide',
-    	2 => 'Death match',
-	    3 => 'Scenario',
-    	4 => 'Campaign',
-	    5 => 'King of the Hill',
-    	6 => 'Wonder race',
-	    7 => 'Defend Wonder',
-    	8 => 'Turbo Random map'
+	/**
+	 * Difficulty level strings. Can be localized.
+	 * @var array
+	 */
+	public static $DIFFICULTY_LEVELS = array(
+    	'Hardest',
+    	'Hard',
+    	'Moderate',
+    	'Standard',
+    	'Easiest'
 	);
 
-	public static $GAME_SPEEDS = array (
+	/**
+	 * Difficulty level strings for AOK. Can be localized.
+	 * @var array
+	 */
+	public static $AOK_DIFFICULTY_LEVELS = array(
+    	'Hardest',
+    	'Hard',
+    	'Moderate',
+    	'Easy',
+    	'Easiest'
+	);
+
+	/**
+	 * Game type strings. Can be localized.
+	 * @var array
+	 */
+	public static $GAME_TYPES = array(
+    	'Random map',
+	    'Regicide',
+    	'Death match',
+	    'Scenario',
+    	'Campaign',
+	    'King of the Hill',
+    	'Wonder race',
+	    'Defend Wonder',
+    	'Turbo Random map'
+	);
+
+	/**
+	 * Game speed strings. Can be localized.
+	 * @var array
+	 */
+	public static $GAME_SPEEDS = array(
     	100 => 'Slow',
     	150 => 'Normal',
     	200 => 'Fast'
 	);
 
-	public static $REVEAL_SETTINGS = array (
-		0 => 'Normal',
-		1 => 'Explored',
-		2 => 'All Visible'
+	/**
+	 * Reveal setting strings. Can be localized.
+	 * @var array
+	 */
+	public static $REVEAL_SETTINGS = array(
+		'Normal',
+		'Explored',
+		'All Visible'
 	);
 
-	public static $CIVS = array (
-		 1 => array ('Britons',		'britons.gif'),
-		 2 => array ('Franks',		'franks.gif'),
-		 3 => array ('Goths',		'goths.gif'),
-		 4 => array ('Teutons',		'teutons.gif'),
-		 5 => array ('Japanese',	'japanese.gif'),
-		 6 => array ('Chinese',		'chinese.gif'),
-		 7 => array ('Byzantines',	'byzantines.gif'),
-		 8 => array ('Persians',	'persians.gif'),
-		 9 => array ('Saracens',	'saracens.gif'),
-		10 => array ('Turks',		'turks.gif'),
-		11 => array ('Vikings',		'vikings.gif'),
-		12 => array ('Mongols',		'mongols.gif'),
-		13 => array ('Celts',		'celts.gif'),
-		14 => array ('Spanish',		'spanish.gif'),
-		15 => array ('Aztecs',		'aztecs.gif'),
-		16 => array ('Mayans',		'mayans.gif'),
-		17 => array ('Huns',		'huns.gif'),
-		18 => array ('Koreans',		'koreans.gif')
+	/**
+	 * Map size strings. Can be localized.
+	 * @var array
+	 */
+	public static $MAP_SIZES = array(
+		'Tiny (2 players)',
+		'Small (3 players)',
+		'Medium (4 players)',
+		'Normal (6 players)',
+		'Large (8 players)',
+		'Giant'
 	);
 
-	public static $COLORS = array (
+	/**
+	 * Starting age strings. Can be localized.
+	 * @var array
+	 */
+	public static $STARTING_AGES = array(
+		'Dark Age',
+		'Feudal Age',
+		'Castle Age',
+		'Imperial Age',
+		'Post-Imperial Age'
+	);
+
+	/**
+	 * Victory condition strings. Can be localized.
+	 * @var array
+	 */
+	public static $VICTORY_CONDITIONS = array(
+    	'Standard',
+    	'Conquest',
+    	'Time Limit',
+    	'Score Limit',
+    	'Custom'
+	);
+
+	/**
+	 * Civilization strings. Can be localized.
+	 * @var array
+	 */
+	public static $CIVS = array(
+		array('', 			''),
+		array('Britons',	'britons'),
+		array('Franks',		'franks'),
+		array('Goths',		'goths'),
+		array('Teutons',	'teutons'),
+		array('Japanese',	'japanese'),
+		array('Chinese',	'chinese'),
+		array('Byzantines',	'byzantines'),
+		array('Persians',	'persians'),
+		array('Saracens',	'saracens'),
+		array('Turks',		'turks'),
+		array('Vikings',	'vikings'),
+		array('Mongols',	'mongols'),
+		array('Celts',		'celts'),
+		array('Spanish',	'spanish'),
+		array('Aztecs',		'aztecs'),
+		array('Mayans',		'mayans'),
+		array('Huns',		'huns'),
+		array('Koreans',	'koreans')
+	);
+
+	public static $COLORS = array(
 		0x00 => '#0000ff',
 		0x01 => '#ff0000',
 		0x02 => '#00ff00',
@@ -130,307 +226,656 @@ final class RecAnalystConst
 		0x07 => '#ff8201'
 	);
 
-	public static $RESOURCES = array (
+	/**
+	 * Resource strings. Can be localized.
+	 * @var array
+	 */
+	public static $RESOURCES = array(
 		0x00 => 'food',
 		0x01 => 'wood',
 		0x02 => 'stone',
 		0x03 => 'gold'
 	);
 
-	public static $MAP_SIZES = array (
-		0x00 => 'Tiny (2 players)',
-		0x01 => 'Small (3 players)',
-		0x02 => 'Medium (4 players)',
-		0x03 => 'Normal (6 players)',
-		0x04 => 'Large (8 players)',
-		0x05 => 'Giant'
-	);
-
-	public static $RESEARCHES = array (
-		101 => array ('Feudal Age',				'feudal_age.gif'),
-		102 => array ('Castle Age',				'castle_age.gif'),
-		103 => array ('Imperial Age',			'imperial_age.gif'),
-		 22 => array ('Loom',					'loom.gif'),
-		213 => array ('Wheel Barrow',			'wheel-barrow.gif'),
-		249 => array ('Hand Cart',				'hand_cart.gif'),
-		  8 => array ('Town Watch',				'town_watch.gif'),
-		280 => array ('Town Patrol',			'town_patrol.gif'),
-		 14 => array ('Horse Collar',			'horse_collar.gif'),
-		 13 => array ('Heavy Plow',				'heavy_plow.gif'),
-		 12 => array ('Crop Rotation',			'crop_rotation.gif'),
-		202 => array ('Double Bit Axe',			'double_bit_axe.gif'),
-		203 => array ('Bow Saw',				'bow_saw.gif'),
-		221 => array ('Two Man Saw',			'two_man_saw.gif'),
-		 55 => array ('Gold Mining',			'gold_mining.gif'),
-		278 => array ('Stone Mining',			'stone_mining.gif'),
-		182 => array ('Gold Shaft Mining',		'gold_shaft_mining.gif'),
-		279 => array ('Stone Shaft Mining',		'stone_shaft_mining.gif'),
-		 19 => array ('Cartography',			'cartography.gif'),
-		 23 => array ('Coinage',				'coinage.gif'),
-		 48 => array ('Caravan',				'caravan.gif'),
-		 17 => array ('Banking',				'banking.gif'),
-		 15 => array ('Guilds',					'guilds.gif'),
-		211 => array ('Padded Archer Armor',	'padded_archer_armor.gif'),
-		212 => array ('Leather Archer Armor',	'leather_archer_armor.gif'),
-		219 => array ('Ring Archer Armor',		'ring_archer_armor.gif'),
-		199 => array ('Fletching',				'fletching.gif'),
-		200 => array ('Bodkin Arrow',			'bodkin_arrow.gif'),
-		201 => array ('Bracer',					'bracer.gif'),
-		 67 => array ('Forging',				'forging.gif'),
-		 68 => array ('Iron Casting',			'iron_casting.gif'),
-		 75 => array ('Blast Furnace',			'blast_furnace.gif'),
-		 81 => array ('Scale Barding',			'scale_barding.gif'),
-		 82 => array ('Chain Barding',			'chain_barding.gif'),
-		 80 => array ('Plate Barding',			'plate_barding.gif'),
-		 74 => array ('Scale Mail',				'scale_mail.gif'),
-		 76 => array ('Chain Mail',				'chain_mail.gif'),
-		 77 => array ('Plate Mail',				'plate_mail.gif'),
-		 50 => array ('Masonry',				'masonry.gif'),
-		194 => array ('Fortified Wall',			'fortified_wall.gif'),
-		 93 => array ('Ballistics',				'ballistics.gif'),
-		380 => array ('Heated Shot',			'heated_shot.gif'),
-		322 => array ('Murder Holes',			'murder_holes.gif'),
-		 54 => array ('Stonecutting',			'stonecutting.gif'),
-		 51 => array ('Architecture',			'architecture.gif'),
-		 47 => array ('Chemistry',				'chemistry.gif'),
-		377 => array ('Siege Engineers',		'siege_engineers.gif'),
-		140 => array ('Guard Tower',			'guard_tower.gif'),
-		 63 => array ('Keep',					'keep.gif'),
-		 64 => array ('Bombard Tower',			'bombard_tower.gif'),
-		222 => array ('Man At Arms',			'man_at_arms.gif'),
-		207 => array ('Long Swordsman',			'long_swordsman.gif'),
-		217 => array ('Two Handed Swordsman',	'two_handed_swordsman.gif'),
-		264 => array ('Champion',				'champion.gif'),
-		197 => array ('Pikeman',				'pikeman.gif'),
-		429 => array ('Halberdier',				'halberdier.gif'),
-		434 => array ('Elite Eagle Warrior',	'eagle_warrior.gif'),
-		 90 => array ('Tracking',				'tracking.gif'),
-		215 => array ('Squires',				'squires.gif'),
-		100 => array ('Crossbow',				'crossbow.gif'),
-		237 => array ('Arbalest',				'arbalest.gif'),
-		 98 => array ('Elite Skirmisher',		'elite_skirmisher.gif'),
-		218 => array ('Heavy Cavalry Archer',	'heavy_cavalry_archer.gif'),
-		437 => array ('Thumb Ring',				'thumb_ring.gif'),
-		436 => array ('Parthian Tactics',		'parthian_tactics.gif'),
-		254 => array ('Light Cavalry',			'light_cavalry.gif'),
-		428 => array ('Hussar',					'hussar.gif'),
-		209 => array ('Cavalier',				'cavalier.gif'),
-		265 => array ('Paladin',				'paladin.gif'),
-		236 => array ('Heavy Camel',			'heavy_camel.gif'),
-		435 => array ('Bloodlines',				'bloodlines.gif'),
-		 39 => array ('Husbandry',				'husbandry.gif'),
-		257 => array ('Onager',					'onager.gif'),
-		320 => array ('Siege Onager',			'siege_onager.gif'),
-		 96 => array ('Capped Ram',				'capped_ram.gif'),
-		255 => array ('Siege Ram',				'siege_ram.gif'),
-		239 => array ('Heavy Scorpion',			'heavy_scorpion.gif'),
-		316 => array ('Redemption',				'redemption.gif'),
-		252 => array ('Fervor',					'fervor.gif'),
-		231 => array ('Sanctity',				'sanctity.gif'),
-		319 => array ('Atonement',				'atonement.gif'),
-		441 => array ('Herbal Medicine',		'herbal_medicine.gif'),
-		439 => array ('Heresy',					'heresy.gif'),
-		230 => array ('Block Printing',			'block_printing.gif'),
-		233 => array ('Illumination',			'illumination.gif'),
-		 45 => array ('Faith',					'faith.gif'),
-		438 => array ('Theocracy',				'theocracy.gif'),
-		 34 => array ('War Galley',				'war_galley.gif'),
-		 35 => array ('Galleon',				'galleon.gif'),
-		246 => array ('Fast Fire Ship',			'fast_fire_ship.gif'),
-		244 => array ('Heavy Demolition Ship',	'heavy_demolition_ship.gif'),
-		 37 => array ('Cannon Galleon',			'cannon_galleon.gif'),
-		376 => array ('Elite Cannon Galleon',	'cannon_galleon.gif'),
-		373 => array ('Shipwright',				'shipwright.gif'),
-		374 => array ('Careening',				'careening.gif'),
-		375 => array ('Dry Dock',				'dry_dock.gif'),
-		379 => array ('Hoardings',				'hoardings.gif'),
-		321 => array ('Sappers',				'sappers.gif'),
-		315 => array ('Conscription',			'conscription.gif'),
-		408 => array ('Spies / Treason',		'spy.gif'),
+	/**
+	 * Research strings. Can be localized.
+	 * @var array
+	 */
+	public static $RESEARCHES = array(
+		101 => array('Feudal Age',				'feudal_age'),
+		102 => array('Castle Age',				'castle_age'),
+		103 => array('Imperial Age',			'imperial_age'),
+		 22 => array('Loom',					'loom'),
+		213 => array('Wheel Barrow',			'wheel-barrow'),
+		249 => array('Hand Cart',				'hand_cart'),
+		  8 => array('Town Watch',				'town_watch'),
+		280 => array('Town Patrol',				'town_patrol'),
+		 14 => array('Horse Collar',			'horse_collar'),
+		 13 => array('Heavy Plow',				'heavy_plow'),
+		 12 => array('Crop Rotation',			'crop_rotation'),
+		202 => array('Double Bit Axe',			'double_bit_axe'),
+		203 => array('Bow Saw',					'bow_saw'),
+		221 => array('Two Man Saw',				'two_man_saw'),
+		 55 => array('Gold Mining',				'gold_mining'),
+		278 => array('Stone Mining',			'stone_mining'),
+		182 => array('Gold Shaft Mining',		'gold_shaft_mining'),
+		279 => array('Stone Shaft Mining',		'stone_shaft_mining'),
+		 19 => array('Cartography',				'cartography'),
+		 23 => array('Coinage',					'coinage'),
+		 48 => array('Caravan',					'caravan'),
+		 17 => array('Banking',					'banking'),
+		 15 => array('Guilds',					'guilds'),
+		211 => array('Padded Archer Armor',		'padded_archer_armor'),
+		212 => array('Leather Archer Armor',	'leather_archer_armor'),
+		219 => array('Ring Archer Armor',		'ring_archer_armor'),
+		199 => array('Fletching',				'fletching'),
+		200 => array('Bodkin Arrow',			'bodkin_arrow'),
+		201 => array('Bracer',					'bracer'),
+		 67 => array('Forging',					'forging'),
+		 68 => array('Iron Casting',			'iron_casting'),
+		 75 => array('Blast Furnace',			'blast_furnace'),
+		 81 => array('Scale Barding',			'scale_barding'),
+		 82 => array('Chain Barding',			'chain_barding'),
+		 80 => array('Plate Barding',			'plate_barding'),
+		 74 => array('Scale Mail',				'scale_mail'),
+		 76 => array('Chain Mail',				'chain_mail'),
+		 77 => array('Plate Mail',				'plate_mail'),
+		 50 => array('Masonry',					'masonry'),
+		194 => array('Fortified Wall',			'fortified_wall'),
+		 93 => array('Ballistics',				'ballistics'),
+		380 => array('Heated Shot',				'heated_shot'),
+		322 => array('Murder Holes',			'murder_holes'),
+		 54 => array('Stonecutting',			'stonecutting'),
+		 51 => array('Architecture',			'architecture'),
+		 47 => array('Chemistry',				'chemistry'),
+		377 => array('Siege Engineers',			'siege_engineers'),
+		140 => array('Guard Tower',				'guard_tower'),
+		 63 => array('Keep',					'keep'),
+		 64 => array('Bombard Tower',			'bombard_tower'),
+		222 => array('Man At Arms',				'man_at_arms'),
+		207 => array('Long Swordsman',			'long_swordsman'),
+		217 => array('Two Handed Swordsman',	'two_handed_swordsman'),
+		264 => array('Champion',				'champion'),
+		197 => array('Pikeman',					'pikeman'),
+		429 => array('Halberdier',				'halberdier'),
+		434 => array('Elite Eagle Warrior',		'eagle_warrior'),
+		 90 => array('Tracking',				'tracking'),
+		215 => array('Squires',					'squires'),
+		100 => array('Crossbow',				'crossbow'),
+		237 => array('Arbalest',				'arbalest'),
+		 98 => array('Elite Skirmisher',		'elite_skirmisher'),
+		218 => array('Heavy Cavalry Archer',	'heavy_cavalry_archer'),
+		437 => array('Thumb Ring',				'thumb_ring'),
+		436 => array('Parthian Tactics',		'parthian_tactics'),
+		254 => array('Light Cavalry',			'light_cavalry'),
+		428 => array('Hussar',					'hussar'),
+		209 => array('Cavalier',				'cavalier'),
+		265 => array('Paladin',					'paladin'),
+		236 => array('Heavy Camel',				'heavy_camel'),
+		435 => array('Bloodlines',				'bloodlines'),
+		 39 => array('Husbandry',				'husbandry'),
+		257 => array('Onager',					'onager'),
+		320 => array('Siege Onager',			'siege_onager'),
+		 96 => array('Capped Ram',				'capped_ram'),
+		255 => array('Siege Ram',				'siege_ram'),
+		239 => array('Heavy Scorpion',			'heavy_scorpion'),
+		316 => array('Redemption',				'redemption'),
+		252 => array('Fervor',					'fervor'),
+		231 => array('Sanctity',				'sanctity'),
+		319 => array('Atonement',				'atonement'),
+		441 => array('Herbal Medicine',			'herbal_medicine'),
+		439 => array('Heresy',					'heresy'),
+		230 => array('Block Printing',			'block_printing'),
+		233 => array('Illumination',			'illumination'),
+		 45 => array('Faith',					'faith'),
+		438 => array('Theocracy',				'theocracy'),
+		 34 => array('War Galley',				'war_galley'),
+		 35 => array('Galleon',					'galleon'),
+		246 => array('Fast Fire Ship',			'fast_fire_ship'),
+		244 => array('Heavy Demolition Ship',	'heavy_demolition_ship'),
+		 37 => array('Cannon Galleon',			'cannon_galleon'),
+		376 => array('Elite Cannon Galleon',	'cannon_galleon'),
+		373 => array('Shipwright',				'shipwright'),
+		374 => array('Careening',				'careening'),
+		375 => array('Dry Dock',				'dry_dock'),
+		379 => array('Hoardings',				'hoardings'),
+		321 => array('Sappers',					'sappers'),
+		315 => array('Conscription',			'conscription'),
+		408 => array('Spies / Treason',			'spy'),
 		// unique-unit-upgrade
-		432 => array ('Elite Jaguar Man',		'jaguar_man.gif'),
-		361 => array ('Elite Cataphract',		'cataphract.gif'),
-		370 => array ('Elite Woad Raider',		'woad_raider.gif'),
-		362 => array ('Elite Chu-Ko-Nu',		'chu_ko_nu.gif'),
-		360 => array ('Elite Longbowman',		'longbowman.gif'),
-		363 => array ('Elite Throwing Axeman',	'throwing_axeman.gif'),
-		365 => array ('Elite Huskarl',			'huskarl.gif'),
-		  2 => array ('Elite Tarkan',			'tarkan.gif'),
-		366 => array ('Elite Samurai',			'samurai.gif'),
-		450 => array ('Elite War Wagon',		'war_wagon.gif'),
-		448 => array ('Elite Turtle Ship',		'turtle_ship.gif'),
-		//348 => array ('Elite Turtle Ship',	'turtle_ship.gif'),
-		 27 => array ('Elite Plumed Archer',	'plumed_archer.gif'),
-		371 => array ('Elite Mangudai',			'mangudai.gif'),
-		367 => array ('Elite War Elephant',		'war_elephant.gif'),
-		368 => array ('Elite Mameluke',			'mameluke.gif'),
-		//378 => array ('Elite Mameluke',		'mameluke.gif'),
-		 60 => array ('Elite Conquistador',		'conquistador.gif'),
-		364 => array ('Elite Teutonic Knight',	'teutonic_knight.gif'),
-		369 => array ('Elite Janissary',		'janissary.gif'),
-		398 => array ('Elite Berserk',			'berserk.gif'),
-		372 => array ('Elite Longboat',			'longboat.gif'),
+		432 => array('Elite Jaguar Man',		'jaguar_man'),
+		361 => array('Elite Cataphract',		'cataphract'),
+		370 => array('Elite Woad Raider',		'woad_raider'),
+		362 => array('Elite Chu-Ko-Nu',			'chu_ko_nu'),
+		360 => array('Elite Longbowman',		'longbowman'),
+		363 => array('Elite Throwing Axeman',	'throwing_axeman'),
+		365 => array('Elite Huskarl',			'huskarl'),
+		  2 => array('Elite Tarkan',			'tarkan'),
+		366 => array('Elite Samurai',			'samurai'),
+		450 => array('Elite War Wagon',			'war_wagon'),
+		448 => array('Elite Turtle Ship',		'turtle_ship'),
+		//348 => array('Elite Turtle Ship',		'turtle_ship'),
+		 27 => array('Elite Plumed Archer',		'plumed_archer'),
+		371 => array('Elite Mangudai',			'mangudai'),
+		367 => array('Elite War Elephant',		'war_elephant'),
+		368 => array('Elite Mameluke',			'mameluke'),
+		//378 => array('Elite Mameluke',		'mameluke'),
+		 60 => array('Elite Conquistador',		'conquistador'),
+		364 => array('Elite Teutonic Knight',	'teutonic_knight'),
+		369 => array('Elite Janissary',			'janissary'),
+		398 => array('Elite Berserk',			'berserk'),
+		372 => array('Elite Longboat',			'longboat'),
 		// unique-research
-		 24 => array ('Garland Wars',			'unique_tech.gif'),
-		 61 => array ('Logistica',				'unique_tech.gif'),
-		  5 => array ('Furor Celtica',			'unique_tech.gif'),
-		 52 => array ('Rocketry',				'unique_tech.gif'),
-		  3 => array ('Yeomen',					'unique_tech.gif'),
-		 83 => array ('Bearded Axe',			'unique_tech.gif'),
-		 16 => array ('Anarchy',				'unique_tech.gif'),
-		457 => array ('Perfusion',				'unique_tech.gif'),
-		 21 => array ('Atheism',				'unique_tech.gif'),
-		 59 => array ('Kataparuto',				'unique_tech.gif'),
-		445 => array ('Shinkichon',				'unique_tech.gif'),
-		  4 => array ('El Dorado',				'unique_tech.gif'),
-		  6 => array ('Drill',					'unique_tech.gif'),
-		  7 => array ('Mahouts',				'unique_tech.gif'),
-		  9 => array ('Zealotry',				'unique_tech.gif'),
-		440 => array ('Supremacy',				'unique_tech.gif'),
-		 11 => array ('Crenellations',			'unique_tech.gif'),
-		 10 => array ('Artillery',				'unique_tech.gif'),
-		 49 => array ('Berserkergang',			'unique_tech.gif')
+		 24 => array('Garland Wars',			'unique_tech'),
+		 61 => array('Logistica',				'unique_tech'),
+		  5 => array('Furor Celtica',			'unique_tech'),
+		 52 => array('Rocketry',				'unique_tech'),
+		  3 => array('Yeomen',					'unique_tech'),
+		 83 => array('Bearded Axe',				'unique_tech'),
+		 16 => array('Anarchy',					'unique_tech'),
+		457 => array('Perfusion',				'unique_tech'),
+		 21 => array('Atheism',					'unique_tech'),
+		 59 => array('Kataparuto',				'unique_tech'),
+		445 => array('Shinkichon',				'unique_tech'),
+		  4 => array('El Dorado',				'unique_tech'),
+		  6 => array('Drill',					'unique_tech'),
+		  7 => array('Mahouts',					'unique_tech'),
+		  9 => array('Zealotry',				'unique_tech'),
+		440 => array('Supremacy',				'unique_tech'),
+		 11 => array('Crenellations',			'unique_tech'),
+		 10 => array('Artillery',				'unique_tech'),
+		 49 => array('Berserkergang',			'unique_tech')
 	);
 
-	public static $UNITS = array (
-		  4 => array ('Archer',					'archer.gif'),
-		  5 => array ('Hand Cannoneer',			'hand_cannoneer.gif'),
-		  6 => array ('Elite Skirmisher',		'elite_skirmisher.gif'),
-		  7 => array ('Skirmisher',				'skirmisher.gif'),
-		  8 => array ('Longbowman',				'longbowman.gif'),
-		 11 => array ('Mangudai',				'mangudai.gif'),
-		 13 => array ('Fishing Ship',			'fishing_ship.gif'),
-		 17	=> array ('Trade Cog',				'trade_cog.gif'),
-		 21	=> array ('War Galley',				'war_galley.gif'),
-		 24	=> array ('Crossbowman',			'crossbowman.gif'),
-		 25	=> array ('Teutonic Knight',		'teutonic_knight.gif'),
-		 35	=> array ('Battering Ram',			'battering_ram.gif'),
-		 36	=> array ('Bombard Cannon',			'bombard_cannon.gif'),
-		 38	=> array ('Knight',					'knight.gif'),
-		 39	=> array ('Cavalry Archer',			'cavalry_archer.gif'),
-		 40	=> array ('Cataphract',				'cataphract.gif'),
-		 41	=> array ('Huskarl',				'huskarl.gif'),
-	//	 42	=> array ('Trebuchet (Unpacked)',	'trebuchet.gif'),
-		 46	=> array ('Janissary',				'janissary.gif'),
-		 73	=> array ('Chu Ko Nu',				'chu_ko_nu.gif'),
-		 74	=> array ('Militia',				'militiaman.gif'),
-		 75	=> array ('Man At Arms',			'man_at_arms.gif'),
-		 76	=> array ('Heavy Swordsman',		'heavy_swordsman.gif'),
-		 77	=> array ('Long Swordsman',			'long_swordsman.gif'),
-		 83	=> array ('Villager',				'villager.gif'),
-		 93	=> array ('Spearman',				'spearman.gif'),
-		125	=> array ('Monk',					'monk.gif'),
-	//	128	=> array ('Trade Cart, Empty',		''),
-		128	=> array ('Trade Cart',				'trade_cart.gif'),
-	//	204	=> array ('Trade Cart, Full',		''),
-		232	=> array ('Woad Raider',			'woad_raider.gif'),
-		239	=> array ('War Elephant',			'war_elephant.gif'),
-		250	=> array ('Longboat',				'longboat.gif'),
-		279	=> array ('Scorpion',				'scorpion.gif'),
-		280	=> array ('Mangonel',				'mangonel.gif'),
-		281	=> array ('Throwing Axeman',		'throwing_axeman.gif'),
-		282	=> array ('Mameluke',				'mameluke.gif'),
-		283	=> array ('Cavalier',				'cavalier.gif'),
-	//	286	=> array ('Monk With Relic',		''),
-		291	=> array ('Samurai',				'samurai.gif'),
-		329	=> array ('Camel',					'camel.gif'),
-		330	=> array ('Heavy Camel',			'heavy_camel.gif'),
-	//	331	=> array ('Trebuchet, P',			'trebuchet.gif'),
-		331	=> array ('Trebuchet',				'trebuchet.gif'),
-		358	=> array ('Pikeman',				'pikeman.gif'),
-		359	=> array ('Halberdier',				'halberdier.gif'),
-		420	=> array ('Cannon Galleon',			'cannon_galleon.gif'),
-		422	=> array ('Capped Ram',				'capped_ram.gif'),
-		434	=> array ('King',					'king.gif'),
-		440	=> array ('Petard',					'petard.gif'),
-		441	=> array ('Hussar',					'hussar.gif'),
-		442	=> array ('Galleon',				'galleon.gif'),
-		448	=> array ('Scout Cavalry',			'scout_cavalry.gif'),
-		473	=> array ('Two Handed Swordsman',	'two_handed_swordsman.gif'),
-		474	=> array ('Heavy Cavalry Archer',	'heavy_cavalry_archer.gif'),
-		492	=> array ('Arbalest',				'arbalest.gif'),
-	//	493	=> array ('Adv Heavy Crossbowman',	''),
-		527	=> array ('Demolition Ship',		'demolition_ship.gif'),
-		528	=> array ('Heavy Demolition Ship',	'heavy_demolition_ship.gif'),
-		529	=> array ('Fire Ship',				'fire_ship.gif'),
-		530	=> array ('Elite Longbowman',		'longbowman.gif'),
-		531	=> array ('Elite Throwing Axeman',	'throwing_axeman.gif'),
-		532	=> array ('Fast Fire Ship',			'fast_fire_ship.gif'),
-		533	=> array ('Elite Longboat',			'longboat.gif'),
-		534	=> array ('Elite Woad Raider',		'woad_raider.gif'),
-		539	=> array ('Galley',					'galley.gif'),
-		542	=> array ('Heavy Scorpion',			'heavy_scorpion.gif'),
-		545	=> array ('Transport Ship',			'transport_ship.gif'),
-		546	=> array ('Light Cavalry',			'light_cavalry.gif'),
-		548	=> array ('Siege Ram',				'siege_ram.gif'),
-		550	=> array ('Onager',					'onager.gif'),
-		553	=> array ('Elite Cataphract',		'cataphract.gif'),
-		554	=> array ('Elite Teutonic Knight',	'teutonic_knight.gif'),
-		555	=> array ('Elite Huskarl',			'huskarl.gif'),
-		556	=> array ('Elite Mameluke',			'mameluke.gif'),
-		557	=> array ('Elite Janissary',		'janissary.gif'),
-		558	=> array ('Elite War Elephant',		'war_elephant.gif'),
-		559	=> array ('Elite Chu Ko Nu',		'chu_ko_nu.gif'),
-		560	=> array ('Elite Samurai',			'samurai.gif'),
-		561	=> array ('Elite Mangudai',			'mangudai.gif'),
-		567	=> array ('Champion',				'champion.gif'),
-		569	=> array ('Paladin',				'paladin.gif'),
-		588	=> array ('Siege Onager',			'siege_onager.gif'),
-		692	=> array ('Berserk',				'berserk.gif'),
-		694	=> array ('Elite Berserk',			'berserk.gif'),
-		725	=> array ('Jaguar Warrior',			'jaguar_man.gif'),
-		726	=> array ('Elite Jaguar Warrior',	'jaguar_man.gif'),
-	//	748	=> array ('Cobra Car',				''),
-		751	=> array ('Eagle Warrior',			'eagle_warrior.gif'),
-		752	=> array ('Elite Eagle Warrior',	'eagle_warrior.gif'),
-		755	=> array ('Tarkan',					'tarkan.gif'),
-		757	=> array ('Elite Tarkan',			'tarkan.gif'),
-		759	=> array ('Huskarl',				'huskarl.gif'),
-		761	=> array ('Elite Huskarl',			'huskarl.gif'),
-		763	=> array ('Plumed Archer',			'plumed_archer.gif'),
-		765	=> array ('Elite Plumed Archer',	'plumed_archer.gif'),
-		771	=> array ('Conquistador',			'conquistador.gif'),
-		773	=> array ('Elite Conquistador',		'conquistador.gif'),
-		775	=> array ('Missionary',				'missionary.gif'),
-	//	812	=> array ('Jaguar',					''),
-		827	=> array ('War Wagon',				'war_wagon.gif'),
-		829	=> array ('Elite War Wagon',		'war_wagon.gif'),
-		831	=> array ('Turtle Ship',			'turtle_ship.gif'),
-		832	=> array ('Elite Turtle Ship',		'turtle_ship.gif'),
+	/**
+	 * Unit strings. Can be localized.
+	 * @var array
+	 */
+	public static $UNITS = array(
+		  4 => array('Archer',					'archer'),
+		  5 => array('Hand Cannoneer',			'hand_cannoneer'),
+		  6 => array('Elite Skirmisher',		'elite_skirmisher'),
+		  7 => array('Skirmisher',				'skirmisher'),
+		  8 => array('Longbowman',				'longbowman'),
+		 11 => array('Mangudai',				'mangudai'),
+		 13 => array('Fishing Ship',			'fishing_ship'),
+		 17	=> array('Trade Cog',				'trade_cog'),
+		 21	=> array('War Galley',				'war_galley'),
+		 24	=> array('Crossbowman',				'crossbowman'),
+		 25	=> array('Teutonic Knight',			'teutonic_knight'),
+		 35	=> array('Battering Ram',			'battering_ram'),
+		 36	=> array('Bombard Cannon',			'bombard_cannon'),
+		 38	=> array('Knight',					'knight'),
+		 39	=> array('Cavalry Archer',			'cavalry_archer'),
+		 40	=> array('Cataphract',				'cataphract'),
+		 41	=> array('Huskarl',					'huskarl'),
+	//	 42	=> array('Trebuchet (Unpacked)',	'trebuchet'),
+		 46	=> array('Janissary',				'janissary'),
+		 73	=> array('Chu Ko Nu',				'chu_ko_nu'),
+		 74	=> array('Militia',					'militiaman'),
+		 75	=> array('Man At Arms',				'man_at_arms'),
+		 76	=> array('Heavy Swordsman',			'heavy_swordsman'),
+		 77	=> array('Long Swordsman',			'long_swordsman'),
+		 83	=> array('Villager',				'villager'),
+		 93	=> array('Spearman',				'spearman'),
+		125	=> array('Monk',					'monk'),
+	//	128	=> array('Trade Cart, Empty',		''),
+		128	=> array('Trade Cart',				'trade_cart'),
+	//	204	=> array('Trade Cart, Full',		''),
+		232	=> array('Woad Raider',				'woad_raider'),
+		239	=> array('War Elephant',			'war_elephant'),
+		250	=> array('Longboat',				'longboat'),
+		279	=> array('Scorpion',				'scorpion'),
+		280	=> array('Mangonel',				'mangonel'),
+		281	=> array('Throwing Axeman',			'throwing_axeman'),
+		282	=> array('Mameluke',				'mameluke'),
+		283	=> array('Cavalier',				'cavalier'),
+	//	286	=> array('Monk With Relic',			''),
+		291	=> array('Samurai',					'samurai'),
+		329	=> array('Camel',					'camel'),
+		330	=> array('Heavy Camel',				'heavy_camel'),
+	//	331	=> array('Trebuchet, P',			'trebuchet'),
+		331	=> array('Trebuchet',				'trebuchet'),
+		358	=> array('Pikeman',					'pikeman'),
+		359	=> array('Halberdier',				'halberdier'),
+		420	=> array('Cannon Galleon',			'cannon_galleon'),
+		422	=> array('Capped Ram',				'capped_ram'),
+		434	=> array('King',					'king'),
+		440	=> array('Petard',					'petard'),
+		441	=> array('Hussar',					'hussar'),
+		442	=> array('Galleon',					'galleon'),
+		448	=> array('Scout Cavalry',			'scout_cavalry'),
+		473	=> array('Two Handed Swordsman',	'two_handed_swordsman'),
+		474	=> array('Heavy Cavalry Archer',	'heavy_cavalry_archer'),
+		492	=> array('Arbalest',				'arbalest'),
+	//	493	=> array('Adv Heavy Crossbowman',	''),
+		527	=> array('Demolition Ship',			'demolition_ship'),
+		528	=> array('Heavy Demolition Ship',	'heavy_demolition_ship'),
+		529	=> array('Fire Ship',				'fire_ship'),
+		530	=> array('Elite Longbowman',		'longbowman'),
+		531	=> array('Elite Throwing Axeman',	'throwing_axeman'),
+		532	=> array('Fast Fire Ship',			'fast_fire_ship'),
+		533	=> array('Elite Longboat',			'longboat'),
+		534	=> array('Elite Woad Raider',		'woad_raider'),
+		539	=> array('Galley',					'galley'),
+		542	=> array('Heavy Scorpion',			'heavy_scorpion'),
+		545	=> array('Transport Ship',			'transport_ship'),
+		546	=> array('Light Cavalry',			'light_cavalry'),
+		548	=> array('Siege Ram',				'siege_ram'),
+		550	=> array('Onager',					'onager'),
+		553	=> array('Elite Cataphract',		'cataphract'),
+		554	=> array('Elite Teutonic Knight',	'teutonic_knight'),
+		555	=> array('Elite Huskarl',			'huskarl'),
+		556	=> array('Elite Mameluke',			'mameluke'),
+		557	=> array('Elite Janissary',			'janissary'),
+		558	=> array('Elite War Elephant',		'war_elephant'),
+		559	=> array('Elite Chu Ko Nu',			'chu_ko_nu'),
+		560	=> array('Elite Samurai',			'samurai'),
+		561	=> array('Elite Mangudai',			'mangudai'),
+		567	=> array('Champion',				'champion'),
+		569	=> array('Paladin',					'paladin'),
+		588	=> array('Siege Onager',			'siege_onager'),
+		692	=> array('Berserk',					'berserk'),
+		694	=> array('Elite Berserk',			'berserk'),
+		725	=> array('Jaguar Warrior',			'jaguar_man'),
+		726	=> array('Elite Jaguar Warrior',	'jaguar_man'),
+	//	748	=> array('Cobra Car',				''),
+		751	=> array('Eagle Warrior',			'eagle_warrior'),
+		752	=> array('Elite Eagle Warrior',		'eagle_warrior'),
+		755	=> array('Tarkan',					'tarkan'),
+		757	=> array('Elite Tarkan',			'tarkan'),
+		759	=> array('Huskarl',					'huskarl'),
+		761	=> array('Elite Huskarl',			'huskarl'),
+		763	=> array('Plumed Archer',			'plumed_archer'),
+		765	=> array('Elite Plumed Archer',		'plumed_archer'),
+		771	=> array('Conquistador',			'conquistador'),
+		773	=> array('Elite Conquistador',		'conquistador'),
+		775	=> array('Missionary',				'missionary'),
+	//	812	=> array('Jaguar',					''),
+		827	=> array('War Wagon',				'war_wagon'),
+		829	=> array('Elite War Wagon',			'war_wagon'),
+		831	=> array('Turtle Ship',				'turtle_ship'),
+		832	=> array('Elite Turtle Ship',		'turtle_ship'),
 	);
 
-	public static $BUILDINGS = array (
-		 12 => array ('Barracks',			'barracks.gif'),
-		 45 => array ('Dock',				'dock.gif'),
-		 49 => array ('Siege Workshop',		'siege_workshop.gif'),
-		 50 => array ('Farm',				'farm.gif'),
-		 68 => array ('Mill',				'mill.gif'),
-		 70 => array ('House',				'house.gif'),
-		 72 => array ('Wall, Palisade',		'palisade_wall.gif'),
-		 79 => array ('Watch Tower',		'watch_tower.gif'),
-		 82 => array ('Castle',				'castle.gif'),
-		 84 => array ('Market',				'market.gif'),
-		 87 => array ('Archery Range',		'archery_range.gif'),
-		101	=> array ('Stable',				'stable.gif'),
-		103	=> array ('Blacksmith',			'blacksmith.gif'),
-		104	=> array ('Monastery',			'monastery.gif'),
-		109	=> array ('Town Center',		'town_center.gif'),
-		117	=> array ('Wall, Stone',		'stone_wall.gif'),
-		155	=> array ('Wall, Fortified',	'fortified_wall.gif'),
-		199 => array ('Fish Trap',			'fish_trap.gif'),
-		209	=> array ('University',			'university.gif'),
-		234	=> array ('Guard Tower',		'guard_tower.gif'),
-		235	=> array ('Keep',				'keep.gif'),
-		236	=> array ('Bombard Tower',		'bombard_tower.gif'),
-		276	=> array ('Wonder',				'wonder.gif'),
-		487	=> array ('Gate',				'gate.gif'),
-		490	=> array ('Gate',				'gate.gif'),
-		562	=> array ('Lumber Camp',		'lumber_camp.gif'),
-		584	=> array ('Mining Camp',		'mining_camp.gif'),
-		598	=> array ('Outpost',			'outpost.gif'),
-		621	=> array ('Town Center',		'town_center.gif'),
-		665 => array ('Gate',				'gate.gif'),
-		673	=> array ('Gate',				'gate.gif')
+	/**
+	 * Building strings. Can be localized.
+	 * @var array
+	 */
+	public static $BUILDINGS = array(
+		 12 => array('Barracks',		'barracks'),
+		 45 => array('Dock',			'dock'),
+		 49 => array('Siege Workshop',	'siege_workshop'),
+		 50 => array('Farm',			'farm'),
+		 68 => array('Mill',			'mill'),
+		 70 => array('House',			'house'),
+		 72 => array('Wall, Palisade',	'palisade_wall'),
+		 79 => array('Watch Tower',		'watch_tower'),
+		 82 => array('Castle',			'castle'),
+		 84 => array('Market',			'market'),
+		 87 => array('Archery Range',	'archery_range'),
+		101	=> array('Stable',			'stable'),
+		103	=> array('Blacksmith',		'blacksmith'),
+		104	=> array('Monastery',		'monastery'),
+		109	=> array('Town Center',		'town_center'),
+		117	=> array('Wall, Stone',		'stone_wall'),
+		155	=> array('Wall, Fortified',	'fortified_wall'),
+		199 => array('Fish Trap',		'fish_trap'),
+		209	=> array('University',		'university'),
+		234	=> array('Guard Tower',		'guard_tower'),
+		235	=> array('Keep',			'keep'),
+		236	=> array('Bombard Tower',	'bombard_tower'),
+		276	=> array('Wonder',			'wonder'),
+		487	=> array('Gate',			'gate'),
+		490	=> array('Gate',			'gate'),
+		562	=> array('Lumber Camp',		'lumber_camp'),
+		584	=> array('Mining Camp',		'mining_camp'),
+		598	=> array('Outpost',			'outpost'),
+		621	=> array('Town Center',		'town_center'),
+		665 => array('Gate',			'gate'),
+		673	=> array('Gate',			'gate')
 	);
+
+	/**
+	 * Terrain colors.
+	 * @var array
+	 */
+	public static $TERRAIN_COLORS = array(
+		array(0x33, 0x97, 0x27),
+		array(0x30, 0x5d, 0xb6),
+		array(0xe8, 0xb4, 0x78),
+		array(0xe4, 0xa2, 0x52),
+		array(0x54, 0x92, 0xb0),
+		array(0x33, 0x97, 0x27),
+		array(0xe4, 0xa2, 0x52),
+		array(0x82, 0x88, 0x4d),//
+		array(0x82, 0x88, 0x4d),//
+		array(0x33, 0x97, 0x27),
+		array(0x15, 0x76, 0x15),
+		array(0xe4, 0xa2, 0x52),
+		array(0x33, 0x97, 0x27),
+		array(0x15, 0x76, 0x15),
+		array(0xe8, 0xb4, 0x78),
+		array(0x30, 0x5d, 0xb6),//
+		array(0x33, 0x97, 0x27),//
+		array(0x15, 0x76, 0x15),
+		array(0x15, 0x76, 0x15),
+		array(0x15, 0x76, 0x15),
+		array(0x15, 0x76, 0x15),
+		array(0x15, 0x76, 0x15),
+		array(0x00, 0x4a, 0xa1),
+		array(0x00, 0x4a, 0xbb),
+		array(0xe4, 0xa2, 0x52),
+		array(0xe4, 0xa2, 0x52),
+		array(0xff, 0xec, 0x49),//
+		array(0xe4, 0xa2, 0x52),
+		array(0x30, 0x5d, 0xb6),//
+		array(0x82, 0x88, 0x4d),//
+		array(0x82, 0x88, 0x4d),//
+		array(0x82, 0x88, 0x4d),//
+		array(0xc8, 0xd8, 0xff),
+		array(0xc8, 0xd8, 0xff),
+		array(0xc8, 0xd8, 0xff),
+		array(0x98, 0xc0, 0xf0),
+		array(0xc8, 0xd8, 0xff),//
+		array(0x98, 0xc0, 0xf0),
+		array(0xc8, 0xd8, 0xff),
+		array(0xc8, 0xd8, 0xff),
+		array(0xe4, 0xa2, 0x52)
+	);
+
+	/**
+	 * Object colors.
+	 * @var array
+	 */
+	public static $OBJECT_COLORS = array(
+		Unit::GOLDMINE   => array(0xff, 0xc7, 0x00),
+		Unit::STONEMINE  => array(0x91, 0x91, 0x91),
+		Unit::CLIFF1     => array(0x71, 0x4b, 0x33),
+		Unit::CLIFF2     => array(0x71, 0x4b, 0x33),
+		Unit::CLIFF3     => array(0x71, 0x4b, 0x33),
+		Unit::CLIFF4     => array(0x71, 0x4b, 0x33),
+		Unit::CLIFF5     => array(0x71, 0x4b, 0x33),
+		Unit::CLIFF6     => array(0x71, 0x4b, 0x33),
+		Unit::CLIFF7     => array(0x71, 0x4b, 0x33),
+		Unit::CLIFF8     => array(0x71, 0x4b, 0x33),
+		Unit::CLIFF9     => array(0x71, 0x4b, 0x33),
+		Unit::CLIFF10    => array(0x71, 0x4b, 0x33),
+		Unit::RELIC      => array(0xff, 0xff, 0xff),
+		Unit::TURKEY     => array(0xa5, 0xc4, 0x6c),
+		Unit::SHEEP      => array(0xa5, 0xc4, 0x6c),
+		Unit::DEER       => array(0xa5, 0xc4, 0x6c),
+		Unit::BOAR       => array(0xa5, 0xc4, 0x6c),
+		Unit::JAVELINA   => array(0xa5, 0xc4, 0x6c),
+		Unit::FORAGEBUSH => array(0xa5, 0xc4, 0x6c)
+	);
+
+	/**
+	 * Player colors.
+	 * @var array
+	 */
+	public static $PLAYER_COLORS = array(
+		0x00 => array(0x00, 0x00, 0xff),
+		0x01 => array(0xff, 0x00, 0x00),
+		0x02 => array(0x00, 0xff, 0x00),
+		0x03 => array(0xff, 0xff, 0x00),
+		0x04 => array(0x00, 0xff, 0xff),
+		0x05 => array(0xff, 0x00, 0xff),
+		0x06 => array(0xb9, 0xb9, 0xb9),
+		0x07 => array(0xff, 0x82, 0x01)
+	);
+
+	/**
+	 * Real world maps.
+	 * @var array
+	 */
+	public static $REAL_WORLD_MAPS = array(
+		Map::IBERIA,
+		Map::BRITAIN,
+		Map::MIDEAST,
+		Map::TEXAS,
+		Map::ITALY,
+		Map::CENTRALAMERICA,
+		Map::FRANCE,
+		Map::NORSELANDS,
+		Map::SEAOFJAPAN,
+		Map::BYZANTINUM
+	);
+
+	/**
+	 * Cliff units.
+	 * @var array
+	 */
+	public static $CLIFF_UNITS = array(
+		Unit::CLIFF1,
+		Unit::CLIFF2,
+		Unit::CLIFF3,
+		Unit::CLIFF4,
+		Unit::CLIFF5,
+		Unit::CLIFF6,
+		Unit::CLIFF7,
+		Unit::CLIFF8,
+		Unit::CLIFF9,
+		Unit::CLIFF10
+	);
+
+	/**
+	 * Gate units.
+	 * @var array
+	 */
+	public static $GATE_UNITS = array(
+		Unit::GATE,
+		Unit::GATE2,
+		Unit::GATE3,
+		Unit::GATE4
+	);
+
+	const VER_94 = 'VER 9.4';
+	const VER_93 = 'VER 9.3';
+	const TRL_93 = 'TRL 9.3';
+}
+
+final class GameVersion {
+
+	const UNKNOWN	= 0;
+	const AOK		= 1;
+	const AOKTRIAL	= 2;
+	const AOK20		= 3;
+	const AOK20A	= 4;
+	const AOC		= 5;
+	const AOCTRIAL	= 6;
+	const AOC10		= 7;
+	const AOC10C	= 8;
+
+	private function __construct(){}
+}
+
+final class MapStyle {
+
+	const STANDARD  = 0;
+	const REALWORLD = 1;
+	const CUSTOM    = 2;
+
+	private function __construct(){}
+}
+
+final class DifficultyLevel {
+
+	const HARDEST  = 0;
+	const HARD     = 1;
+	const MODERATE = 2;
+	const STANDARD = 3;
+	const EASIEST  = 4;
+
+	private function __construct(){}
+}
+
+final class GameType {
+
+	const RANDOMMAP  = 0;
+	const REGICIDE   = 1;
+	const DEATHMATCH = 2;
+	const SCENARIO   = 3;
+	const CAMPAIGN   = 4;
+
+	private function __construct(){}
+}
+
+final class GameSpeed
+{
+	const SLOW   = 100;
+	const NORMAL = 150;
+	const FAST   = 200;
+
+	private function __construct(){}
+}
+
+final class RevealMap
+{
+	const NORMAL     = 0;
+	const EXPLORED   = 1;
+	const ALLVISIBLE = 2;
+
+	private function __construct(){}
+}
+
+final class MapSize
+{
+	const TINY   = 0;
+	const SMALL  = 1;
+	const MEDIUM = 2;
+	const NORMAL = 3;
+	const LARGE  = 4;
+	const GIANT  = 5;
+
+	private function __construct(){}
+}
+
+final class Civilization {
+
+	const NONE       = 0;
+	const BRITONS    = 1;
+	const FRANKS     = 2;
+	const GOTHS      = 3;
+	const TEUTONS    = 4;
+	const JAPANESE   = 5;
+	const CHINESE    = 6;
+	const BYZANTINES = 7;
+	const PERSIANS   = 8;
+	const SARACENS   = 9;
+	const TURKS      = 10;
+	const VIKINGS    = 11;
+	const MONGOLS    = 12;
+	const CELTS      = 13;
+	const SPANISH    = 14;
+	const AZTECS     = 15;
+	const MAYANS     = 16;
+	const HUNS       = 17;
+	const KOREANS    = 18;
+
+	private function __construct(){}
+}
+
+final class Resource {
+
+	const FOOD  = 0;
+	const WOOD  = 1;
+	const STONE = 2;
+	const GOLD  = 3;
+
+	private function __construct(){}
+}
+
+final class StartingAge {
+
+	const DARKAGE         = 0;
+	const FEUDALAGE       = 1;
+	const CASTLEAGE       = 2;
+	const IMPERIALAGE     = 3;
+	const POSTIMPERIALAGE = 4;
+
+	private function __construct(){}
+}
+
+final class VictoryCondition {
+
+	const STANDARD   = 0;
+	const CONQUEST   = 1;
+	const TIMELIMIT  = 2;
+	const SCORELIMIT = 3;
+	const CUSTOM     = 4;
+
+	private function __construct(){}
+}
+
+final class Map {
+
+	const ARABIA         = 9;
+	const ARCHIPELAGO    = 10;
+	const BALTIC         = 11;
+	const BLACKFOREST    = 12;
+	const COASTAL        = 13;
+	const CONTINENTAL    = 14;
+	const CRATERLAKE     = 15;
+	const FORTRESS       = 16;
+	const GOLDRUSH       = 17;
+	const HIGHLAND       = 18;
+	const ISLANDS        = 19;
+	const MEDITERRANEAN  = 20;
+	const MIGRATION      = 21;
+	const RIVERS         = 22;
+	const TEAMISLANDS    = 23;
+	const RANDOM         = 24;
+	const SCANDINAVIA    = 25;
+	const MONGOLIA       = 26;
+	const YUCATAN        = 27;
+	const SALTMARSH      = 28;
+	const ARENA          = 29;
+	const KINGOFTHEHILL  = 30;
+	const OASIS          = 31;
+	const GHOSTLAKE      = 32;
+	const NOMAD          = 33;
+	const IBERIA         = 34;
+	const BRITAIN        = 35;
+	const MIDEAST        = 36;
+	const TEXAS          = 37;
+	const ITALY          = 38;
+	const CENTRALAMERICA = 39;
+	const FRANCE         = 40;
+	const NORSELANDS     = 41;
+	const SEAOFJAPAN     = 42;
+	const BYZANTINUM     = 43;
+	const CUSTOM         = 44;
+	const BLINDRANDOM    = 48;
+
+	private function __construct(){}
+}
+
+final class Unit {
+
+	const GOLDMINE   = 66;
+	const STONEMINE  = 102;
+	const CLIFF1     = 264;
+	const CLIFF2     = 265;
+	const CLIFF3     = 266;
+	const CLIFF4     = 267;
+	const CLIFF5     = 268;
+	const CLIFF6     = 269;
+	const CLIFF7     = 270;
+	const CLIFF8     = 271;
+	const CLIFF9     = 272;
+	const CLIFF10    = 273;
+	const RELIC      = 285;
+	const TURKEY     = 833;
+	const SHEEP      = 594;
+	const DEER       = 65;
+	const BOAR       = 48;
+	const JAVELINA   = 822;
+	const FORAGEBUSH = 59;
+
+	const GATE	= 487;
+	const GATE2	= 490;
+	const GATE3	= 665;
+	const GATE4	= 673;
 }
 ?>

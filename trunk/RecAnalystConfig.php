@@ -5,7 +5,7 @@
  * @package recAnalyst
  * @version $Id$
  * @author biegleux <biegleux[at]gmail[dot]com>
- * @copyright copyright (c) 2008-2009 biegleux
+ * @copyright copyright (c) 2008-2010 biegleux
  * @license http://www.opensource.org/licenses/gpl-3.0.html GNU General Public License version 3 (GPLv3)
  * @link http://recanalyst.sourceforge.net/
  * @filesource
@@ -19,11 +19,10 @@
  *
  * @package recAnalyst
  */
-class RecAnalystConfig
-{
+class RecAnalystConfig {
+
 	/**
 	 * Instance holder of this class.
-	 *
 	 * @var RecAnalystConfig
 	 * @static
 	 */
@@ -32,7 +31,6 @@ class RecAnalystConfig
 	/**
 	 * Defines a path (absolute or relative) to directory where we wish to save generated maps.
 	 * Write permission is required.
-	 *
 	 * @var string
 	 */
 	public $mapsDir;
@@ -40,28 +38,24 @@ class RecAnalystConfig
 	/**
 	 * Defines a path (absolute or relative) to directory where we wish to save generated research timelines.
 	 * Write permission is required.
-	 *
 	 * @var string
 	 */
 	public $researchesDir;
 
 	/**
 	 * Defines a path (absolute or relative) to directory where we store resources required for generating research timelines.
-	 *
 	 * @var string
 	 */
 	public $resourcesDir;
 
 	/**
 	 * Defines a width of the map image we wish to generate.
-	 *
 	 * @var int
 	 */
 	public $mapWidth;
 
 	/**
 	 * Defines a height of the map image we wish to generate.
-	 *
 	 * @var int
 	 */
 	public $mapHeight;
@@ -70,21 +64,18 @@ class RecAnalystConfig
 
 	/**
 	 * Defines width and height of one research tile in research timelines image.
-	 *
 	 * @var int
 	 */
 	public $researchTileSize;
 
 	/**
 	 * Defines vertical spacing between players in research timelines image.
-	 *
 	 * @var int
 	 */
 	public $researchVSpacing;
 
 	/**
 	 * Defines background image for research timelines image.
-	 *
 	 * @var string
 	 */
 	public $researchBackgroundImage;
@@ -92,14 +83,12 @@ class RecAnalystConfig
 	/**
 	 * Defines color for Dark Age in the research timelines image.
 	 * Array consist of red, green, blue color and alpha.
-	 *
 	 * @var array
 	 */
 	public $researchDAColor;
 
 	/**
 	 * Defines color for Dark Age in the research timelines image.
-	 *
 	 * @var array
 	 * @see $researchDAColor
 	 */
@@ -107,7 +96,6 @@ class RecAnalystConfig
 
 	/**
 	 * Defines color for Dark Age in the research timelines image.
-	 *
 	 * @var array
 	 * @see $researchDAColor
 	 */
@@ -115,7 +103,6 @@ class RecAnalystConfig
 
 	/**
 	 * Defines color for Dark Age in the research timelines image.
-	 *
 	 * @var array
 	 * @see $researchDAColor
 	 */
@@ -123,66 +110,47 @@ class RecAnalystConfig
 
 	/**
 	 * Determines if to show players positions on the map.
-	 *
-	 * @var bool true if it is desirable to show players positions, false otherwise
+	 * @var bool
 	 */
 	public $showPositions;
 
 	/**
-	 * Determines if to use snow colors for terrain instead of game's default ones.
-	 *
-	 * @var bool true if it is desirable to use snow colors, false otherwise
-	 */
-	public $useSnowColors;
-
-	/**
-	 * Determines if to use elevation colors in map generation.
-	 *
-	 * @var bool true if it is desirable to use elevation colors, false otherwise
-	 */
-	public $useElevationColors;
-
-	/**
 	 * Private class constructor.
-	 *
+	 * @return void
 	 */
-	private function __construct ()
-	{
-		$this->mapsDir = '/www/htdocs/.../';
-		$this->researchesDir = '/www/htdocs/.../';
-		$this->resourcesDir = '/www/htdocs/.../';
+	private function __construct() {
+
+		$baseDir = dirname(__FILE__) . DIRECTORY_SEPARATOR;
+		$this->mapsDir = $baseDir . 'maps' . DIRECTORY_SEPARATOR;;
+		$this->researchesDir = $baseDir . 'researches' . DIRECTORY_SEPARATOR;;
+		$this->resourcesDir = $baseDir . 'resources' . DIRECTORY_SEPARATOR;;
 		$this->mapWidth = 204;
 		$this->mapHeight = 102;
 		$this->researchTileSize = 19;
 		$this->researchVSpacing = 8;
 		$this->researchBackgroundImage = $this->resourcesDir . 'researches' . DIRECTORY_SEPARATOR . 'background.jpg';
-		$this->researchDAColor = array (0xff, 0x00, 0x00, 0x50);
-		$this->researchFAColor = array (0x00, 0xff, 0x00, 0x50);
-		$this->researchCAColor = array (0x00, 0x00, 0xff, 0x50);
-		$this->researchIAColor = array (0x99, 0x66, 0x00, 0x50);
+		$this->researchDAColor = array(0xff, 0x00, 0x00, 0x50);
+		$this->researchFAColor = array(0x00, 0xff, 0x00, 0x50);
+		$this->researchCAColor = array(0x00, 0x00, 0xff, 0x50);
+		$this->researchIAColor = array(0x99, 0x66, 0x00, 0x50);
 		$this->showPositions = true;
-		$this->useSnowColors = true;
-		$this->useElevationColors = true;
 	}
 
 	/**
 	 * Disallow cloning.
-	 *
+	 * @return void
 	 */
-	private function __clone ()
-	{
-	}
+	private function __clone() {}
 
 	/**
 	 * Retrieves the singleton instance of this class.
-	 *
-	 * @return RecAnalystConfig A RecAnalystConfig implementation instance.
+	 * @return RecAnalystConfig A RecAnalystConfig implementation instance
 	 */
-	public static function getInstance ()
-	{
-		if (!isset (self::$instance))
-		{
-			self::$instance = new self ();
+	public static function getInstance() {
+
+		if (!isset(self::$instance)) {
+
+			self::$instance = new self();
 		}
 
 		return self::$instance;

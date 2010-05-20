@@ -3,10 +3,10 @@
  *                       AOC Recorded Games Analyzer
  *                       ---------------------------
  *    begin            : Monday, December 3, 2007
- *    copyright        : (c) 2007-2009 biegleux
+ *    copyright        : (c) 2007-2010 biegleux
  *    email            : biegleux(at)gmail(dot)com
  *
- *    recAnalyst v1.1.0 2009/05/21
+ *    recAnalyst v2.0.0 2010/05/20
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -23,8 +23,6 @@
  *
  *    Thanks to bari [aocai-lj(at)infoseek.jp] for sharing mgx file format
  *    description.
- *
- *    Note: Code is not fully optimized, any suggestions appreciated.
  ************************************************************************* */
 /**
  * Defines RecAnalyst class.
@@ -32,7 +30,7 @@
  * @package recAnalyst
  * @version $Id$
  * @author biegleux <biegleux[at]gmail[dot]com>
- * @copyright copyright (c) 2008-2009 biegleux
+ * @copyright copyright (c) 2008-2010 biegleux
  * @license http://www.opensource.org/licenses/gpl-3.0.html GNU General Public License version 3 (GPLv3)
  * @link http://recanalyst.sourceforge.net/
  * @filesource
@@ -47,1009 +45,1044 @@
  * RecAnalyst implements analyzing of recorded games.
  *
  * @package recAnalyst
- * @todo gz support
  */
 class RecAnalyst
 {
-	const mgxExt = '.mgx';
-	const rarExt = '.rar';
-	const zipExt = '.zip';
-
-	/* Error codes */
-	public static $E__NO_ERROR						= 0x00;
-	public static $E__FILE_NOT_SPECIFIED			= 0x01;
-	public static $E__FORMAT_NOT_SUPPORTED			= 0x02;
-	public static $E__UNABLE_TO_OPEN_ZIP_ARCHIVE	= 0x03;
-	public static $E__ZIP_ARCHIVE_EMPTY				= 0x04;
-	public static $E__OLD_FORMAT_VER				= 0x05;
-	public static $E__EMPTY_HEADER_STREAM			= 0x06;
-	public static $E__ERROR_IN_UNCOMPRESSED_STREAM	= 0x07;
-	public static $E__RAR_EXTENSION_NOT_INSTALLED	= 0x08;
-	public static $E__RAR_NOT_IMPLEMENTED			= 0x09;
-	public static $E__MORE_FILES_PER_ARCHIVE		= 0x0A;
-	public static $E__NO_RECGAME_FOUND				= 0x0B;
-	public static $E__ERROR_IN_HEADER_STREAM		= 0x0C;
-
-	/**
-	 * Internal storage for new members.
-	 *
-	 * @var array
-	 */
-	private $data;
-
-	/**
-	 * Input filename we wish to analyze.
-	 *
-	 * @var string
-	 */
-	public $fileName;
-
 	/**
 	 * Internal stream containing header information.
-	 *
 	 * @var string
 	 */
 	protected $headerStream;
 
 	/**
 	 * Internal stream containing body information.
-	 *
 	 * @var string
 	 */
 	protected $bodyStream;
 
 	/**
-	 * Holds a code of the recent error.
-	 *
-	 * @var int
-	 */
-	protected $lastError;
-
-	/**
 	 * An array containing map data.
-	 *
 	 * $var array
 	 */
-	protected $mapData;
+	protected $_mapData;
 
 	/**
 	 * Map width.
-	 *
 	 * @var int
 	 */
-	protected $mapWidth;
+	protected $_mapWidth;
 
 	/**
 	 * Map height.
-	 *
 	 * @var int
 	 */
-	protected $mapHeight;
+	protected $_mapHeight;
 
 	/**
 	 * Game settings information.
-	 *
 	 * @var GameSettings
 	 */
 	public $gameSettings;
 
 	/**
+	 * Game information.
+	 * @var GameInfo
+	 */
+	public $gameInfo;
+
+	/**
 	 * List of players in the game.
-	 *
 	 * @var PlayerList
 	 */
-	public $playerList;
+	public $players;
 
 	/**
 	 * List of teams in the game.
-	 *
 	 * @var TeamList
 	 */
 	public $teams;
 
 	/**
 	 * An array containing pre-game chat.
-	 *
 	 * @var array
 	 */
 	public $pregameChat;
 
 	/**
 	 * An array containing in-game chat.
-	 *
 	 * @var array
 	 */
 	public $ingameChat;
 
 	/**
 	 * An associative array containing "unit_type_id - unit_num" pairs.
-	 *
 	 * @var array
 	 */
 	public $units;
 
 	/**
 	 * An associative multi-dimesional array containing "building_type_id - building_num" pairs for each player.
-	 *
 	 * @var array
 	 */
 	public $buildings;
 
 	/**
-	 * An associative multi-dimesional array containing information about tributing.
-	 *
-	 * @var array
-	 */
-	public $tributing;
-
-	/**
 	 * Elapsed time for analyzing in miliseconds.
-	 *
 	 * @var int
 	 */
-	public $analyzeTime;
+	protected $_analyzeTime;
 
 	/**
-	 * Array for holding initial players view position.
-	 *
-	 * @var Array
+	 * Internal queue.
+	 * @var Queue
 	 */
-	private $viewPositions;
+	protected $_queue;
+
+	/**
+	 * True, if the file being analyzed is mgx. False otherwise.
+	 * @var bool
+	 */
+	protected $_isMgx;
+
+	/**
+	 * List of GAIA objects.
+	 * @var TList
+	 */
+	protected $gaiaObjects;
+
+	/**
+	 * List of any player objects.
+	 * @var TList
+	 */
+	protected $playerObjects;
+
+	/**
+	 * Pre-game chat messages.
+	 * @var TList
+	 */
+	public $pregameChatMessages;
+
+	/**
+	 * In-game chat messages.
+	 * @var TList
+	 */
+	public $ingameChatMessages;
+
+	/**
+	 * List of tributes.
+	 * @var TList
+	 */
+	public $tributes;
 
 	/**
 	 * Class constructor.
-	 *
-	 */
-	public function __construct ()
-	{
-		$this->data = array ();
-		$this->fileName = '';
-		$this->headerStream = '';
-		$this->bodyStream = '';
-		$this->lastError = self::$E__NO_ERROR;
-		$this->gameSettings = new GameSettings ();
-		$this->playerList = new PlayerList ();
-		$this->teams = new TeamList ();
-		$this->pregameChat = array ();
-		$this->ingameChat = array ();
-		$this->units = array ();
-		$this->buildings = array ();
-		$this->mapData = array ();
-		$this->mapWidth = $this->mapHeight = 0;
-		$this->tributing = array ();
-		$this->analyzeTime = 0;
-		$this->viewPositions = array ();
-	}
-
-	/**
-	 * Destructor.
-	 *
-	 */
-	public function __destruct ()
-	{
-	}
-
-	/**
-	 * Callback method for setting a property.
-	 *
-	 * @param mixed $nm
-	 * @param mixed $val
 	 * @return void
 	 */
-	public function __set ($nm, $val)
-	{
-		$this->data[$nm] = $val;
+	public function __construct() {
+
+		$this->headerStream = new MemoryStream();
+		$this->bodyStream = new MemoryStream();
+		$this->gameSettings = new GameSettings($this);
+		$this->gameInfo = new GameInfo($this);
+		$this->players = new PlayerList();
+		$this->teams = new TeamList();
+		$this->pregameChat = array();
+		$this->ingameChat = array();
+		$this->units = array();
+		$this->buildings = array();
+		$this->_mapData = array();
+		$this->_mapWidth = $this->_mapHeight = 0;
+		$this->_analyzeTime = 0;
+		$this->_queue = new Queue();
+		$this->_isMgx = false;
+		$this->gaiaObjects = new TList();
+		$this->playerObjects = new TList();
+		$this->pregameChatMessages = new TList();
+		$this->ingameChatMessages = new TList();
+		$this->tributes = new TList();
 	}
 
 	/**
-	 * Callback method for getting a property.
-	 *
-	 * @param mixed $nm
-	 * @return mixed
+	 * Resets the internal state.
+	 * @return void
 	 */
-	public function __get ($nm)
-	{
-		return $this->data[$nm];
-	}
+	public function reset() {
 
-	/**
-	 * Returns code of the recent error.
-	 *
-	 * @return int error code
-	 */
-	public function getLastError ()
-	{
-		return $this->lastError;
-	}
-
-	/**
- 	* Represents the error code as a string information.
- 	*
- 	* @param int $errCode error code
- 	* @static
- 	* @return string error string
- 	*/
-	public static function errorCodeToString ($errCode)
-	{
-		switch ($errCode)
-		{
-			case self::$E__NO_ERROR:
-				$errString = 'No error occured.';
-				break;
-			case self::$E__FILE_NOT_SPECIFIED:
-				$errString = 'No file has been specified for analyzing.';
-				break;
-			case self::$E__FORMAT_NOT_SUPPORTED:
-				$errString = 'File format is not supported.';
-				break;
-			case self::$E__UNABLE_TO_OPEN_ZIP_ARCHIVE:
-				$errString = 'Unable to open zip archive.';
-				break;
-			case self::$E__ZIP_ARCHIVE_EMPTY:
-				$errString = 'Empty zip archive.';
-				break;
-			case self::$E__MORE_FILES_PER_ARCHIVE:
-				$errString = 'Only one file per archive is supported for analyzing.';
-				break;
-			case self::$E__OLD_FORMAT_VER:
-				$errString = 'Old mgx file format.';
-				break;
-			case self::$E__EMPTY_HEADER_STREAM:
-				$errString = 'Empty header stream.';
-				break;
-			case self::$E__ERROR_IN_UNCOMPRESSED_STREAM:
-				$errString = 'Error in uncompressed stream.';
-				break;
-			case self::$E__RAR_EXTENSION_NOT_INSTALLED:
-				$errString = 'Rar extension is not installed on server.';
-				break;
-			case self::$E__RAR_NOT_IMPLEMENTED:
-				$errString = 'Support for rar archives is not implemented.';
-				break;
-			case self::$E__NO_RECGAME_FOUND:
-				$errString = 'No recorded game has been found in archive.';
-				break;
-			case self::$E__ERROR_IN_HEADER_STREAM:
-				$errString = 'Error in header stream.';
-				break;
-			default:
-				$errString = '';
-				break;
-		}
-		return ($errString);
+		$this->headerStream = new MemoryStream();
+		$this->bodyStream = new MemoryStream();
+		$this->gameSettings = new GameSettings($this);
+		$this->gameInfo = new GameInfo($this);
+		$this->players = new PlayerList();
+		$this->teams = new TeamList();
+		$this->pregameChat = array();
+		$this->ingameChat = array();
+		$this->units = array();
+		$this->buildings = array();
+		$this->_mapData = array();
+		$this->_mapWidth = $this->_mapHeight = 0;
+		$this->_analyzeTime = 0;
+		$this->_queue = new Queue();
+		$this->_isMgx = false;
+		$this->gaiaObjects = new TList();
+		$this->playerObjects = new TList();
+		$this->pregameChatMessages = new TList();
+		$this->ingameChatMessages = new TList();
+		$this->tributes = new TList();
 	}
 
 	/**
  	* Converts game's time to string representation.
- 	*
- 	* @param int $time game time
- 	* @param string $format desired string format
+ 	* @param int $time Game time.
+ 	* @param string $format Desired string format.
+ 	* @return string Time in formatted string.
  	* @static
- 	* @return string time in formatted string
  	*/
-	public static function gameTimeToString ($time, $format = '%02d:%02d:%02d')
-	{
-		if ($time == 0)
+	public static function gameTimeToString($time, $format = '%02d:%02d:%02d') {
+
+		if ($time == 0) {
 			return '-';
+		}
 
 		$hour   =  (int)($time / 1000 / 3600);
 		$minute = ((int)($time / 1000 / 60)) % 60;
 		$second = ((int)($time / 1000)) % 60;
 
-		return sprintf ($format, $hour, $minute, $second);
+		return sprintf($format, $hour, $minute, $second);
+	}
+
+	/**
+	 * Loads the file for analysis.
+	 * @param string $filename
+	 * @param mixed $input File handler or file contents.
+	 * @return void
+	 */
+	public function load($filename, $input) {
+
+		$ext = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+		$this->extractStreams($ext, $input);
 	}
 
 	/**
 	 * Extracts header and body streams from an archive.
-	 *
-	 * @return bool true, if the streams were successfully extracted, false otherwise
+	 * @param string $ext File extension.
+	 * @param mixed $input File handler or file contents.
+	 * @return void
+	 * @throws RecAnalystException
+	 * @todo input as file contents
 	 */
-	protected function extractStreamsFromArchive ()
-	{
-		if (!$this->fileName)
-		{
-			$this->lastError = self::$E__FILE_NOT_SPECIFIED;
-			return false;
+	protected function extractStreams($ext, $input) {
+
+		if (empty($input)) {
+			throw new RecAnalystException('No file has been specified for analyzing',
+				RecAnalystException::FILE_NOT_SPECIFIED);
 		}
 
-		$ext = strrchr ($this->fileName, '.');
-		if (strcasecmp ($ext, self::rarExt) != 0 && strcasecmp ($ext, self::zipExt) != 0)
-		{
-			$this->lastError = self::$E__FORMAT_NOT_SUPPORTED;
-			return false;
+		if ($ext == 'mgl') {
+			$this->_isMgx = false;
+		}
+		elseif ($ext == 'mgx') {
+			$this->_isMgx = true;
+		}
+		else {
+			throw new RecAnalystException('Wrong file extension, file format is not supported',
+				RecAnalystException::FILEFORMAT_NOT_SUPPORTED);
 		}
 
-		if (strcasecmp ($ext, self::rarExt) == 0)
-		{
-			if (!function_exists ('rar_open'))
-			{
-				$this->lastError = self::$E__RAR_EXTENSION_NOT_INSTALLED;
-				return false;
-			}
-			// support for rar archives is not implemented
-			// as I haven't meet any server with rar extension installed yet
-			$this->lastError = self::$E__RAR_NOT_IMPLEMENTED;
-			return false;
+		if (is_string($input)) {
+			//TODO
+			throw new RecAnalystException('This feature has not been implemented yet',
+				RecAnalystException::NOT_IMPLEMENTED);
 		}
 
-		if (strcasecmp ($ext, self::zipExt) == 0)
-		{
-			$zip = new ZipArchive ();
+		$fp = $input;
+		if (($packed_data = fread($fp, 4)) === false || strlen($packed_data) < 4) {
+			throw new RecAnalystException('Unable to read the header length',
+				RecAnalystException::HEADERLEN_READERROR);
+		}
 
-			if ($zip->open ($this->fileName) !== true)
-			{
-				$this->lastError = self::$E__UNABLE_TO_OPEN_ZIP_ARCHIVE;
-				return false;
-			}
+		$unpacked_data = unpack("V", $packed_data);
+		$header_len = $unpacked_data[1];
 
-			if ($zip->numFiles == 0)
-			{
-				$zip->close ();
-				$this->lastError = self::$E__ZIP_ARCHIVE_EMPTY;
-				return false;
-			}
+		if (!$header_len) {
+			throw new RecAnalystException('Header length is zero',
+				RecAnalystException::EMPTY_HEADER);
+		}
 
-			if ($zip->numFiles != 1)
-			{
-				$zip->close ();
-				$this->lastError = self::$E__MORE_FILES_PER_ARCHIVE;
-				return false;
-			}
+		/* skip next_pos */
+		if ($this->_isMgx) {
+			fread($fp, 4);
+		}
 
-			$mgx_found = false;
+		$header_len -= ($this->_isMgx) ? 8 : 4;
 
-			for ($i = 0; false !== ($stat = $zip->statIndex ($i)); $i++)
-			{
-				// skip directories and 0-bytes files
-				if (!$stat['size'])
-				{
-					continue;
-				}
+		$read = 0;
+		$bindata = '';
+		while ($read < $header_len && ($buff = fread($fp, $header_len - $read))) {
+			$read += strlen($buff);
+			$bindata .= $buff;
+		}
 
-				// skip non-mgx files
-				$ext = strrchr ($stat['name'], '.');
-				if (strcasecmp ($ext, self::mgxExt) != 0)
-				{
-					continue;
-				}
+		$read = 0;
+		while (!feof($fp)) {
+			$buff = fread($fp, 8192);
+			$this->bodyStream->write($buff);
+		}
+		unset($buff);
+		fclose($fp);
 
-				// get a file handler to the entry
-				if (!($fp = $zip->getStream ($stat['name'])))
-				{
-					continue;
-				}
+		$this->headerStream->write(@gzinflate($bindata, 8388608));  // 8MB
+		unset($bindata);
 
-				$mgx_found = true;
-
-				// read data
-				$packed_data = fread ($fp, 4);
-
-				if ($packed_data === false || strlen ($packed_data) < 4)
-				{
-					$zip->close ();
-					$this->lastError = self::$E__ERROR_IN_HEADER_STREAM;
-					return false;
-				}
-
-				$unpacked_data = unpack ("V", $packed_data);
-				$header_len = $unpacked_data[1];
-
-				if ($header_len == 0)
-				{
-					$zip->close ();
-					$this->lastError = self::$E__OLD_FORMAT_VER;
-					return false;
-				}
-
-				// skip next_pos
-				$packed_data = fread ($fp, 4);
-				$header_len -= 8;
-
-				// TODO: getMemoryLimit ()
-				if ($header_len > 1048576) // 1MB
-				{
-					$zip->close ();
-					$this->lastError = self::$E__ERROR_IN_HEADER_STREAM;
-					return false;
-				}
-
-				$read = 0;
-				while ($read < $header_len && ($buff = fread ($fp, $header_len - $read)))
-				{
-					$read += strlen ($buff);
-					$this->headerStream .= $buff;
-				}
-
-				$read = 0;
-				while (!feof ($fp))
-				{
-					$buff = fread ($fp, 1024 * 8);
-					$this->bodyStream .= $buff;
-				}
-
-				unset ($buff);
-				fclose ($fp);
-				$zip->close ();
-
-				return true;
-			} // endfor
-
-			$zip->close ();
-
-			if (!$mgx_found)
-			{
-				$this->lastError = self::$E__NO_RECGAME_FOUND;
-				return false;
-			}
-		} // end zip uncompression
+		if (!$this->headerStream->getSize()) {
+			throw new RecAnalystException('Cannot decompress header section',
+				RecAnalystException::HEADER_DECOMPRESSERROR);
+		}
 	}
 
 	/**
-	 * Uncompresses header stream.
-	 *
-	 * @return string|bool uncompressed stream or false if an error has occured
+	 * Analyzes header stream.
+	 * @return bool True if the stream was analyzed successfully, false otherwise.
+	 * @throws RecAnalystException
 	 */
-	protected function uncompressHeaderStream ()
-	{
-		if (!$this->headerStream)
-		{
-			$this->lastError = self::$E__EMPTY_HEADER_STREAM;
-			return false;
+	protected function analyzeheaderStream() {
+
+		$constant2			= pack('c*', 0x9A, 0x99, 0x99, 0x99, 0x99, 0x99, 0xF9, 0x3F);
+		$separator			= pack('c*', 0x9D, 0xFF, 0xFF, 0xFF);
+		$scenario_constant	= pack('c*', 0xF6, 0x28, 0x9C, 0x3F);
+		$aok_separator		= pack('c*', 0x9A, 0x99, 0x99, 0x3F);
+		$player_info_end_separator = pack('c*', 0x00, 0x0B, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x0B);
+
+		$this->headerStream->setPosition(0);
+
+		/* getting version */
+		$this->headerStream->readBuffer($version, 8);
+		$version = rtrim($version); // throw null-termination character
+		switch ($version) {
+
+			case RecAnalystConst::VER_94:
+				$this->gameInfo->_gameVersion = GameVersion::AOC;
+				break;
+			case RecAnalystConst::VER_93:
+				$this->gameInfo->_gameVersion = GameVersion::AOK;
+				break;
+			case RecAnalystConst::TRL_93:
+				$this->gameInfo->_gameVersion = $this->_isMgx ? GameVersion::AOCTRIAL : GameVersion::AOKTRIAL;
+				break;
+			default:
+				$this->gameInfo->_gameVersion = GameVersion::UNKNOWN;
+				break;
 		}
 
-		//TODO: getMemoryLimit ()
-		// 4194304 (4MB) is not enough if the map size is giant
-		$this->headerStream = @gzinflate ($this->headerStream, 8388608); // 8MB
+		switch ($this->gameInfo->_gameVersion) {
 
-		if (!$this->headerStream)
-		{
-			$this->lastError = self::$E__ERROR_IN_HEADER_STREAM;
-			return false;
+			case GameVersion::AOK:
+			case GameVersion::AOKTRIAL:
+				$this->_isMgx = false;
+				break;
+			case GameVersion::AOC:
+			case GameVersion::AOCTRIAL:
+				$this->_isMgx = true;
+				break;
+		}
+
+		/* getting Trigger_info position */
+		$trigger_info_pos = $this->headerStream->rfind($constant2);
+		if ($trigger_info_pos == -1) {
+			throw new RecAnalystException('"Trigger Info" block has not been found',
+											RecAnalystException::TRIGGERINFO_NOTFOUND);
+		}
+		$trigger_info_pos += strlen($constant2);
+
+		/* getting Game_setting position */
+		$game_setting_pos = $this->headerStream->rfind($separator,
+								-($this->headerStream->getSize() - $trigger_info_pos));
+		if ($game_setting_pos == -1) {
+			throw new RecAnalystException('"Game Settings" block has not been found',
+											RecAnalystException::GAMESETTINGS_NOTFOUND);
+		}
+		$game_setting_pos += strlen($separator);
+
+		/* getting Scenario_header position */
+		$scenario_separator = ($this->_isMgx) ? $scenario_constant : $aok_separator;
+		$scenario_header_pos = $this->headerStream->rfind($scenario_separator,
+									-($this->headerStream->getSize() - $game_setting_pos));
+		if ($scenario_header_pos != -1) {
+			$scenario_header_pos -= 4;  // next_unit_id
+		}
+
+		/* getting Game_Settings data */
+		/* skip negative[2] */
+		$this->headerStream->setPosition($game_setting_pos + 8);
+		if ($this->_isMgx) {
+			$this->headerStream->readInt($map_id);
+		}
+		$this->headerStream->readInt($difficulty);
+		$this->headerStream->readBool($lock_teams);
+
+		if ($this->_isMgx) {
+
+			if (isset(RecAnalystConst::$MAPS[$map_id])) {
+
+				$this->gameSettings->map = RecAnalystConst::$MAPS[$map_id][0];
+				if ($map_id == Map::CUSTOM) {
+					$this->gameSettings->_mapStyle = MAPSTYLE::CUSTOM;
+				}
+				elseif (isset(RecAnalystConst::$REAL_WORLD_MAPS[$map_id])) {
+					$this->gameSettings->_mapStyle = MAPSTYLE::REALWORLD;
+				}
+				else {
+					$this->gameSettings->_mapStyle = MAPSTYLE::STANDARD;
+				}
+
+				$this->gameSettings->_mapId = $map_id;
+			}
+		}
+
+		$this->gameSettings->_difficultyLevel = $difficulty;
+		$this->gameSettings->lockDiplomacy = $lock_teams;
+
+		/* getting Player_info data */
+		for ($i = 0; $i < 9; $i++) {
+
+			$this->headerStream->readInt($player_data_index);
+			$this->headerStream->readInt($human);
+			$this->headerStream->readString($playername);
+
+			/* sometimes very rarely index is 1 */
+			if ($human == 0x00 || $human == 0x01) {
+				continue;
+			}
+
+			if ($i) {
+
+				$player = new Player();
+				$player->name  = $playername;
+				$player->index = $player_data_index;
+				$player->human = ($human == 0x02);
+				$this->players->addPlayer($player);
+			}
+		}
+
+		/* getting game type for aok */
+		if (!$this->_isMgx) {
+
+			$this->headerStream->setPosition($trigger_info_pos - strlen($constant2));
+			$this->headerStream->skip(-6);
+			// unknown25
+			$this->headerStream->readInt($unknown25);
+			switch ($unknown25) {
+
+				case 1:
+					$this->gameSettings->_gameType = GameType::DEATHMATCH;
+					break;
+				case 256:
+					$this->gameSettings->_gameType = GameType::REGICIDE;
+					break;
+			}
+		}
+
+		/* getting victory */
+		$this->headerStream->setPosition($trigger_info_pos - strlen($constant2));
+		if ($this->_isMgx) {
+			$this->headerStream->skip(-7);
+		}
+		$this->headerStream->skip(-110);
+		$this->headerStream->readInt($victory_condition);
+		$this->headerStream->skip(8);
+		$this->headerStream->readChar($is_timelimit);
+		if ($is_timelimit) {
+			$this->headerStream->readFloat($time_limit);
+		}
+
+		$this->gameSettings->victory->_victoryCondition = $victory_condition;
+		if ($is_timelimit) {
+			$this->gameSettings->victory->_timeLimit = intval(round($time_limit) / 10);
+		}
+
+		/* Trigger_info */
+		$this->headerStream->setPosition($trigger_info_pos + 1);
+
+		// always zero in mgl? or not a really trigger_info here for aok
+		$this->headerStream->readInt($num_trigger);
+		if ($num_trigger) {
+
+			/* skip Trigger_info data */
+			for ($i = 0; $i < $num_trigger; $i++) {
+
+				$this->headerStream->skip(18);
+				$this->headerStream->readInt($desc_len);
+				$this->headerStream->skip($desc_len);
+				$this->headerStream->readInt($name_len);
+				$this->headerStream->skip($name_len);
+				$this->headerStream->readInt($num_effect);
+				for ($j = 0; $j < $num_effect; $j++) {
+
+					$this->headerStream->skip(24);
+					$this->headerStream->readInt($num_selected_object);
+					if ($num_selected_object == -1) {
+						$num_selected_object = 0;
+					}
+
+					$this->headerStream->skip(72);
+					$this->headerStream->readInt($text_len);
+					$this->headerStream->skip($text_len);
+					$this->headerStream->readInt($sound_len);
+					$this->headerStream->skip($sound_len);
+					$this->headerStream->skip($num_selected_object << 2);
+				}
+				$this->headerStream->skip($num_effect << 2);
+				$this->headerStream->readInt($num_condition);
+				$this->headerStream->skip(72 * $num_condition);
+				$this->headerStream->skip($num_condition << 2);
+			}
+			$this->headerStream->skip($num_trigger << 2);
+
+			$this->gameSettings->map = '';
+			$this->gameSettings->_gameType = GameType::SCENARIO;
+		}
+
+		/* Other_data */
+		$team_indexes = array();
+		for ($i = 0; $i < 8; $i++) {
+			$this->headerStream->readChar($team_indexes[]);
+		}
+
+		for ($i = 0; $i < $this->players->count(); $i++) {
+			if ($player = $this->players->getPlayer($i)) {
+				$player->team = $team_indexes[$i] - 1;
+			}
+		}
+
+		$this->headerStream->skip(1);  // always 1?
+		$this->headerStream->readInt($reveal_map);
+		$this->headerStream->skip(4);  // always 1?
+		$this->headerStream->readInt($map_size);
+		$this->headerStream->readInt($pop_limit);
+		if ($this->_isMgx) {
+
+			$this->headerStream->readChar($game_type);
+			$this->headerStream->readChar($lock_diplomacy);
+		}
+
+		$this->gameSettings->_revealMap = $reveal_map;
+		$this->gameSettings->_mapSize = $map_size;
+		$this->gameSettings->popLimit = $pop_limit;
+		if ($this->_isMgx) {
+
+			$this->gameSettings->lockDiplomacy = ($lock_diplomacy == 0x01);
+			$this->gameSettings->_gameType = $game_type;
+		}
+
+	    // here comes pre-game chat (mgl doesn't keep this information)
+	    if ($this->_isMgx) {
+
+	    	$this->headerStream->readInt($num_chat);
+	    	for ($i = 0; $i < $num_chat; $i++) {
+
+	    		$this->headerStream->readString($chat);
+	    		// 0-length chat exists
+	    		if ($chat == '') {
+	    			continue;
+	    		}
+
+				if ($chat[0] == '@' && $chat[1] == '#' && $chat[2] >= '1' && $chat[2] <= '8') {
+
+					$chat = rtrim($chat);  // throw null-termination character
+					$this->pregameChat[] = $chat;
+
+					$chatmessage = new ChatMessage();
+					$chatmessage->player = $this->players->getPlayerByIndex($chat[2]);
+					$chatmessage->msg = substr($chat, 3);
+					$this->pregameChatMessages->add($chatmessage);
+				}
+			}
+	    	unset($chat);
+	    }
+
+		/* skip AI_info if exists */
+		$this->headerStream->setPosition(0x0C);
+		$this->headerStream->readBool($include_ai);
+		if ($include_ai) {
+
+			$this->headerStream->skip(2);
+			$this->headerStream->readWord($num_string);
+			$this->headerStream->skip(4);
+			for ($i = 0; $i < $num_string; $i++) {
+
+				$this->headerStream->readInt($string_length);
+				$this->headerStream->skip($string_length);
+			}
+			$this->headerStream->skip(6);
+			for ($i = 0; $i < 8; $i++) {
+
+				$this->headerStream->skip(10);
+				$this->headerStream->readWord($num_rule);
+				$this->headerStream->skip(4);
+				$this->headerStream->skip(400 * $num_rule);
+			}
+			$this->headerStream->skip(5544);
+		}
+
+		/* getting data */
+		$this->headerStream->skip(4);
+		$this->headerStream->readInt($game_speed);
+		$this->headerStream->skip(37);
+		$this->headerStream->readWord($rec_player_ref);
+		$this->headerStream->readChar($num_player);
+
+		$rec_player_ref--;  // 0 is GAIA, not appears in players
+		$num_player--;
+
+		$this->gameSettings->_gameSpeed = $game_speed;
+
+		if ($player = $this->players->getPlayer($rec_player_ref)) {
+
+			$player->owner = true;
+			//$this->gameSettings->playingPlayers = $num_player;
+		}
+		//$this->gameSettings->inGameCoop = ($num_player < $this->players->count());
+
+		$num_player++;
+
+		/* getting map */
+		$this->headerStream->skip(62);
+		if (!$this->_isMgx) {
+			$this->headerStream->skip(-2);
+		}
+		$this->headerStream->readInt($map_size_x);
+		$this->headerStream->readInt($map_size_y);
+		$this->_mapWidth = $map_size_x;
+		$this->_mapHeight = $map_size_y;
+
+		$this->headerStream->readInt($num_unknown_data);
+		/* unknown data */
+		for ($i = 0; $i < $num_unknown_data; $i++) {
+
+			$this->headerStream->skip(1275 + $map_size_x * $map_size_y);
+			$this->headerStream->readInt($num_float);
+			$this->headerStream->skip(($num_float << 2) + 4);
+		}
+		$this->headerStream->skip(2);
+
+		/* map data */
+		for ($y = 0; $y < $map_size_y; $y++) {
+
+			for ($x = 0; $x < $map_size_x; $x++) {
+
+				$this->headerStream->readChar($terrain_id);
+				$this->headerStream->readChar($elevation);
+				$this->_mapData[$x][$y] = $terrain_id + 1000 * ($elevation + 1); // hack
+			}
+		}
+
+		$this->headerStream->readInt($num_data);
+		$this->headerStream->skip(4 + ($num_data << 2));
+		for ($i = 0; $i < $num_data; $i++) {
+
+			$this->headerStream->readInt($num_couples);
+			$this->headerStream->skip($num_couples << 2);
+		}
+		$this->headerStream->readInt($map_size_x2);
+		$this->headerStream->readInt($map_size_y2);
+		$this->headerStream->skip(($map_size_x2 * $map_size_y2 << 2) + 4);
+		$this->headerStream->readInt($num_unknown_data2);
+		$this->headerStream->skip(27 * $num_unknown_data2 + 4);
+
+		$this->_queue->push($num_player);
+		$this->_queue->push($map_size_x);
+		$this->_queue->push($map_size_y);
+		$this->_queue->push($this->headerStream->getPosition());
+
+		/* getting Player_info */
+		if (!$this->readPlayerInfoBlockEx()) {
+
+			$this->gaiaObjects->clear();
+			$this->playerObjects->clear();
+
+			$this->_queue->pop();
+			$this->_queue->pop();
+			$this->_queue->pop();
+
+			$this->headerStream->getPosition($this->_queue->pop());
+			/* first is GAIA, skip some useless bytes */
+			if ($this->gameInfo->_gameVersion == GameVersion::AOKTRIAL || $this->gameInfo->_gameVersion == GameVersion::AOCTRIAL) {
+				$this->headerStream->skip(4);
+			}
+			$this->headerStream->skip($num_player + 70); // + 2 len of playerlen
+			$this->headerStream->skip($this->_isMgx ? 792 : 756);
+			$this->headerStream->skip($this->_isMgx ? 41249 : 34277);
+			$this->headerStream->skip($map_size_x * $map_size_y);
+
+			foreach ($this->players as $player) {
+
+				// skip cooping player, he/she has no data in Player_info
+				$player_ = $this->players->getPlayerByIndex($player->index);
+				if ($player_ && ($player_ !== $player) && $player_->civId) {
+
+					$player->civId = $player_->civId;
+					$player->colorId = $player_->colorId;
+					$player->team = $player_->team;
+					$player->isCooping = true;
+					continue;
+				}
+
+				if ($this->_queue->atLeast(1)) {
+					$this->headerStream->setPosition($this->_queue->pop());
+				}
+				else {
+					$pos = $this->headerStream->find($player_info_end_separator);
+					$this->headerStream->skip(strlen($player_info_end_separator));
+
+					if ($this->gameInfo->_gameVersion == GameVersion::AOKTRIAL || $this->gameInfo->_gameVersion == GameVersion::AOCTRIAL) {
+						$this->headerStream->skip(4);
+					}
+          			$this->headerStream->skip($num_player + 52 + strlen($player->name)); // + null-terminator
+				}
+
+				/* Civ_header */
+				$this->headerStream->readFloat($food);
+				$this->headerStream->readFloat($wood);
+				$this->headerStream->readFloat($stone);
+				$this->headerStream->readFloat($gold);
+				/* headroom = (house capacity - population) */
+				$this->headerStream->readFloat($headroom);
+				$this->headerStream->skip(4);
+				/* Starting Age, note: PostImperial Age = Imperial Age here */
+				$this->headerStream->readFloat($data6);
+				$this->headerStream->skip(16);
+				$this->headerStream->readFloat($population);
+				$this->headerStream->skip(100);
+				$this->headerStream->readFloat($civilian_pop);
+				$this->headerStream->skip(8);
+				$this->headerStream->readFloat($military_pop);
+				$this->headerStream->skip($this->_isMgx ? 629 : 593);
+				$this->headerStream->readFloat($init_camera_pos_x);
+				$this->headerStream->readFloat($init_camera_pos_y);
+				$this->headerStream->skip($this->_isMgx ? 9 : 5);
+				$this->headerStream->readChar($civilization);
+				// sometimes(?) civilization is zero in scenarios when the first player is briton (only? always? rule?)
+				if (!$civilization) {
+					$civilization++;
+				}
+				/* skip unknown9[3] */
+				$this->headerStream->skip(3);
+				$this->headerStream->readChar($player_color);
+
+				$player->civId = $civilization;
+				$player->colorId = $player_color;
+				$player->initialState->position = array(round($init_camera_pos_x), round($init_camera_pos_y));
+				$player->initialState->food = round($food);
+				$player->initialState->wood = round($wood);
+				$player->initialState->stone = round($stone);
+				$player->initialState->gold = round($gold);
+				$player->initialState->startingAge = round($data6);
+				$player->initialState->houseCapacity = round($headroom) + round($population);
+				$player->initialState->population = round($population);
+				$player->initialState->civilianPop = round($civilian_pop);
+				$player->initialState->militaryPop = round($military_pop);
+				$player->initialState->extraPop = $player->initialState->population -
+					($player->initialState->civilianPop + $player->initialState->militaryPop);
+
+				$this->headerStream->skip($this->_isMgx ? 41249 : 34277);
+				$this->headerStream->skip(map_size_x * map_size_y);
+			}
+		}
+
+		/* getting objectives or instructions */
+		if ($scenario_header_pos > 0) {
+
+			$this->headerStream->setPosition($scenario_header_pos + 4433);
+			/* original scenario file name */
+			$this->headerStream->readString($original_sc_filename, 2);
+			if ($original_sc_filename != '') {
+
+				$this->gameInfo->scFileName = $original_sc_filename;
+				if (!$this->_Mgx) {
+					$this->gameSettings->gameType = GameType::SCENARIO;  // this way we detect scenarios in mgl, is there any other way?
+				}
+			}
+			$this->headerStream->skip($this->_isMgx ? 24 : 20);
+		}
+
+		/* scenario instruction or Objectives string, depends on game type */
+		$objectives_pos = $this->headerStream->getPosition();
+		$this->headerStream->readString($instructions, 2);
+		if ($instructions != '' && !$this->gameSettings->isScenario()) {
+			$this->gameInfo->objectivesString = rtrim($instructions);
 		}
 
 		return true;
 	}
 
 	/**
-	 * Analyzes header stream.
-	 *
-	 * @return bool true if the stream was analyzed successfully, false otherwise
+	 * Analyzes body stream.
+	 * This method is slower and is not used, just for demonstration.
+	 * @see RecAnalyst::analyzeBodyStreamF()
+	 * @return bool True if the stream was successfully analyzed, false otherwise.
 	 */
-	protected function analyzeHeaderStream ()
-	{
-		// initialize variables
-		$constant2      = pack ('c*', 0x9A, 0x99, 0x99, 0x99, 0x99, 0x99, 0xF9, 0x3F);
-		$separator      = pack ('c*', 0x9D, 0xFF, 0xFF, 0xFF);
-		$unknown_const2 = pack ('c*', 0x98, 0x9E, 0x00, 0x00, 0x02, 0x0B);
-		$trigger_info_pos = $game_setting_pos = 0;
-
-		$string_id = pack ('c*', 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-								 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-								 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-								 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-								 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-								 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-								 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
-								 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF);
+	protected function analyzeBodyStream() {
 
 		$pos = 0;
-		$m_header_len = strlen ($this->headerStream);
+		$time_cnt = $this->gameSettings->_gameSpeed;
+		$age_flag = array(0, 0, 0, 0, 0, 0, 0, 0);
 
-		$len = strlen ($constant2);
-		$pos = ($m_header_len - $len);
+		$this->bodyStream->setPosition(0);
+		$size = $this->bodyStream->getSize();
 
-		$buff = substr ($this->headerStream, $pos, $len); $pos += $len;
-		// TODO: use substr_compare
-		while ($pos > 0)
-		{
-			if (strcmp ($buff, $constant2) == 0)
-			{
-				$trigger_info_pos = $pos;
-				break;
+		while ($this->bodyStream->getPosition() < $size - 3) {
+
+			if ($this->bodyStream->getPosition() == 0 && !$this->_isMgx) {
+				$od_type = 0x04;
 			}
-			$pos -= $len + 1;
-			$buff = substr ($this->headerStream, $pos, $len); $pos += $len;
-		}
-
-		if ($trigger_info_pos == 0)
-		{
-			$this->lastError = self::$E__ERROR_IN_UNCOMPRESSED_STREAM;
-			return false;
-		}
-
-		// getting Game_settings position
-		$len = strlen ($separator);
-		$buff = substr ($this->headerStream, $pos, $len); $pos += $len;
-		while ($pos > 0)
-		{
-			if (strcmp ($buff, $separator) == 0)
-			{
-				$game_setting_pos = $pos;
-				break;
+			else {
+				$this->bodyStream->readInt($od_type);
 			}
-
-			$pos -= $len + 1;
-			$buff = substr ($this->headerStream, $pos, $len); $pos += $len;
-		}
-
-		if ($game_setting_pos == 0)
-		{
-			// not found
-			$this->lastError = self::$E__ERROR_IN_UNCOMPRESSED_STREAM;
-			return false;
-		}
-
-		// getting Game_Settings data
-		// skip negative[2]
-		$pos = $game_setting_pos + 8;
-
-		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-		$unpacked_data = unpack ("V", $packed_data);
-		$map_id = $unpacked_data[1];
-
-		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-		$unpacked_data = unpack ("V", $packed_data);
-		$difficulty = $unpacked_data[1];
-		// skip unknown
-		$pos += 4;
-
-		if (array_key_exists ($map_id, RecAnalystConst::$MAPS))
-		{
-			$this->gameSettings->map = RecAnalystConst::$MAPS[$map_id][0];
-			if ($map_id >= 34 && $map_id <= 43) // real world maps
-				$this->gameSettings->mapStyle = RecAnalystConst::$MAP_STYLES[1];
-			else
-				$this->gameSettings->mapStyle = RecAnalystConst::$MAP_STYLES[0];
-		}
-		else
-		{
-			$this->gameSettings->mapStyle = RecAnalystConst::$MAP_STYLES[2];
-		}
-
-		if (array_key_exists ($difficulty, RecAnalystConst::$DIFFICULTY_LEVELS))
-		{
-			$this->gameSettings->difficultyLevel = RecAnalystConst::$DIFFICULTY_LEVELS[$difficulty];
-		}
-
-		// getting Player_info data
-		for ($i = 0; $i <= 8; $i++)
-		{
-			$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-			$unpacked_data = unpack ("V", $packed_data);
-			$player_data_index = $unpacked_data[1];
-
-			$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-			$unpacked_data = unpack ("V", $packed_data);
-			$human = $unpacked_data[1];
-
-			$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-			$unpacked_data = unpack ("V", $packed_data);
-			$name_len = $unpacked_data[1];
-
-			$playername = substr ($this->headerStream, $pos, $name_len); $pos += $name_len;
-
-			// 0x00:invalid player, 0x02:human, 0x04:computer
-			// index 0 is GAIA player
-			if ($human == 0x00)
-				continue;
-			// sometimes very rarely index is 1
-			if ($human == 0x01)
-				continue;
-			if ($i != 0)
-			{
-				$player = new Player ();
-				$player->name  = $playername;
-				$player->index = $player_data_index;
-				$player->human = ($human == 0x02);
-
-				$this->playerList->addPlayer ($player);
-			}
-		} // endfor
-
-		// Trigger_info
-		$pos = $trigger_info_pos + 1;
-
-		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-		$unpacked_data = unpack ("V", $packed_data);
-		$num_trigger = $unpacked_data[1];
-
-		if ($num_trigger != 0)
-		{
-			// skip Trigger_info data
-			for ($i = 0; $i < $num_trigger; $i++)
-			{
-				$pos += 18;		// different from mgx description (14)
-				$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-				$unpacked_data = unpack ("V", $packed_data);
-				$desc_len = $unpacked_data[1];
-				$pos += $desc_len;
-				$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-				$unpacked_data = unpack ("V", $packed_data);
-				$name_len = $unpacked_data[1];
-				$pos += $name_len;
-				$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-				$unpacked_data = unpack ("V", $packed_data);
-				$num_effect = $unpacked_data[1];
-
-				for ($j = 0; $j < $num_effect; $j++)
-				{
-					$pos += 24;
-					$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-					$unpacked_data = unpack ("V", $packed_data);
-					$num_selected_object = $unpacked_data[1];
-					if ($num_selected_object == -1)
-					{
-						$num_selected_object = 0;
-					}
-					$pos += 72;
-					$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-					$unpacked_data = unpack ("V", $packed_data);
-					$text_len = $unpacked_data[1];
-					$pos += $text_len;
-					$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-					$unpacked_data = unpack ("V", $packed_data);
-					$sound_len = $unpacked_data[1];
-					$pos += $sound_len;
-					$pos += $num_selected_object * 4;
-				}
-
-				$pos += ($num_effect * 4);
-				$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-				$unpacked_data = unpack ("V", $packed_data);
-				$num_condition = $unpacked_data[1];
-				$pos += 72 * $num_condition;
-				$pos += 4 * $num_condition;
-			}
-			$pos += 4 * $num_trigger;
-
-			$this->gameSettings->isScenario = true;
-			$this->gameSettings->map = '';
-			$this->gameSettings->gameType = RecAnalystConst::$GAME_TYPES[3];
-			$this->gameSettings->mapStyle = RecAnalystConst::$MAP_STYLES[2];
-		}
-
-		// Other_data
-		for ($i = 0; $i < 8; $i++)
-		{
-			$packed_data = substr ($this->headerStream, $pos, 1); $pos += 1;
-			$unpacked_data = unpack ("C", $packed_data);
-			$team = $unpacked_data[1];
-
-			if (($i + 1) <= $this->playerList->getCount ())
-			{
-				if ($player = $this->playerList->getPlayer ($i))
-				{
-					$player->team = $team - 1;
-				}
-			}
-		}
-
-		$pos++;
-
-		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-		$unpacked_data = unpack ("V", $packed_data);
-		$reveal_map = $unpacked_data[1];
-
-		$pos += 4;
-
-		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-		$unpacked_data = unpack ("V", $packed_data);
-		$map_size = $unpacked_data[1];
-
-		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-		$unpacked_data = unpack ("V", $packed_data);
-		$pop_limit = $unpacked_data[1];
-
-		$packed_data = substr ($this->headerStream, $pos, 1); $pos += 1;
-		$unpacked_data = unpack ("C", $packed_data);
-		$game_type = $unpacked_data[1];
-
-		$packed_data = substr ($this->headerStream, $pos, 1); $pos += 1;
-		$unpacked_data = unpack ("C", $packed_data);
-		$lock_diplomacy = $unpacked_data[1];
-
-		$this->gameSettings->popLimit = $pop_limit;
-		$this->gameSettings->gameType = RecAnalystConst::$GAME_TYPES[$game_type];
-		$this->gameSettings->lockDiplomacy = ($lock_diplomacy == 0x01);
-		$this->gameSettings->revealMap = RecAnalystConst::$REVEAL_SETTINGS[$reveal_map];
-
-		if (array_key_exists ($map_size, RecAnalystConst::$MAP_SIZES))
-		{
-			$this->gameSettings->mapSize = RecAnalystConst::$MAP_SIZES[$map_size];
-		}
-
-		// here comes pre-game chat
-		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-		$unpacked_data = unpack ("V", $packed_data);
-		$num_chat = $unpacked_data[1];
-		for ($i = 0; $i < $num_chat; $i++)
-		{
-			$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-			$unpacked_data = unpack ("V", $packed_data);
-			$chat_len = $unpacked_data[1];
-
-			// 0-length chat exists
-			if ($chat_len == 0)
-			{
-				continue;
-			}
-
-			$chat = substr ($this->headerStream, $pos, $chat_len); $pos += $chat_len;
-
-			if ($chat[0] == '@' && $chat[1] == '#' && $chat[2] >= '1' && $chat[2] <= '8')
-			{
-				$chat = rtrim ($chat); // throw null-termination character
-				$this->pregameChat[] = $chat;
-			}
-		}
-		unset ($chat);
-
-		// skip AI_info if exists
-		$pos = 0x0C;
-		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-		$unpacked_data = unpack ("V", $packed_data);
-		$include_ai = $unpacked_data[1];
-
-		if ($include_ai == 0x01)
-		{
-			$pos += 2;
-			$packed_data = substr ($this->headerStream, $pos, 2); $pos += 2;
-			$unpacked_data = unpack ("v", $packed_data);
-			$num_string = $unpacked_data[1];
-			$pos += 4;
-			for ($i = 0; $i < $num_string; $i++)
-			{
-				$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-				$unpacked_data = unpack ("V", $packed_data);
-				$string_length = $unpacked_data[1];
-				$pos += $string_length;
-			}
-			$pos += 6;
-			// AI_data
-			for ($i = 0; $i < 8; $i++)
-			{
-				$pos += 10;
-				$packed_data = substr ($this->headerStream, $pos, 2); $pos += 2;
-				$unpacked_data = unpack ("v", $packed_data);
-				$num_rule = $unpacked_data[1];
-				$pos += 4;
-				$pos += 400 * $num_rule;
-			}
-			$pos += 5544;
-		}
-
-		// getting data
-		$pos += 4;
-		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-		$unpacked_data = unpack ("V", $packed_data);
-		$game_speed = $unpacked_data[1];
-
-		$pos += 37;
-		$packed_data = substr ($this->headerStream, $pos, 2); $pos += 2;
-		$unpacked_data = unpack ("v", $packed_data);
-		$rec_player_ref = $unpacked_data[1];
-
-		$packed_data = substr ($this->headerStream, $pos, 1); $pos += 1;
-		$unpacked_data = unpack ("C", $packed_data);
-		$num_player = $unpacked_data[1];
-
-		$rec_player_ref--;  // 0 is GAIA, not appears in playerList
-		$num_player--;
-		$this->gameSettings->speed = RecAnalystConst::$GAME_SPEEDS[$game_speed];
-		if ($player = $this->playerList->getPlayer ($rec_player_ref))
-		{
-			$player->owner = true;
-		}
-
-		$this->gameSettings->inGameCoop = ($num_player < $this->playerList->getCount ());
-
-		// getting map
-		$pos += 62;
-		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-		$unpacked_data = unpack ("V", $packed_data);
-		$map_size_x = $unpacked_data[1];
-		$this->mapWidth = $map_size_x;
-
-		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-		$unpacked_data = unpack ("V", $packed_data);
-		$map_size_y = $unpacked_data[1];
-		$this->mapHeight = $map_size_y;
-
-		$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-		$unpacked_data = unpack ("V", $packed_data);
-		$num_unknown_data = $unpacked_data[1];
-		// unknown data
-		for ($i = 0; $i < $num_unknown_data; $i++)
-		{
-			$pos += 1275;
-			$pos += $map_size_x * $map_size_y;
-
-			$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-			$unpacked_data = unpack ("V", $packed_data);
-			$num_float = $unpacked_data[1];
-
-			$pos += 4 * $num_float;
-			$pos += 4;
-		}
-		$pos += 2;
-
-		// map data
-		for ($y = 0; $y < $map_size_y; $y++)
-		{
-			for ($x = 0; $x < $map_size_x; $x++)
-			{
-				// terrain_id
-				$packed_data = substr ($this->headerStream, $pos, 1); $pos += 1;
-				$unpacked_data = unpack ("C", $packed_data);
-				$terrain_id = $unpacked_data[1];
-
-				// elevation
-				$packed_data = substr ($this->headerStream, $pos, 1); $pos += 1;
-				$unpacked_data = unpack ("C", $packed_data);
-				$elevation = $unpacked_data[1];
-
-				$this->mapData[$x][$y] = $terrain_id + 1000 * ($elevation + 1);
-			}
-		}
-
-		$pos += 128;
-		$pos += $map_size_x * $map_size_y * 4;
-		$pos += 15;
-		/*
-		// TODO: test for behavior if there is a Computer
-		// getting Player_info position
-		$len = strlen ($unknown_const2);
-		$buff = substr ($this->headerStream, $pos, $len); $pos += $len;
-		while ($pos <= ($m_header_len - $len))
-		{
-			if (strcmp ($buff, $unknown_const2) == 0)
-			{
-				break;
-			}
-			$pos -= $len - 1;
-			$buff = substr ($this->headerStream, $pos, $len); $pos += $len;
-		}
-		*/
-		$pos += 5138;
-
-		foreach ($this->playerList as $player)
-		{
-			// skip cooping player, he/she has no data in Player_info
-			$player_ = $this->playerList->getPlayerByIndex ($player->index);
-
-			if ($player_ && ($player_ !== $player) && $player_->civId)
-			{
-				$player->civId = $player_->civId;
-				$player->civ = $player_->civ;
-				$player->colorId = $player_->colorId;
-				$player->isCooping = true;
-				continue;
-			}
-			$playerName = $player->name;
-
-			while ($pos <= ($m_header_len - strlen ($playerName)))
-			{
-				$buff = substr ($this->headerStream, $pos, strlen ($playerName));
-
-				if (strcmp ($buff, $playerName) == 0)
-				{
-					break;
-				}
-				$pos++;
-			}
-
-			$pos += strlen ($playerName);
-			// skip data (first byte is null char player's name terminator)
-			$pos += 1;
-			$pos += 6;
-			$pos += 792;
-			$pos += 1;
-
-			$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-			$unpacked_data = unpack("f", $packed_data);
-			$init_camera_pos_x = round ($unpacked_data[1]);
-
-			$packed_data = substr ($this->headerStream, $pos, 4); $pos += 4;
-			$unpacked_data = unpack("f", $packed_data);
-			$init_camera_pos_y = round ($unpacked_data[1]);
-
-			$pos += 9;
-			// civilization
-			$packed_data = substr ($this->headerStream, $pos, 1); $pos += 1;
-			$unpacked_data = unpack ("C", $packed_data);
-			$civilization = $unpacked_data[1];
-
-			$player->civId = $civilization;
-			$player->civ = RecAnalystConst::$CIVS[$civilization][0];
-
-			// skip unknown9[3]
-			$pos += 3;
-			// player_color
-			$packed_data = substr ($this->headerStream, $pos, 1); $pos += 1;
-			$unpacked_data = unpack ("C", $packed_data);
-			$player_color = $unpacked_data[1];
-
-			$player->colorId = $player_color;
-
-			$this->viewPositions[] = array (
-				$player->colorId, $init_camera_pos_x, $init_camera_pos_y
-				);
-
-			$pos += 4299;
-		} // endfor
-
-		// initialize variables
-		$con1 = pack ('c*', 0x3A, 0x20);
-		$con2 = pack ('c*', 0xA1, 0x47);
-
-		$LANGUAGES = array (
-			'en'  => pack ('c*', 0x4D, 0x61, 0x70, 0x20, 0x54, 0x79, 0x70, 0x65),
-			'cz'  => pack ('c*', 0x54, 0x79, 0x70, 0x20, 0x6D, 0x61, 0x70, 0x79),
-			'jp'  => pack ('c*', 0x83, 0x7D, 0x83, 0x62, 0x83, 0x76, 0x82, 0xCC, 0x8E, 0xED, 0x97, 0xDE),
-			'cn'  => pack ('c*', 0xB5, 0xD8, 0xCD, 0xBC, 0xC0, 0xE0, 0xD0, 0xCD),
-			'sp'  => pack ('c*', 0x54, 0x69, 0x70, 0x6F, 0x20, 0x64, 0x65, 0x20, 0x6D, 0x61, 0x70, 0x61),
-			'de'  => pack ('c*', 0x4B, 0x61, 0x72, 0x74, 0x65, 0x6E, 0x74, 0x79, 0x70),
-			'cn2' => pack ('c*', 0xA6, 0x61, 0xB9, 0xCF, 0xC3, 0xFE, 0xA7, 0x4F),
-			'kr'  => pack ('c*', 0xC7, 0xA5, 0xC1, 0xD8, 0x0A, 0xC0, 0xDA, 0xBF, 0xF8),
-			'fr'  => pack ('c*', 0x54, 0x79, 0x70, 0x65, 0x20, 0x64, 0x65, 0x20, 0x63, 0x61, 0x72, 0x74, 0x65, 0xA0),
-			'it'  => pack ('c*', 0x54, 0x69, 0x70, 0x6F, 0x20, 0x64, 0x69, 0x20, 0x6D, 0x61, 0x70, 0x70, 0x61),
-			'sp2' => pack ('c*', 0x54, 0x69, 0x70, 0x6F, 0x20, 0x64, 0x65, 0x20, 0x4D, 0x61, 0x70, 0x61),
-			'ur'  => pack ('c*', 0xD2, 0xE8, 0xEF, 0x20, 0xCA, 0xE0, 0xF0, 0xF2, 0xFB));
-
-		// getting map name (only if map is custom (44) and game type is not scenario (game_type still $00 in scenarios)
-		// if map_id = 32 (Random Land Map), it is possible to obtain map if it's written in english
-		if (!array_key_exists ($map_id, RecAnalystConst::$MAPS) && $game_type != 0x03 && !$this->gameSettings->isScenario)
-		{
-			$pos = $game_setting_pos - 11520;
-
-			$mapFound = false;
-
-			$buff = substr ($this->headerStream, $pos, 2); $pos += 2;
-			// searching up to -100000 bytes, than stop
-			while ($pos > $game_setting_pos - 11520 - 100000 && !$mapFound)
-			{
-				if (strcmp ($buff, $con1) == 0 || strcmp ($buff, $con2) == 0)
-				{
-					$pos -= 2;
-
-					foreach ($LANGUAGES as $val)
-					{
-						$pos -= strlen ($val);
-						$map_name = substr ($this->headerStream, $pos, strlen ($val)); $pos += strlen ($val);
-
-						if (strcmp ($map_name, $val) == 0)
-						{
-							$mapName = '';
-							$pos += 2; // skip ': '
-
-							for ($i = 0; $i < 100; $i++)
-							{
-								$buff = substr ($this->headerStream, $pos, 1); $pos += 1;
-
-								if ($buff != chr (0x0A))
-								{
-									$mapName .= $buff;
-								}
-								else
-								{
-									$mapFound = true;
+			// ope_data types: 4(Game_start or Chat), 2(Sync), or 1(Command)
+			switch ($od_type) {
+
+				// Game_start or Chat command
+				case 0x04:
+				case 0x03:
+					$this->bodyStream->readInt($command);
+					if ($command == 0x01F4) {
+
+						// Game_start
+						if (!$this->_isMgx) {
+
+							$this->bodyStream->skip(28);
+							$this->bodyStream->readChar($ver);
+							switch ($ver) {
+
+								case 0:
+									if ($this->gameInfo->_gameVersion != GameVersion::AOKTRIAL) {
+										$this->gameInfo->_gameVersion = GameVersion::AOK20;
+									}
 									break;
-								}
-							} // endfor
+								case 1:
+									$this->gameInfo->_gameVersion = GameVersion::AOK20A;
+									break;
+							}
+							$this->bodyStream->skip(3);
+						}
+						else {
+
+							switch ($od_type) {
+
+								case 0x03:
+									if ($this->gameInfo->_gameVersion != GameVersion::AOCTRIAL) {
+										$this->gameInfo->_gameVersion = GameVersion::AOC10;
+									}
+									break;
+								case 0x04:
+									$this->gameInfo->_gameVersion = GameVersion::AOC10C;
+									break;
+							}
+							$this->bodyStream->skip(20);
+						}
+					}
+					elseif ($command == -1) {
+
+						// Chat
+						for ($i = 0; $i < $this->players->count(); $i++) {
+
+							if (!($player = $this->players->getPlayer($i))) {
+								continue;
+							}
+
+							if ($player->feudalTime != 0 && $player->feudalTime < $time_cnt && $age_flag[$i] < 1) {
+
+								$chatmessage = new ChatMessage();
+								$chatmessage->time = $player->feudalTime;
+								$chatmessage->msg = sprintf('%s advanced to Feudal Age', $player->name);
+								$this->ingameChatMessages->add($chatmessage);
+
+								$this->ingameChat[] = sprintf('%d@#0%s advanced to Feudal Age', $player->feudalTime, $player->name);
+								$age_flag[$i] = 1;
+							}
+							if ($player->castleTime != 0 && $player->castleTime < $time_cnt && $age_flag[$i] < 2) {
+
+								$chatmessage = new ChatMessage();
+								$chatmessage->time = $player->castleTime;
+								$chatmessage->msg = sprintf('%s advanced to Castle Age', $player->name);
+								$this->ingameChatMessages->add($chatmessage);
+
+								$this->ingameChat[] = sprintf('%d@#0%s advanced to Castle Age', $player->castleTime, $player->name);
+								$age_flag[$i] = 2;
+							}
+							if ($player->imperialTime != 0 && $player->imperialTime < $time_cnt && $age_flag[$i] < 3) {
+
+								$chatmessage = new ChatMessage();
+								$chatmessage->time =$player->imperialTime;
+								$chatmessage->msg = sprintf('%s advanced to Imperial Age', $player->name);
+								$this->ingameChatMessages->add($chatmessage);
+
+								$this->ingameChat[] = sprintf('%d@#0%s advanced to Imperial Age', $player->imperialTime, $player->name);
+								$age_flag[$i] = 3;
+							}
+						}
+
+						$this->bodyStream->readString($chat);
+						if ($chat[0] == '@' && $chat[1] == '#' && $chat[2] >= '1' && $chat[2] <= '8') {
+
+							$chat = rtrim($chat); // throw null-termination character
+							if (substr($chat, 3, 2) == '--' && substr($chat, -2) == '--') {
+
+							}
+							else {
+
+								$chatmessage = new ChatMessage();
+								$chatmessage->time = $time_cnt;
+								$chatmessage->player = $this->players->getPlayerByIndex($chat[2]);
+								$chatmessage->msg = substr($chat, 3);
+								$this->ingameChatMessages->add($chatmessage);
+
+								$this->ingameChat[] = sprintf('%d%s', $time_cnt, $chat);
+							}
+						}
+					}
+					break;
+				// Sync
+				case 0x02:
+					$this->bodyStream->readInt($time);
+					$time_cnt += $time; // time_cnt is in miliseconds
+					$this->bodyStream->readInt($unknown);
+					if ($unknown == 0) {
+						$this->bodyStream->skip(28);
+					}
+					$this->bodyStream->skip(12);
+					break;
+				// Command
+				case 0x01:
+					$this->bodyStream->readInt($length);
+					$this->bodyStream->readChar($command);
+					$this->bodyStream->skip(-1);
+					switch ($command) {
+
+						case 0x0B: // player resign
+							$this->bodyStream->skip(1);
+							$this->bodyStream->readChar($player_index);
+							//$this->bodyStream->skip(1);
+							if (($player = $this->players->getPlayerByIndex($player_index))
+								&& $player->resignTime == 0) {
+
+								$player->resignTime = $time_cnt;
+								$chatmessage = new ChatMessage();
+								$chatmessage->time = $time_cnt;
+								$chatmessage->msg = sprintf('%s resigned', $player->name);
+								$this->ingameChatMessages->add($chatmessage);
+
+								$this->ingameChat[] = sprintf('%d@#0%s resigned', $player->resignTime, $player->name);
+							}
+							$this->bodyStream->skip($length - 2);
 							break;
-						} // endif
-					} // end foreach
-				} // endif
+						case 0x65: // researches
+							$this->bodyStream->skip(8);
+							$this->bodyStream->readWord($player_id);
+							$this->bodyStream->readWord($research_id);
+							if (!($player = $this->players->getPlayerByIndex($player_id))) {
 
-				$pos -= 3;
-				$buff = substr ($this->headerStream, $pos, 2); $pos += 2;
-			} // endwhile
+								$this->bodyStream->skip($length - 12);
+								break;
+							}
+							switch ($research_id) {
 
-			$this->gameSettings->map = ($mapFound) ? $mapName : RecAnalystConst::$MAP_STYLES[2];
-		} // endif
+								case 101:
+									$player->feudalTime = $time_cnt + 130000;
+									break;
+								case 102:
+									$player->castleTime = ($player->civId == Civilization::PERSIANS) ?
+										$time_cnt + round(160000 / 1.10) : $time_cnt + 160000;
+									break;
+								case 103:
+									$player->imperialTime = ($player->civId == Civilization::PERSIANS) ?
+										$time_cnt + round(190000 / 1.15) : $time_cnt + 190000;
+									break;
+								default:
+									$player->researches[$research_id] = $time_cnt;
+									break;
+							}
+							$this->bodyStream->skip($length - 12);
+							break;
+						case 0x77: // training unit
+							$this->bodyStream->skip(8);
+							$this->bodyStream->readWord($unit_type_id);
+							$this->bodyStream->readWord($unit_num);
 
-		// build teams
-		$this->buildTeams ();
+							if (!isset($this->units[$unit_type_id])) {
+								$this->units[$unit_type_id] = $unit_num;
+							}
+							else {
+								$this->units[$unit_type_id] += $unit_num;
+							}
+							$this->bodyStream->skip($length - 12);
+							break;
+						case 0x64: // pc trains unit
+							$this->bodyStream->skip(10);
+							$this->bodyStream->readWord($unit_type_id);
+							$unit_num = 1; // always for pc?
+							if (!isset($this->units[$unit_type_id])) {
+								$this->units[$unit_type_id] = $unit_num;
+							}
+							else {
+								$this->units[$unit_type_id] += $unit_num;
+							}
+							$this->bodyStream->skip($length - 12);
+							break;
+						case 0x66: // building
+							$this->bodyStream->skip(2);
+							$this->bodyStream->readWord($player_id);
+							$this->bodyStream->skip(8);
+							$this->bodyStream->readWord($building_type_id);
+
+							if (in_array($building_type_id, RecAnalystConst::GATE_UNITS)) {
+								$building_type_id = Unit::GATE;
+							}
+
+							if (!isset($this->buildings[$player_id][$building_type_id])) {
+								$this->buildings[$player_id][$building_type_id] = 1;
+							}
+							else {
+								$this->buildings[$player_id][$building_type_id]++;
+							}
+							$this->bodyStream->skip($length - 14);
+							break;
+						case 0x6C: // tributing
+							$this->bodyStream->skip(1);
+							$this->bodyStream->readChar($player_id_from);
+							$this->bodyStream->readChar($player_id_to);
+							$this->bodyStream->readChar($resource_id);
+							$this->bodyStream->readFloat($amount_tributed);
+							$this->bodyStream->readFloat($market_fee);
+
+							$playerFrom = $this->players->getPlayerFromIndex($player_id_from);
+							$playerTo = $this->players->getPlayerFromIndex($player_id_to);
+							if ($playerFrom && $playerTo) {
+
+								$tribute = new Tribute();
+								$tribute->time = $time_cnt;
+								$tribute->playerFrom = $playerFrom;
+								$tribute->playerTo = $playerTo;
+								$tribute->resourceId = $resource_id;
+								$tribute->amount = floor($amount_tributed);
+								$tribute->fee = $market_fee;
+								$this->tributes->add($tribute);
+							}
+							$this->bodyStream->skip($length - 12);
+							break;
+						default:
+							$this->bodyStream->skip($length);
+							break;
+					}
+					$this->bodyStream->skip(4);
+					break;
+				default:
+					// shouldn't occure, just to prevent unexpected endless cycling
+					$this->bodyStream->skip(1);
+					break;
+			}
+		}
+
+		$this->gameInfo->playTime = $time_cnt;
 
 		return true;
 	}
@@ -1059,332 +1092,322 @@ class RecAnalyst
 	 *
 	 * @return bool true if the stream was successfully analyzed, false otherwise
 	 */
-	protected function analyzeBodyStream ()
+	protected function analyzeBodyStreamF()
 	{
-		$pos = $tributing_cnt = 0;
-		$time_cnt = (int) array_search ($this->gameSettings->speed, RecAnalystConst::$GAME_SPEEDS);
-		$m_body_len = strlen ($this->bodyStream);
-		$age_flag = array (0, 0, 0, 0, 0, 0, 0, 0);
+		$time_cnt = $this->gameSettings->_gameSpeed;
+		$age_flag = array(0, 0, 0, 0, 0, 0, 0, 0);
 
-		while ($pos < $m_body_len - 3)
-		{
-			$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
-			$unpacked_data = unpack ("V", $packed_data);
-			$type = $unpacked_data[1];
+		$bodyStream = $this->bodyStream->getDataString();
+		$size = $this->bodyStream->getSize();
+		$pos = 0;
+
+		while ($pos < $size - 3) {
+
+			if ($pos == 0 && !$this->_isMgx) {
+				$od_type = 0x04;
+			}
+			else {
+				$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
+				$unpacked_data = unpack("l", $packed_data);
+				$od_type = $unpacked_data[1];
+			}
 
 			// ope_data types: 4(Game_start or Chat), 2(Sync), or 1(Command)
-			switch ($type)
-			{
-				// Game_start or Chat command
-				case 4:
-					$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
-					$unpacked_data = unpack ("V", $packed_data);
-					$command = $unpacked_data[1];
-					if ($command == 0x01F4)
-					{
-						// Game_start
-						// skip unknown
-						$pos += 4;
-						// skip player_index (POV)
-						$pos += 4;
-						// skip 'Map Reveal' data
-						$pos += 4;
-						// skip unknown
-						$pos += 8;
-					}
-					elseif ($command == -1)
-					{
-						// Chat
-						$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
-						$unpacked_data = unpack ("V", $packed_data);
-						$chat_len = $unpacked_data[1];
+			switch ($od_type) {
 
-						for ($i = 0; $i < $this->playerList->getCount (); $i++)
-						{
-							if (!($player = $this->playerList->getPlayer ($i)))
-							{
+				// Game_start or Chat command
+				case 0x04:
+				case 0x03:
+					$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
+					$unpacked_data = unpack("l", $packed_data);
+					$command = $unpacked_data[1];
+					if ($command == 0x01F4) {
+
+						// Game_start
+						if (!$this->_isMgx) {
+
+							$pos += 28;
+							$packed_data = substr($bodyStream, $pos, 1); $pos++;
+							$unpacked_data = unpack("C", $packed_data);
+							$ver = $unpacked_data[1];
+							switch ($ver) {
+
+								case 0:
+									if ($this->gameInfo->_gameVersion != GameVersion::AOKTRIAL) {
+										$this->gameInfo->_gameVersion = GameVersion::AOK20;
+									}
+									break;
+								case 1:
+									$this->gameInfo->_gameVersion = GameVersion::AOK20A;
+									break;
+							}
+							$pos += 3;
+						}
+						else {
+
+							switch ($od_type) {
+
+								case 0x03:
+									if ($this->gameInfo->_gameVersion != GameVersion::AOCTRIAL) {
+										$this->gameInfo->_gameVersion = GameVersion::AOC10;
+									}
+									break;
+								case 0x04:
+									$this->gameInfo->_gameVersion = GameVersion::AOC10C;
+									break;
+							}
+							$pos += 20;
+						}
+					}
+					elseif ($command == -1) {
+
+						// Chat
+						for ($i = 0; $i < $this->players->count(); $i++) {
+
+							if (!($player = $this->players->getPlayer($i))) {
 								continue;
 							}
 
-							if ($player->feudalTime != 0 && $player->feudalTime < $time_cnt && $age_flag[$i] < 1)
-							{
+							if ($player->feudalTime != 0 && $player->feudalTime < $time_cnt && $age_flag[$i] < 1) {
+
+								$chatmessage = new ChatMessage();
+								$chatmessage->time = $player->feudalTime;
+								$chatmessage->msg = sprintf('%s advanced to Feudal Age', $player->name);
+								$this->ingameChatMessages->add($chatmessage);
+
 								$this->ingameChat[] = sprintf ('%d@#0%s advanced to Feudal Age', $player->feudalTime, $player->name);
 								$age_flag[$i] = 1;
 							}
-							if ($player->castleTime != 0 && $player->castleTime < $time_cnt && $age_flag[$i] < 2)
-							{
+							if ($player->castleTime != 0 && $player->castleTime < $time_cnt && $age_flag[$i] < 2) {
+
+								$chatmessage = new ChatMessage();
+								$chatmessage->time = $player->castleTime;
+								$chatmessage->msg = sprintf('%s advanced to Castle Age', $player->name);
+								$this->ingameChatMessages->add($chatmessage);
+
 								$this->ingameChat[] = sprintf ('%d@#0%s advanced to Castle Age', $player->castleTime, $player->name);
 								$age_flag[$i] = 2;
 							}
-							if ($player->imperialTime != 0 && $player->imperialTime < $time_cnt && $age_flag[$i] < 3)
-							{
+							if ($player->imperialTime != 0 && $player->imperialTime < $time_cnt && $age_flag[$i] < 3) {
+
+								$chatmessage = new ChatMessage();
+								$chatmessage->time = $player->imperialTime;
+								$chatmessage->msg = sprintf('%s advanced to Imperial Age', $player->name);
+								$this->ingameChatMessages->add($chatmessage);
+
 								$this->ingameChat[] = sprintf ('%d@#0%s advanced to Imperial Age', $player->imperialTime, $player->name);
 								$age_flag[$i] = 3;
 							}
 						}
 
-						$chat = substr ($this->bodyStream, $pos, $chat_len); $pos += $chat_len;
+						$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
+						$unpacked_data = unpack("l", $packed_data);
+						$chat_len = $unpacked_data[1];
+						$chat = substr($bodyStream, $pos, $chat_len); $pos += $chat_len;
 
-						if ($chat[0] == '@' && $chat[1] == '#' && $chat[2] >= '1' && $chat[2] <= '8')
-						{
-							$chat = rtrim ($chat); // throw null-termination character
-							if (substr ($chat, 3, 2) == '--' && substr ($chat, -2) == '--')
-							{
+						if ($chat[0] == '@' && $chat[1] == '#' && $chat[2] >= '1' && $chat[2] <= '8') {
+
+							$chat = rtrim($chat); // throw null-termination character
+							if (substr($chat, 3, 2) == '--' && substr($chat, -2) == '--') {
+
 							}
-							else
-							{
-								$this->ingameChat[] = sprintf ('%d%s', $time_cnt, $chat);
+							else {
+
+								$chatmessage = new ChatMessage();
+								$chatmessage->time = $time_cnt;
+								$chatmessage->player = $this->players->getPlayerByIndex($chat[2]);
+								$chatmessage->msg = substr($chat, 3);
+								$this->ingameChatMessages->add($chatmessage);
+
+								$this->ingameChat[] = sprintf('%d%s', $time_cnt, $chat);
 							}
 						}
 					}
 					break;
 				// Sync
-				case 2:
-					$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
-					$unpacked_data = unpack ("V", $packed_data);
+				case 0x02:
+					$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
+					$unpacked_data = unpack("l", $packed_data);
 					$time_cnt += $unpacked_data[1]; // time_cnt is in miliseconds
-					$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
-					$unpacked_data = unpack ("V", $packed_data);
+					$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
+					$unpacked_data = unpack("l", $packed_data);
 					$unknown = $unpacked_data[1];
-					if ($unknown == 0)
-					{
-						// zero
-						$pos += 4;
-
-						// unknown checksum1, can cause out of sync if incorrect
-						$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
-						$unpacked_data = unpack ("V", $packed_data);
-						$unknown = $unpacked_data[1];
-
-						// unknown checksum2, can cause out of sync if incorrect
-						$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
-						$unpacked_data = unpack ("V", $packed_data);
-						$unknown = $unpacked_data[1];
-
-						//zeros
-						$pos += 8;
-
-						// time checksum, can cause out of sync if incorrect
-						$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
-						$unpacked_data = unpack ("V", $packed_data);
-						$time_checksum = $unpacked_data[1];
-
-						$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
-						$unpacked_data = unpack ("V", $packed_data);
-						$three = $unpacked_data[1];
-						//$pos += 28;
+					if ($unknown == 0) {
+						$pos += 28;
 					}
 					$pos += 12;
 					break;
 				// Command
-				case 1:
-					$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
-					$unpacked_data = unpack ("V", $packed_data);
+				case 0x01:
+					$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
+					$unpacked_data = unpack("l", $packed_data);
 					$length = $unpacked_data[1];
 
-					$packed_data = substr ($this->bodyStream, $pos, 1);
-					$unpacked_data = unpack ("C", $packed_data);
+					$packed_data = substr($bodyStream, $pos, 1); $pos++;
+					$unpacked_data = unpack("C", $packed_data);
 					$command = $unpacked_data[1];
+					$pos--;
 
-					switch ($command)
-					{
+					switch ($command) {
+
 						case 0x0B: // player resign
-							$pos += 1;
-							$packed_data = substr ($this->bodyStream, $pos, 1); $pos += 1;
-							$unpacked_data = unpack ("C", $packed_data);
-							$player_number = $unpacked_data[1];
-							$pos += 2;
-							if ($player = $this->playerList->getPlayerByIndex ($player_number))
-							{
+							$pos++;
+							$packed_data = substr($bodyStream, $pos, 1); $pos++;
+							$unpacked_data = unpack("C", $packed_data);
+							$player_index = $unpacked_data[1];
+
+							if (($player = $this->players->getPlayerByIndex($player_index))
+								&& $player->resignTime == 0) {
+
 								$player->resignTime = $time_cnt;
-								$this->ingameChat[] = sprintf ('%d@#0%s resigned', $player->resignTime, $player->name);
+								$chatmessage = new ChatMessage();
+								$chatmessage->time = $time_cnt;
+								$chatmessage->msg = sprintf('%s resigned', $player->name);
+								$this->ingameChatMessages->add($chatmessage);
+
+								$this->ingameChat[] = sprintf('%d@#0%s resigned', $player->resignTime, $player->name);
 							}
-							$pos += $length - 4;  // different from mgx format description
+							$pos += $length - 2;
 							break;
 						case 0x65: // researches
 							$pos += 8;
-							// player_id
-							$packed_data = substr ($this->bodyStream, $pos, 2); $pos += 2;
-							$unpacked_data = unpack ("v", $packed_data);
+							$packed_data = substr($bodyStream, $pos, 2); $pos += 2;
+							$unpacked_data = unpack("v", $packed_data);
 							$player_id = $unpacked_data[1];
-							// research_id
-							$packed_data = substr ($this->bodyStream, $pos, 2); $pos += 2;
-							$unpacked_data = unpack ("v", $packed_data);
+
+							$packed_data = substr($bodyStream, $pos, 2); $pos += 2;
+							$unpacked_data = unpack("v", $packed_data);
 							$research_id = $unpacked_data[1];
-							if ($research_id == 101)
-							{
-								// feudal time
-								if ($player = $this->playerList->getPlayerByIndex ($player_id))
-								{
-									$player->feudalTime = $time_cnt + 130 * 1000; // + research time (2:10)
-								}
+
+							if (!($player = $this->players->getPlayerByIndex($player_id))) {
+								$pos += $length - 12;
+								break;
 							}
-							if ($research_id == 102)
-							{
-								// castle time
-								if ($player = $this->playerList->getPlayerByIndex ($player_id))
-								{
-									// persians?
-									$player->castleTime = ($player->civId == 0x08) ? $time_cnt + 144 * 1000 : $time_cnt + 160 * 1000;
-								}
-							}
-							if ($research_id == 103)
-							{
-								// imperial time
-								if ($player = $this->playerList->getPlayerByIndex ($player_id))
-								{
-									// persians?
-									$player->imperialTime = ($player->civId == 0x08) ? $time_cnt + 162 * 1000 : $time_cnt + 190 * 1000;
-								}
-							}
-							// else
-							{
-								if ($player = $this->playerList->getPlayerByIndex ($player_id))
-								{
+							switch ($research_id) {
+
+								case 101:
+									$player->feudalTime = $time_cnt + 130000;
+									break;
+								case 102:
+									$player->castleTime = ($player->civId == Civilization::PERSIANS) ?
+										$time_cnt + round(160000 / 1.10) : $time_cnt + 160000;
+									break;
+								case 103:
+									$player->imperialTime = ($player->civId == Civilization::PERSIANS) ?
+										$time_cnt + round(190000 / 1.15) : $time_cnt + 190000;
+									break;
+								default:
 									$player->researches[$research_id] = $time_cnt;
-								}
+									break;
 							}
-							$pos += ($length - 12);
-							break;
-						case 0x77:
-							$pos += 1;
-							$pos += 3;
-
-							// object_id (building_id)
-							$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
-							$unpacked_data = unpack ("V", $packed_data);
-							$object_id = $unpacked_data[1];
-							// unit_type_id
-							$packed_data = substr ($this->bodyStream, $pos, 2); $pos += 2;
-							$unpacked_data = unpack ("v", $packed_data);
-							$unit_type_id = $unpacked_data[1];
-							// unit_num (num_unit)
-							$packed_data = substr ($this->bodyStream, $pos, 2); $pos += 2;
-							$unpacked_data = unpack ("v", $packed_data);
-							$unit_num = $unpacked_data[1];
-
-							if (!isset ($this->units[$unit_type_id]))
-							{
-								$this->units[$unit_type_id] = $unit_num;
-							}
-							else
-							{
-								$this->units[$unit_type_id] += $unit_num;
-							}
-
-							$pos += ($length - 12);
-							break;
-						case 0x66:
-							$pos += 1;
-							$pos += 1;
-							// player_id
-							$packed_data = substr ($this->bodyStream, $pos, 2); $pos += 2;
-							$unpacked_data = unpack ("v", $packed_data);
-							$player_id = $unpacked_data[1];
-							$pos += 8;
-							// building_type_id unit_type_id
-							$packed_data = substr ($this->bodyStream, $pos, 2); $pos += 2;
-							$unpacked_data = unpack ("v", $packed_data);
-							$building_type_id = $unpacked_data[1];
-
-							if (!isset ($this->buildings[$player_id][$building_type_id]))
-							{
-								$this->buildings[$player_id][$building_type_id] = 1;
-							}
-							else
-							{
-								$this->buildings[$player_id][$building_type_id]++;
-							}
-							$pos += ($length - 14);
-							break;
-						case 0x6C: // tributing
-							$pos += 1;
-							// player_id_from
-							$packed_data = substr ($this->bodyStream, $pos, 1); $pos += 1;
-							$unpacked_data = unpack ("C", $packed_data);
-							$player_id_from = $unpacked_data[1];
-							// player_id_to
-							$packed_data = substr ($this->bodyStream, $pos, 1); $pos += 1;
-							$unpacked_data = unpack ("C", $packed_data);
-							$player_id_to = $unpacked_data[1];
-							// resource_id
-							$packed_data = substr ($this->bodyStream, $pos, 1); $pos += 1;
-							$unpacked_data = unpack ("C", $packed_data);
-							$resource_id = $unpacked_data[1];
-							// amount_tributed
-							$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
-							$unpacked_data = unpack ("f", $packed_data);
-							$amount_tributed = floor ($unpacked_data[1]);
-							// market_fee
-							$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
-							$unpacked_data = unpack ("f", $packed_data);
-							$market_fee = round ($unpacked_data[1], 3);
-
-							$this->tributing[$tributing_cnt++] = array (
-																'from'	=>	$player_id_from,
-																'to'	=>	$player_id_to,
-																'rid'	=>	$resource_id,
-																'amount'=>  $amount_tributed,
-																'fee'	=>	$market_fee,
-																'time'	=>	$time_cnt
-							);
-
 							$pos += $length - 12;
 							break;
-							/*
-							case 0x64: // pc trains units
+						case 0x77: // training unit
+							$pos += 8;
+							$packed_data = substr($bodyStream, $pos, 2); $pos += 2;
+							$unpacked_data = unpack("v", $packed_data);
+							$unit_type_id = $unpacked_data[1];
+
+							$packed_data = substr($bodyStream, $pos, 2); $pos += 2;
+							$unpacked_data = unpack("v", $packed_data);
+							$unit_num = $unpacked_data[1];
+
+							if (!isset($this->units[$unit_type_id])) {
+								$this->units[$unit_type_id] = $unit_num;
+							}
+							else {
+								$this->units[$unit_type_id] += $unit_num;
+							}
+							$pos += $length - 12;
 							break;
-							*/
-						case 0x03:
-						case 0x78:
-						case 0x00:
-							$pos += $length;
+						case 0x64: // pc trains unit
+							$pos += 10;
+							$packed_data = substr($bodyStream, $pos, 2); $pos += 2;
+							$unpacked_data = unpack("v", $packed_data);
+							$unit_type_id = $unpacked_data[1];
+							$unit_num = 1; // always for pc?
+							if (!isset($this->units[$unit_type_id])) {
+								$this->units[$unit_type_id] = $unit_num;
+							}
+							else {
+								$this->units[$unit_type_id] += $unit_num;
+							}
+							$pos += $length - 12;
+							break;
+						case 0x66: // building
+							$pos += 2;
+							$packed_data = substr($bodyStream, $pos, 2); $pos += 2;
+							$unpacked_data = unpack("v", $packed_data);
+							$player_id = $unpacked_data[1];
+							$pos += 8;
+							$packed_data = substr($bodyStream, $pos, 2); $pos += 2;
+							$unpacked_data = unpack("v", $packed_data);
+							$building_type_id = $unpacked_data[1];
+
+							if (in_array($building_type_id, RecAnalystConst::$GATE_UNITS)) {
+								$building_type_id = Unit::GATE;
+							}
+							if (!isset($this->buildings[$player_id][$building_type_id])) {
+								$this->buildings[$player_id][$building_type_id] = 1;
+							}
+							else {
+								$this->buildings[$player_id][$building_type_id]++;
+							}
+							$pos += $length - 14;
+							break;
+						case 0x6C: // tributing
+							$pos++;
+							// player_id_from
+							$packed_data = substr($bodyStream, $pos, 1); $pos++;
+							$unpacked_data = unpack("C", $packed_data);
+							$player_id_from = $unpacked_data[1];
+							// player_id_to
+							$packed_data = substr($bodyStream, $pos, 1); $pos++;
+							$unpacked_data = unpack("C", $packed_data);
+							$player_id_to = $unpacked_data[1];
+							// resource_id
+							$packed_data = substr($bodyStream, $pos, 1); $pos++;
+							$unpacked_data = unpack("C", $packed_data);
+							$resource_id = $unpacked_data[1];
+							// amount_tributed
+							$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
+							$unpacked_data = unpack("f", $packed_data);
+							$amount_tributed = $unpacked_data[1];
+							// market_fee
+							$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
+							$unpacked_data = unpack("f", $packed_data);
+							$market_fee = $unpacked_data[1];
+
+							$playerFrom = $this->players->getPlayerByIndex($player_id_from);
+							$playerTo = $this->players->getPlayerByIndex($player_id_to);
+							if ($playerFrom && $playerTo) {
+
+								$tribute = new Tribute();
+								$tribute->time = $time_cnt;
+								$tribute->playerFrom = $playerFrom;
+								$tribute->playerTo = $playerTo;
+								$tribute->resourceId = $resource_id;
+								$tribute->amount = floor($amount_tributed);
+								$tribute->fee = $market_fee;
+								$this->tributes->add($tribute);
+							}
+							$pos += $length - 12;
 							break;
 						default:
 							$pos += $length;
 							break;
 					}
-					$packed_data = substr ($this->bodyStream, $pos, 4); $pos += 4;
-					$unpacked_data = unpack ("V", $packed_data);
-					$cmd_time = $unpacked_data[1];
-					//$pos +=4;
+					$pos += 4;
 					break;
 				default:
 					// shouldn't occure, just to prevent unexpected endless cycling
-					$pos += 1;
+					$pos++;
 					break;
 			}
 		}
-		$this->gameSettings->playTime = $time_cnt;
 
-		// fix: player could click age advance, but game finished before reaching specific age
-		foreach ($this->playerList as $player)
-		{
-			if ($player->feudalTime > $this->gameSettings->playTime)
-			{
-				$player->feudalTime = 0;
-			}
-
-			if ($player->castleTime > $this->gameSettings->playTime)
-			{
-				$player->castleTime = 0;
-			}
-
-			if ($player->imperialTime > $this->gameSettings->playTime)
-			{
-				$player->imperialTime = 0;
-			}
-		}
-
-		if (!empty ($this->ingameChat))
-		{
-			sort ($this->ingameChat, SORT_NUMERIC);
-		}
-
-		if (!empty ($this->buildings))
-		{
-			ksort ($this->buildings);
-		}
+		unset($bodyStream);
+		$this->gameInfo->playTime = $time_cnt;
 
 		return true;
 	}
@@ -1394,243 +1417,433 @@ class RecAnalyst
 	 *
 	 * @return bool true if successfully analyzed, false otherwise
 	 */
-	public function analyze ()
-	{
-		$starttime = microtime (true);
+	public function analyze() {
 
-		if (!$this->extractStreamsFromArchive ())
+		$starttime = microtime(true);
+
+		if (!$this->analyzeheaderStream())
 			return false;
 
-		if (!$this->uncompressHeaderStream ())
+		if (!$this->analyzeBodyStreamF())
 			return false;
 
-		if (!$this->analyzeHeaderStream ())
-		{
-			unset ($this->headerStream);
-			return false;
-		}
+		//TODO: triedit units, buildings v post analyze?
+		$this->postAnalyze();
 
-		unset ($this->headerStream);
-
-		if (!$this->analyzeBodyStream ())
-		{
-			unset ($this->bodyStream);
-			return false;
-		}
-
-		unset ($this->bodyStream);
-
-		$endtime = microtime (true);
-
-		$this->analyzeTime = round (($endtime - $starttime) * 1000);
+		$endtime = microtime(true);
+		$this->_analyzeTime = round(($endtime - $starttime) * 1000);
 
 		return true;
 	}
+
+	protected function readPlayerInfoBlockEx() {
+
+		$exist_object_separator = pack('c*', 0x0B, 0x00, 0x08, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00);
+		$object_end_separator = pack('c*',
+  			0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x80, 0xBF, 0x00, 0x00, 0x80, 0xBF, 0xFF, 0xFF, 0xFF,
+    		0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00);
+		$aok_object_end_separator = pack('c*',
+			0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x80, 0xBF, 0x00,
+			0x00, 0x80, 0xBF, 0x00, 0x00, 0x00, 0x00, 0x00);
+		$player_info_end_separator = pack('c*', 0x00, 0x0B, 0x00, 0x02, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00, 0x00, 0x0B);
+		$objects_mid_separator_gaia = pack('c*', 0x00, 0x0B, 0x00, 0x40, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00);
+
+		$num_player = $this->_queue->pop();
+  		$map_size_x = $this->_queue->pop();
+  		$map_size_y = $this->_queue->pop();
+
+  		for ($i = 0; $i <= $this->players->count(); $i++) { // first is GAIA
+
+			if ($i) {
+
+				// skip GAIA player
+				$player = $this->players->getPlayer($i - 1);
+				// skip cooping player, she/he has no data in Player_info
+				$player_ = $this->players->getPlayerByIndex($player->index);
+
+				if ($player_ && ($player_ !== $player) && $player_->civId) {
+
+					$player->civId = $player_->civId;
+					$player->colorId = $player_->colorId;
+					$player->team = $player_->team;
+					$player->isCooping = true;
+					continue;
+				}
+				if ($this->gameInfo->_gameVersion == GameVersion::AOKTRIAL ||
+					$this->gameInfo->_gameVersion == GameVersion::AOCTRIAL) {
+					$this->headerStream->skip(4);
+				}
+				$this->headerStream->skip($num_player + 43);
+
+				// skip playername
+				$this->headerStream->readWord($player_name_len);
+				$this->headerStream->skip($player_name_len + 6);
+
+				$this->_queue->push($this->headerStream->getPosition());
+				// Civ header
+				$this->headerStream->readFloat($food);
+				$this->headerStream->readFloat($wood);
+				$this->headerStream->readFloat($stone);
+				$this->headerStream->readFloat($gold);
+				// headroom = (house capacity - population)
+				$this->headerStream->readFloat($headroom);
+				$this->headerStream->skip(4);
+				// Starting Age, note: PostImperial Age = Imperial Age here
+				$this->headerStream->readFloat($data6);
+				$this->headerStream->skip(16);
+				$this->headerStream->readFloat($population);
+				$this->headerStream->skip(100);
+				$this->headerStream->readFloat($civilian_pop);
+				$this->headerStream->skip(8);
+				$this->headerStream->readFloat($military_pop);
+				$this->headerStream->skip($this->_isMgx ? 629 : 593);
+				$this->headerStream->readFloat($init_camera_pos_x);
+				$this->headerStream->readFloat($init_camera_pos_y);
+				$this->headerStream->skip($this->_isMgx ? 9 : 5);
+				$this->headerStream->readChar($civilization);
+				if (!$civilization) {
+					$civilizaton++;
+				}
+				$this->headerStream->skip(3);
+				$this->headerStream->readChar($player_color);
+
+				$player->civId = $civilization;
+				$player->colorId = $player_color;
+				$player->initialState->position = array(round($init_camera_pos_x), round($init_camera_pos_y));
+				$player->initialState->food = round($food);
+				$player->initialState->wood = round($wood);
+				$player->initialState->stone = round($stone);
+				$player->initialState->gold = round($gold);
+				$player->initialState->startingAge = round($data6);
+				$player->initialState->houseCapacity = round($headroom) + round($population);
+				$player->initialState->population = round($population);
+				$player->initialState->civilianPop = round($civilian_pop);
+				$player->initialState->militaryPop = round($military_pop);
+				$player->initialState->extraPop = $player->initialState->population -
+					($player->initialState->civilianPop + $player->initialState->militaryPop);
+			}
+			if (!$i) {
+
+				// GAIA
+				if ($this->gameInfo->_gameVersion == GameVersion::AOKTRIAL ||
+					$this->gameInfo->_gameVersion == GameVersion::AOCTRIAL) {
+					$this->headerStream->skip(4);
+				}
+				$this->headerStream->skip($num_player + 70);
+				$this->headerStream->skip($this->_isMgx ? 792 : 756);
+			}
+			$this->headerStream->skip($this->_isMgx ? 41249 : 34277);
+			$this->headerStream->skip($map_size_x * $map_size_y);
+
+			// getting exist_object_pos
+			if ($this->headerStream->find($exist_object_separator) == -1) {
+				return false;
+			}
+			$this->headerStream->skip(strlen($exist_object_separator));
+
+			$breakflag = false;
+			while (true) {
+
+				$this->headerStream->readChar($object_type);
+				$this->headerStream->readChar($owner);
+				$this->headerStream->readWord($unit_id);
+
+				switch ($object_type) {
+
+					case 10:
+						switch ($unit_id) {
+
+							case Unit::GOLDMINE:
+							case Unit::STONEMINE:
+							case Unit::CLIFF1:
+							case Unit::CLIFF2:
+							case Unit::CLIFF3:
+							case Unit::CLIFF4:
+							case Unit::CLIFF5:
+							case Unit::CLIFF6:
+							case Unit::CLIFF7:
+							case Unit::CLIFF8:
+							case Unit::CLIFF9:
+							case Unit::CLIFF10:
+							case Unit::FORAGEBUSH:
+								$this->headerStream->skip(19);
+								$this->headerStream->readFloat($pos_x);
+								$this->headerStream->readFloat($pos_y);
+								$go = new UnitObject();
+								$go->id = $unit_id;
+								$go->position = array(round($pos_x), round($pos_y));
+								$this->gaiaObjects->add($go);
+								$this->headerStream->skip(-27);
+								break;
+						}
+						$this->headerStream->skip(63-4);
+						if (!$this->_isMgx) {
+							$this->headerStream->skip(1);
+						}
+						break;
+					case 20:
+						if ($this->_isMgx) {
+
+							$this->headerStream->skip(59);
+							$this->headerStream->readChar($b);
+							$this->headerStream->skip(-60);
+							$this->headerStream->skip(68-4);
+							if ($b == 2) {
+								$this->headerStream->skip(34);
+							}
+						}
+						else
+							$this->headerStream->skip(103-4);
+						break;
+					case 30:
+						if ($this->_isMgx) {
+
+							$this->headerStream->skip(59);
+							$this->headerStream->readChar($b);
+							$this->headerStream->skip(-60);
+							$this->headerStream->skip(204-4);
+							if ($b == 2) {
+								$this->headerStream->skip(17);
+							}
+						}
+						else {
+
+							$this->headerStream->skip(60);
+							$this->headerStream->readChar($b);
+							$this->headerStream->skip(-61);
+							$this->headerStream->skip(205-4);
+							if ($b == 2) {
+								$this->headerStream->skip(17);
+							}
+						}
+						break;
+					case 60:
+						$this->headerStream->skip(204);
+						$this->headerStream->readChar($b);
+						$this->headerStream->skip(-205);
+						$this->headerStream->skip(233-4);
+						if ($b) {
+							$this->headerStream->skip(67);
+						}
+						break;
+					case 70:
+						switch ($unit_id) {
+
+							case Unit::RELIC:
+							case Unit::DEER:
+							case Unit::BOAR:
+							case Unit::JAVELINA:
+							case Unit::TURKEY:
+							case Unit::SHEEP:
+								$this->headerStream->skip(19);
+								$this->headerStream->readFloat($pos_x);
+								$this->headerStream->readFloat($pos_y);
+								$go = new UnitObject();
+								$go->id = $unit_id;
+								$go->position = array(round($pos_x), round($pos_y));
+								$this->gaiaObjects->add($go);
+								break;
+						}
+						if ($owner && $unit_id != Unit::TURKEY && $unit_id != Unit::SHEEP) {
+
+							// exclude convertable objects
+							$this->headerStream->skip(19);
+							$this->headerStream->readFloat($pos_x);
+							$this->headerStream->readFloat($pos_y);
+							$uo = new UnitObject();
+							$uo->id = $unit_id;
+							$uo->owner = $owner;
+							$uo->position = array(round($pos_x), round($pos_y));
+							$this->playerObjects->add($uo);
+						}
+						if ($this->_isMgx) {
+							$separator_pos = $this->headerStream->find($object_end_separator);
+							$this->headerStream->skip(strlen($object_end_separator));
+						}
+						else {
+							$separator_pos = $this->headerStream->find($aok_object_end_separator);
+							$this->headerStream->skip(strlen($aok_object_end_separator));
+						}
+						if ($separator_pos == -1) {
+							return false;
+						}
+						break;
+					case 80:
+						if ($owner) {
+
+							$this->headerStream->skip(19);
+							$this->headerStream->readFloat($pos_x);
+							$this->headerStream->readFloat($pos_y);
+							$uo = new UnitObject();
+							$uo->id = $unit_id;
+							$uo->owner = $owner;
+							$uo->position = array(round($pos_x), round($pos_y));
+							$this->playerObjects->add($uo);
+						}
+						if ($this->_isMgx) {
+							$separator_pos = $this->headerStream->find($object_end_separator);
+							$this->headerStream->skip(strlen($object_end_separator));
+						}
+						else {
+							$separator_pos = $this->headerStream->find($aok_object_end_separator);
+							$this->headerStream->skip(strlen($aok_object_end_separator));
+						}
+						if ($separator_pos == -1) {
+							return false;
+						}
+						$this->headerStream->skip(126);
+						if ($this->_isMgx) {
+							$this->headerStream->skip(1);
+						}
+						break;
+					case 00:
+						$this->headerStream->skip(-4);
+						$this->headerStream->readBuffer($buff, strlen($player_info_end_separator));
+						$this->headerStream->skip(-strlen($player_info_end_separator));
+						if ($buff == $player_info_end_separator) {
+							$this->headerStream->skip(strlen($player_info_end_separator));
+							$breakflag = true;
+							break;
+						}
+
+						if ($buff[0] == $objects_mid_separator_gaia[0] &&
+							$buff[1] == $objects_mid_separator_gaia[1]) {
+							$this->headerStream->skip(strlen($objects_mid_separator_gaia));
+						}
+						else {
+							return false;
+						}
+						break;
+					default:
+						return false;
+						break;
+				}
+				if ($breakflag) {
+					break;
+				}
+			}
+  		}
+
+  		return true;
+	}
+
 
 	/**
 	 * Generates a map image.
 	 *
 	 * Note: We can generate map only once, after that map data will be discarded to save memory.
 	 *
-	 * @param string $mapFileName map filename
-	 * @return bool true if the map is successfully generated, false otherwise
+	 * @param string $mapFileName Map filename.
+	 * @return bool True if the map is successfully generated, false otherwise.
 	 */
-	public function generateMap ($mapFileName)
-	{
-		$config = RecAnalystConfig::getInstance ();
+	public function generateMap($mapFileName) {
 
-		if (!isset ($this->mapData))
-			return false;
-		/*
-		if ($this->mapWidth > 255 || $this->mapHeight > 255)
-		{
-			unset ($this->mapData, $this->mapWidth, $this->mapHeight);
-			return false;
-		}
-		*/
-		if (!($gd = imagecreatetruecolor ($this->mapWidth, $this->mapHeight)))
-		{
-			unset ($this->mapData, $this->mapWidth, $this->mapHeight);
+		$config = RecAnalystConfig::getInstance();
+
+		if (!isset($this->_mapData)) {
 			return false;
 		}
 
-		for ($x = 0; $x < $this->mapWidth; $x++)
-		{
-			for ($y = 0; $y < $this->mapHeight; $y++)
-			{
-				$terrain_id = $this->mapData[$x][$y]%1000;
-				$elevation = (int)(($this->mapData[$x][$y] - $terrain_id)/1000);
+		if (!($gd = imagecreatetruecolor($this->_mapWidth, $this->_mapHeight))) {
+			//TODO unset($this->_mapData, $this->_mapWidth, $this->_mapHeight);
+			return false;
+		}
+
+		$colors = array();
+		foreach (RecAnalystConst::$TERRAIN_COLORS as $col) {
+			$colors[] = imagecolorallocate($gd, $col[0], $col[1], $col[2]);
+		}
+
+		for ($x = 0; $x < $this->_mapWidth; $x++) {
+			for ($y = 0; $y < $this->_mapHeight; $y++) {
+				$terrain_id = $this->_mapData[$x][$y]%1000;
+				$elevation = (int)(($this->_mapData[$x][$y] - $terrain_id)/1000);
 				$elevation--;
-				switch ($terrain_id)
-				{
-					case 0x00: // grass
-						if (!$config->useElevationColors || $elevation == 0 || $elevation == 1 || $elevation == 7)
-							$c = imagecolorallocate ($gd, 0x33, 0x97, 0x27);
-						else
-							$c = imagecolorallocate ($gd, 0x00, 141, 0x00);
-						break;
-					case 0x01: // water
-						$c = imagecolorallocate ($gd, 0x30, 0x5d, 0xb6);
-						break;
-					case 0x02: // beach
-						$c = imagecolorallocate ($gd, 0xe8, 0xb4, 0x78);
-						break;
-					case 0x03: // dirt3
-						$c = imagecolorallocate ($gd, 0xe4, 0xa2, 0x52);
-						break;
-					case 0x04: // shallow
-						$c = imagecolorallocate ($gd, 0x54, 0x92, 0xb0);
-						break;
-					case 0x05: // leaves
-						$c = imagecolorallocate ($gd, 0x33, 0x97, 0x27);
-						break;
-					case 0x06: // dirt
-						$c = imagecolorallocate ($gd, 0xe4, 0xa2, 0x52);
-						break;
-					case 0x09: // grass3
-						if (!$config->useElevationColors || $elevation == 0 || $elevation == 1 || $elevation == 7)
-							$c = imagecolorallocate ($gd, 0x33, 0x97, 0x27);
-						else
-							$c = imagecolorallocate ($gd, 0x00, 141, 0x00);
-						break;
-					case 0x0A: // forest
-						$c = imagecolorallocate ($gd, 0x15, 0x76, 0x15);
-						break;
-					case 0x0B: // dirt2
-						$c = imagecolorallocate ($gd, 0xe4, 0xa2, 0x52);
-						break;
-					case 0x0C: // grass2
-						$c = imagecolorallocate ($gd, 0x33, 0x97, 0x27);
-						break;
-					case 0x0D: // palm desert
-						$c = imagecolorallocate ($gd, 0x15, 0x76, 0x15);
-						break;
-					case 0x0E: // desert
-						$c = imagecolorallocate ($gd, 0xe8, 0xb4, 0x78);
-						break;
-					case 0x11: // jungle
-						$c = imagecolorallocate ($gd, 0x15, 0x76, 0x15);
-						break;
-					case 0x12: // bamboo
-						$c = imagecolorallocate ($gd, 0x15, 0x76, 0x15);
-						break;
-					case 0x13: // pine forest
-						$c = imagecolorallocate ($gd, 0x15, 0x76, 0x15);
-						break;
-					case 0x14: // oak forest (looks like grass2)
-						$c = imagecolorallocate ($gd, 0x15, 0x76, 0x15);
-						break;
-					case 0x15: // snow forest (snow pine forest)
-						$c = imagecolorallocate ($gd, 0x15, 0x76, 0x15);
-						break;
-					case 0x16: // deep water
-						$c = imagecolorallocate ($gd, 0x00, 0x4a, 0xa1);
-						break;
-					case 0x17: // med water (water, medium)
-						$c = imagecolorallocate ($gd, 0x00, 0x4a, 0xbb);
-						break;
-					case 0x18: // road
-						$c = imagecolorallocate ($gd, 0xe4, 0xa2, 0x52);
-						break;
-					case 0x19: // road2 (road, broken)
-						$c = imagecolorallocate ($gd, 0xe4, 0xa2, 0x52);
-						break;
-					case 0x1B: // dirt2 (same as 11)
-						$c = imagecolorallocate ($gd, 0xe4, 0xa2, 0x52);
-						break;
-					case 0x20: // snow
-						if ($config->useSnowColors)
-							$c = imagecolorallocate ($gd, 0xd8, 0xc8, 0xff);
-						else
-							$c = imagecolorallocate ($gd, 0x33, 0x97, 0x27);
-						break;
-					case 0x21: // dirt snow
-						if ($config->useSnowColors)
-							$c = imagecolorallocate ($gd, 0xd8, 0xc8, 0xff);
-						else
-							$c = imagecolorallocate ($gd, 0xe4, 0xa2, 0x52);
-						break;
-					case 0x22: // grass snow
-						if ($config->useSnowColors)
-							$c = imagecolorallocate ($gd, 0xd8, 0xc8, 0xff);
-						else
-							$c = imagecolorallocate ($gd, 0x33, 0x97, 0x27);
-						break;
-					case 0x23: // ice
-						$c = imagecolorallocate ($gd, 0x98, 0xc0, 0xf0);
-						break;
-					case 0x25: // pobrezie
-						$c = imagecolorallocate ($gd, 0x98, 0xc0, 0xf0);
-						break;
-					case 0x26: // road3 (road, snow)
-						if ($config->useSnowColors)
-							$c = imagecolorallocate ($gd, 0xd8, 0xc8, 0xff);
-						else
-							$c = imagecolorallocate ($gd, 0xe4, 0xa2, 0x52);
-						break;
-					case 0x27: // road4 (road, fungus)
-						if ($config->useSnowColors)
-							$c = imagecolorallocate ($gd, 0xd8, 0xc8, 0xff);
-						else
-							$c = imagecolorallocate ($gd, 0xe4, 0xa2, 0x52);
-						break;
-					default:
-						// fuchsia
-						$c = imagecolorallocate ($gd, 0xff, 0x00, 0xff);
-						break;
+
+				if (isset($colors[$terrain_id])) {
+					imagesetpixel($gd, $x, $y, $colors[$terrain_id]);
 				}
-				imagesetpixel ($gd, $x, $y, $c);
-			}
-		}
-
-		if ($config->showPositions)
-		{
-			foreach ($this->viewPositions as $viewPos)
-			{
-				$c = $viewPos[0]; $x = $viewPos[1]; $y = $viewPos[2];
-
-				list ($r, $g, $b) = array (
-					RecAnalystConst::$COLORS[$c][1].RecAnalystConst::$COLORS[$c][2],
-					RecAnalystConst::$COLORS[$c][3].RecAnalystConst::$COLORS[$c][4],
-					RecAnalystConst::$COLORS[$c][5].RecAnalystConst::$COLORS[$c][6]
-				);
-				$r = hexdec ($r); $g = hexdec ($g); $b = hexdec ($b);
-
-				$color = imagecolorallocate ($gd, $r, $g, $b);
-				imageellipse ($gd, $x, $y, 18, 18, $color);
-				imagefilledellipse ($gd, $x, $y, 8, 8, $color);
-
+				else { // fuchsia
+					imagesetpixel($gd, $x, $y, imagecolorallocate($gd, 0xff, 0x00, 0xff));
+				}
 			}
 		}
 
 		// we do not need them anymore
-		unset ($this->mapData, $this->mapWidth, $this->mapHeight, $this->viewPositions);
+		// TODO array() unset($this->_mapData, $this->_mapWidth, $this->_mapHeight);
+
+		// draw gaia objects
+		foreach ($this->gaiaObjects as $obj) {
+
+			$c = RecAnalystConst::$OBJECT_COLORS[$obj->id];
+			$c = imagecolorallocate($gd, $c[0], $c[1], $c[2]);
+			$x = $obj->position[0];
+			$y = $obj->position[1];
+			imagefilledrectangle($gd, $x-1, $y-1, $x+1, $y+1, $c);
+		}
+
+		// draw positions
+		if ($config->showPositions && !$this->gameSettings->isScenario()
+			&& $this->gameSettings->_mapId != Map::CUSTOM) {
+
+			foreach ($this->players as $player) {
+
+				if ($player->isCooping) {
+					continue;
+				}
+
+				$c = RecAnalystConst::$PLAYER_COLORS[$player->colorId];
+				$c = imagecolorallocate($gd, $c[0], $c[1], $c[2]);
+				$x = $player->initialState->position[0];
+				$y = $player->initialState->position[1];
+
+				imageellipse($gd, $x, $y, 18, 18, $c);
+				imagefilledellipse($gd, $x, $y, 8, 8, $c);
+			}
+		}
+
+		// draw player objects
+		if ($config->showPositions) {
+
+			foreach ($this->playerObjects as $obj) {
+
+				if (!($player = $this->players->getPlayerByIndex($obj->owner))) {
+					continue;
+				}
+				$c = RecAnalystConst::$PLAYER_COLORS[$player->colorId];
+				$c = imagecolorallocate($gd, $c[0], $c[1], $c[2]);
+				$x = $obj->position[0];
+				$y = $obj->position[1];
+				imagefilledrectangle($gd, $x-1, $y-1, $x+1, $y+1, $c);
+			}
+		}
+
+		//TODO unset($this->gaiaObjects, $this->playerObjects);
 
 		$degrees = 45;
 
-		//$tc = imagecolortransparent ($gd);
-		//imagefill ($gd, 0, 0, $tc);
+		//$tc = imagecolortransparent($gd);
+		//imagefill($gd, 0, 0, $tc);
 
-		$gd = imagerotate ($gd, $degrees, -1);
-		//imagealphablending ($gd, true);
-		//imagesavealpha ($gd, true);
+		$gd = imagerotate($gd, $degrees, -1);
+		//imagealphablending($gd, true);
+		//imagesavealpha($gd, true);
 
-		$width = imagesx ($gd);
-		$height = imagesy ($gd);
+		$width = imagesx($gd);
+		$height = imagesy($gd);
 
-		if (!($mapim = imagecreatetruecolor ($config->mapWidth, $config->mapHeight)))
-		{
-			imagedestroy ($gd);
+		if (!($mapim = imagecreatetruecolor($config->mapWidth, $config->mapHeight))) {
+			imagedestroy($gd);
 			return false;
 		}
 
-		imageantialias ($mapim, true);
-		imagealphablending ($mapim, false);
-		imagesavealpha ($mapim, true);
-		imagecopyresampled ($mapim, $gd, 0, 0, 0, 0, $config->mapWidth, $config->mapHeight, $width, $height);
-		//imagecopyresized ($mapim, $gd, 0, 0, 0, 0, $config->mapWidth, $config->mapHeight, $width, $height);
+		imageantialias($mapim, true);
+		imagealphablending($mapim, false);
+		imagesavealpha($mapim, true);
+		imagecopyresampled($mapim, $gd, 0, 0, 0, 0, $config->mapWidth, $config->mapHeight, $width, $height);
+		//imagecopyresized($mapim, $gd, 0, 0, 0, 0, $config->mapWidth, $config->mapHeight, $width, $height);
 
-		return imagepng ($mapim, $config->mapsDir . $mapFileName);
+		return imagepng($mapim, $config->mapsDir . $mapFileName);
 	}
 
 	/**
@@ -1642,19 +1855,17 @@ class RecAnalyst
 	 * @todo implement use of custom fonts
 	 * @todo jpg, gif output support
 	 */
-	public function generateResearches ($researchesFileName)
+	public function generateResearches($researchesFileName)
 	{
-		$config = RecAnalystConfig::getInstance ();
+		$config = RecAnalystConfig::getInstance();
 
-		// I rely on researches to be logically time-sorted, but there are recorded games,
+		// We rely on researches to be logically time-sorted, but there are recorded games,
 		// where it doesn't need to be true, that's why asort() is used
 		// to use a better structure to avoid using asort()?
-		foreach ($this->playerList as $player)
-		{
-			asort ($player->researches, SORT_NUMERIC);
-		}
+		foreach ($this->players as $player)
+			asort($player->researches, SORT_NUMERIC);
 
-		$total_mins = ceil ($this->gameSettings->playTime / 1000 / 60);
+		$total_mins = ceil($this->gameInfo->playTime / 1000 / 60);
 		// original width / height of image representing one research
 		$orw = $orh = 38;
 		// new width / height of image representing one research
@@ -1665,27 +1876,25 @@ class RecAnalyst
 
 		// pole mins bude obsahovat maximum zo sumy vynajdenych objavov jednotliveho hraca v danej minute
 		// array mins will contain max = (sum(t)_p)...
-		$mins = array ();
-		$mins = array_fill (0, $total_mins, 0);
+		$mins = array();
+		$mins = array_fill(0, $total_mins, 0);
 
-		foreach ($this->playerList as $player)
+		foreach ($this->players as $player)
 		{
 			$prev_min = -1;
-			$tmp_mins = array_fill (0, $total_mins, 0);
+			$tmp_mins = array_fill(0, $total_mins, 0);
 			foreach ($player->researches as $research_id => $min)
 			{
-				if (array_key_exists ($research_id, RecAnalystConst::$RESEARCHES))
+				if (array_key_exists($research_id, RecAnalystConst::$RESEARCHES))
 				{
-					$min = floor ($min / 1000 / 60); // in minutes
+					$min = floor($min / 1000 / 60); // in minutes
 					$tmp_mins[$min]++;
 				}
 			}
 			foreach ($mins as $min => &$cnt)
 			{
 				if ($cnt < $tmp_mins[$min])
-				{
 					$cnt = $tmp_mins[$min];
-				}
 			}
 		}
 
@@ -1693,14 +1902,12 @@ class RecAnalyst
 		$max_username_width = 0; // max width for username
 		$font = 3; // font used for usernames
 		$real_cnt = 0;
-		foreach ($this->playerList as $player)
+		foreach ($this->players as $player)
 		{
-			if (empty ($player->researches))
-			{
+			if (empty($player->researches))
 				continue;
-			}
-			if (strlen ($player->name) * imagefontwidth ($font) > $max_username_width)
-			$max_username_width = strlen ($player->name) * imagefontwidth ($font);
+			if (strlen($player->name) * imagefontwidth($font) > $max_username_width)
+			$max_username_width = strlen($player->name) * imagefontwidth($font);
 			$real_cnt++;
 		}
 
@@ -1709,66 +1916,62 @@ class RecAnalyst
 		$max_username_width += $padding;
 		// sirka obrazku bude suma cez min * sirka researchu + padding-left + padding-right
 		// image width will be sum over min * reseach width + padding-left + padding-right
-		$gd_width = array_sum ($mins) * $rw + 2 * $padding + $max_username_width;
+		$gd_width = array_sum($mins) * $rw + 2 * $padding + $max_username_width;
 		$gd_height = ($rw + $spacing) * $real_cnt + 50;
 
-		if (!($gd = imagecreatetruecolor ($gd_width, $gd_height)))
-		{
+		if (!($gd = imagecreatetruecolor($gd_width, $gd_height)))
 			return false;
-		}
 
 		// fill gd with background
 		// TODO: fciu volat podla koncovky
-		if (!($bkgim = imagecreatefromjpeg ($config->researchBackgroundImage)))
+		if (!($bkgim = imagecreatefromjpeg($config->researchBackgroundImage)))
 		{
-			imagedestroy ($gd);
+			imagedestroy($gd);
 			return false;
 		}
 
-		$bkgim_w = imagesx ($bkgim);
-		$bkgim_h = imagesy ($bkgim);
+		$bkgim_w = imagesx($bkgim);
+		$bkgim_h = imagesy($bkgim);
 
 		$dst_x = $dst_y = 0;
 		while ($dst_y < $gd_height)
 		{
 			while ($dst_x < $gd_width)
 			{
-				imagecopy ($gd, $bkgim, $dst_x, $dst_y, 0, 0, $bkgim_w, $bkgim_h);
+				imagecopy($gd, $bkgim, $dst_x, $dst_y, 0, 0, $bkgim_w, $bkgim_h);
 				$dst_x += $bkgim_w;
 			}
 			$dst_x = 0;
 			$dst_y += $bkgim_h;
 		}
-		imagedestroy ($bkgim);
+		imagedestroy($bkgim);
 
 		// fill gd with usernames
 		$idx = 0;
-		$black = imagecolorallocate ($gd, 0x00, 0x00, 0x00);
-		foreach ($this->playerList as $player)
+		$black = imagecolorallocate($gd, 0x00, 0x00, 0x00);
+		foreach ($this->players as $player)
 		{
-			if (empty ($player->researches))
-			{
+			if (empty($player->researches))
 				continue;
-			}
 
-			$dst_y = $idx * ($rh + $spacing) + $padding + round (imagefontheight ($font) / 2); $dst_x = 0 + $padding;
+			$dst_y = $idx * ($rh + $spacing) + $padding + round(imagefontheight($font) / 2); $dst_x = 0 + $padding;
 			$idx++;
 
-			list ($r, $g, $b) = array (
+			list ($r, $g, $b) = array(
 				RecAnalystConst::$COLORS[$player->colorId][1].RecAnalystConst::$COLORS[$player->colorId][2],
 				RecAnalystConst::$COLORS[$player->colorId][3].RecAnalystConst::$COLORS[$player->colorId][4],
 				RecAnalystConst::$COLORS[$player->colorId][5].RecAnalystConst::$COLORS[$player->colorId][6]
 			);
-			$r = hexdec ($r); $g = hexdec ($g); $b = hexdec ($b);
+			$r = hexdec($r); $g = hexdec($g); $b = hexdec($b);
 
-			$color = imagecolorallocate ($gd, $r, $g, $b);
-			imagestring ($gd, $font, $dst_x + 1, $dst_y + 1, $player->name, $black);
-			imagestring ($gd, $font, $dst_x, $dst_y, $player->name, $color);
+			$color = imagecolorallocate($gd, $r, $g, $b);
+			imagestring($gd, $font, $dst_x + 1, $dst_y + 1, $player->name, $black);
+			imagestring($gd, $font, $dst_x, $dst_y, $player->name, $color);
 		}
 
 		// x_offsets bude obsahovat x-ovy offset prveho researchu v danej minute (variabilna dlzka minuty)
 		// x_offsets will contain x-offset of first research in particular minute (variable length of minute)
-		$x_offsets = array ();
+		$x_offsets = array();
 		$sum = 0 + $padding + $max_username_width;
 		foreach ($mins as $min => $cnt)
 		{
@@ -1777,32 +1980,30 @@ class RecAnalyst
 		}
 
 		// fill gd with colors for specific ages
-		list ($r, $g, $b, $a) = $config->researchDAColor;
-		$darkage_color = imagecolorallocatealpha ($gd, $r, $g, $b, $a);
-		list ($r, $g, $b, $a) = $config->researchFAColor;
-		$feudalage_color = imagecolorallocatealpha ($gd, $r, $g, $b, $a);
-		list ($r, $g, $b, $a) = $config->researchCAColor;
-		$castleage_color = imagecolorallocatealpha ($gd, $r, $g, $b, $a);
-		list ($r, $g, $b, $a) = $config->researchIAColor;
-		$imperialage_color = imagecolorallocatealpha ($gd, $r, $g, $b, $a);
+		list($r, $g, $b, $a) = $config->researchDAColor;
+		$darkage_color = imagecolorallocatealpha($gd, $r, $g, $b, $a);
+		list($r, $g, $b, $a) = $config->researchFAColor;
+		$feudalage_color = imagecolorallocatealpha($gd, $r, $g, $b, $a);
+		list($r, $g, $b, $a) = $config->researchCAColor;
+		$castleage_color = imagecolorallocatealpha($gd, $r, $g, $b, $a);
+		list($r, $g, $b, $a) = $config->researchIAColor;
+		$imperialage_color = imagecolorallocatealpha($gd, $r, $g, $b, $a);
 
 		$idx = 0;
-		foreach ($this->playerList as $player)
+		foreach ($this->players as $player)
 		{
 			if (empty ($player->researches))
-			{
 				continue;
-			}
 			$dst_y = $idx * ($rh + $spacing) + $padding; $dst_x = 0; $prev_min = -1; $cnt = 0;
 			$idx++;
 
-			$age_flag = array (0, 0, 0);
-			$age_x = array (0, 0, 0);
+			$age_flag = array(0, 0, 0);
+			$age_x = array(0, 0, 0);
 			foreach ($player->researches as $research_id => $min)
 			{
 				// if (array_key_exists ($research_id, RecAnalystConst::$RESEARCHES))
 				{
-					$min = floor ($min / 1000 / 60); // in minutes
+					$min = floor($min / 1000 / 60); // in minutes
 					if ($prev_min == $min)
 					{
 						$cnt ++;
@@ -1821,7 +2022,7 @@ class RecAnalyst
 						$y1 = $dst_y - 2;
 						$x2 = $dst_x;
 						$y2 = $dst_y + $rh + 2;
-						imagefilledrectangle ($gd, $x1, $y1, $x2, $y2, $darkage_color);
+						imagefilledrectangle($gd, $x1, $y1, $x2, $y2, $darkage_color);
 						$age_x[0] = $x2;
 					}
 					elseif ($research_id == 102)
@@ -1831,7 +2032,7 @@ class RecAnalyst
 						$y1 = $dst_y - 2;
 						$x2 = $dst_x;
 						$y2 = $dst_y + $rh + 2;
-						imagefilledrectangle ($gd, $x1, $y1, $x2, $y2, $feudalage_color);
+						imagefilledrectangle($gd, $x1, $y1, $x2, $y2, $feudalage_color);
 						$age_x[1] = $x2;
 					}
 					elseif ($research_id == 103)
@@ -1841,14 +2042,14 @@ class RecAnalyst
 						$y1 = $dst_y - 2;
 						$x2 = $dst_x;
 						$y2 = $dst_y + $rh + 2;
-						imagefilledrectangle ($gd, $x1, $y1, $x2, $y2, $castleage_color);
+						imagefilledrectangle($gd, $x1, $y1, $x2, $y2, $castleage_color);
 						$age_x[2] = $x2;
 
 						$x1 = $x2;// + $rw;
 						$y1 = $dst_y - 2;
 						$x2 = $gd_width - $padding;
 						$y2 = $dst_y + $rh + 2;
-						imagefilledrectangle ($gd, $x1, $y1, $x2, $y2, $imperialage_color);
+						imagefilledrectangle($gd, $x1, $y1, $x2, $y2, $imperialage_color);
 					}
 				}
 			}
@@ -1858,7 +2059,7 @@ class RecAnalyst
 				$y1 = $dst_y - 2;
 				$x2 = $gd_width - $padding;
 				$y2 = $dst_y + $rh + 2;
-				imagefilledrectangle ($gd, $x1, $y1, $x2, $y2, $darkage_color);
+				imagefilledrectangle($gd, $x1, $y1, $x2, $y2, $darkage_color);
 			}
 			elseif (!$age_flag[1])
 			{
@@ -1866,7 +2067,7 @@ class RecAnalyst
 				$y1 = $dst_y - 2;
 				$x2 = $gd_width - $padding;
 				$y2 = $dst_y + $rh + 2;
-				imagefilledrectangle ($gd, $x1, $y1, $x2, $y2, $feudalage_color);
+				imagefilledrectangle($gd, $x1, $y1, $x2, $y2, $feudalage_color);
 			}
 			elseif (!$age_flag[2])
 			{
@@ -1874,27 +2075,25 @@ class RecAnalyst
 				$y1 = $dst_y - 2;
 				$x2 = $gd_width - $padding;
 				$y2 = $dst_y + $rh + 2;
-				imagefilledrectangle ($gd, $x1, $y1, $x2, $y2, $castleage_color);
+				imagefilledrectangle($gd, $x1, $y1, $x2, $y2, $castleage_color);
 			}
 		}
 
 		// fill gd with researches
 		$idx = 0;
-		foreach ($this->playerList as $player)
+		foreach ($this->players as $player)
 		{
 			// skip cooping player
-			if (empty ($player->researches))
-			{
+			if (empty($player->researches))
 				continue;
-			}
 			$dst_y = $idx * ($rh + $spacing) + $padding; $dst_x = 0; $prev_min = -1; $cnt = 0;
 			$idx++;
 
 			foreach ($player->researches as $research_id => $min)
 			{
-				if (array_key_exists ($research_id, RecAnalystConst::$RESEARCHES))
+				if (array_key_exists($research_id, RecAnalystConst::$RESEARCHES))
 				{
-					$min = floor ($min / 1000 / 60); // in minutes
+					$min = floor($min / 1000 / 60); // in minutes
 					if ($prev_min == $min)
 					{
 						$cnt ++;
@@ -1905,10 +2104,11 @@ class RecAnalyst
 						$cnt = 0;
 						$dst_x = $x_offsets[$min];
 					}
-					if ($im = imagecreatefromgif ($config->resourcesDir . 'researches' . DIRECTORY_SEPARATOR . RecAnalystConst::$RESEARCHES[$research_id][1]))
+					if ($im = imagecreatefromgif($config->resourcesDir . 'researches' . DIRECTORY_SEPARATOR .
+						RecAnalystConst::$RESEARCHES[$research_id][1]) . RecAnalystConst::IMG_EXT)
 					{
-						imagecopyresampled ($gd, $im, $dst_x, $dst_y, 0, 0, $rw, $rh, $orw, $orh);
-						imagedestroy ($im);
+						imagecopyresampled($gd, $im, $dst_x, $dst_y, 0, 0, $rw, $rh, $orw, $orh);
+						imagedestroy($im);
 					}
 					$prev_min = $min;
 				}
@@ -1916,42 +2116,39 @@ class RecAnalyst
 		}
 
 		// fill gd with timeline
-		$white = imagecolorallocate ($gd, 0xff, 0xff, 0xff);
-		$shift = round (floor ($rw / 2) - imagefontheight (1) / 2);
+		$white = imagecolorallocate($gd, 0xff, 0xff, 0xff);
+		$shift = round(floor($rw / 2) - imagefontheight(1) / 2);
 		foreach ($mins as $min => $cnt)
 		{
 			if ($cnt == 0)
-			{
 				continue;
-			}
 			$x = $x_offsets[$min] + $shift;
 			$y = $real_cnt * ($rh + $spacing) + $padding + 30;
-			$label = sprintf ('%d min', $min);
+			$label = sprintf('%d min', $min);
 			$font = 1;
-			imagestringup ($gd, $font, $x + 1, $y + 1, $label, $black);
-			imagestringup ($gd, $font, $x, $y, $label, $white);
+			imagestringup($gd, $font, $x + 1, $y + 1, $label, $black);
+			imagestringup($gd, $font, $x, $y, $label, $white);
 			$x_offsets[$min] = $sum;
 			$sum += $cnt * $rw;
 		}
 
-		return imagepng ($gd, $config->researchesDir . $researchesFileName);
+		return imagepng($gd, $config->researchesDir . $researchesFileName);
 	}
 
 	/**
 	 * Generates image map for research timelines.
-	 *
-	 * @return string generated image map
+	 * @return string Generated image map.
 	 */
 	public function generateResearchesImageMap ()
 	{
 		$config = RecAnalystConfig::getInstance ();
 
-		foreach ($this->playerList as $player)
+		foreach ($this->players as $player)
 		{
 			asort ($player->researches, SORT_NUMERIC);
 		}
 
-		$total_mins = ceil ($this->gameSettings->playTime / 1000 / 60);
+		$total_mins = ceil ($this->gameInfo->playTime / 1000 / 60);
 		// original width / height of image representing one research
 		$orw = $orh = 38;
 		// new width / height of image representing one research
@@ -1961,18 +2158,18 @@ class RecAnalyst
 		$total_mins += 5;
 
 		// pole mins bude obsahovat maximum zo sumy vynajdenych researches jednotliveho hraca v danej minute
-		$mins = array ();
-		$mins = array_fill (0, $total_mins, 0);
+		$mins = array();
+		$mins = array_fill(0, $total_mins, 0);
 
-		foreach ($this->playerList as $player)
+		foreach ($this->players as $player)
 		{
 			$prev_min = -1;
-			$tmp_mins = array_fill (0, $total_mins, 0);
+			$tmp_mins = array_fill(0, $total_mins, 0);
 			foreach ($player->researches as $research_id => $min)
 			{
-				if (array_key_exists ($research_id, RecAnalystConst::$RESEARCHES))
+				if (array_key_exists($research_id, RecAnalystConst::$RESEARCHES))
 				{
-					$min = floor ($min / 1000 / 60); // in minutes
+					$min = floor($min / 1000 / 60); // in minutes
 					$tmp_mins[$min]++;
 				}
 			}
@@ -1989,13 +2186,11 @@ class RecAnalyst
 		$max_username_width = 0; // max width for username
 		$font = 3; // font used for usernames
 		$real_cnt = 0;
-		foreach ($this->playerList as $player)
+		foreach ($this->players as $player)
 		{
 			// skip cooping players
 			if (empty ($player->researches))
-			{
 				continue;
-			}
 			if (strlen ($player->name) * imagefontwidth ($font) > $max_username_width)
 			$max_username_width = strlen ($player->name) * imagefontwidth ($font);
 			$real_cnt++;
@@ -2011,7 +2206,7 @@ class RecAnalyst
 
 		// x_offsets bude obsahovat x-ovy offset prveho researchu v danej minute (variabilna dlzka minuty)
 		// x_offsets will contain x-offset of first research in particular minute (variable length of minute)
-		$x_offsets = array ();
+		$x_offsets = array();
 		$sum = 0 + $padding + $max_username_width;
 		foreach ($mins as $min => $cnt)
 		{
@@ -2019,23 +2214,21 @@ class RecAnalyst
 			$sum += $cnt * $rw;
 		}
 
-		$imageMap = array ();
+		$imageMap = array();
 		$idx = 0;
-		foreach ($this->playerList as $player)
+		foreach ($this->players as $player)
 		{
-			if (empty ($player->researches))
-			{
+			if (empty($player->researches))
 				continue;
-			}
 			$dst_y = $idx * ($rh + $spacing) + $padding; $dst_x = 0; $prev_min = -1; $cnt = 0;
 			$idx++;
 
 			foreach ($player->researches as $research_id => $min)
 			{
-				if (array_key_exists ($research_id, RecAnalystConst::$RESEARCHES))
+				if (array_key_exists($research_id, RecAnalystConst::$RESEARCHES))
 				{
 					$time = $min;
-					$min = floor ($min / 1000 / 60); // in minutes
+					$min = floor($min / 1000 / 60); // in minutes
 
 					if ($prev_min == $min)
 					{
@@ -2047,9 +2240,9 @@ class RecAnalyst
 						$cnt = 0;
 						$dst_x = $x_offsets[$min];
 					}
-					$imageMap[] = array (
-											0 => sprintf ('%d,%d,%d,%d', $dst_x, $dst_y, $dst_x + $rw, $dst_y + $rh),
-											1 => sprintf ('%s %s', RecAnalystConst::$RESEARCHES[$research_id][0], self::gameTimeToString ($time, '(%02d:%02d:%02d)'))
+					$imageMap[] = array(
+											0 => sprintf('%d,%d,%d,%d', $dst_x, $dst_y, $dst_x + $rw, $dst_y + $rh),
+											1 => sprintf('%s %s', RecAnalystConst::$RESEARCHES[$research_id][0], self::gameTimeToString ($time, '(%02d:%02d:%02d)'))
 					);
 					$prev_min = $min;
 				}
@@ -2061,60 +2254,139 @@ class RecAnalyst
 
 	/**
 	 * Builds teams.
-	 *
 	 * @return void
 	 */
-	public function buildTeams ()
-	{
-		if ($this->teams->getCount ())
-			return;
+	public function buildTeams() {
 
-		foreach ($this->playerList as $player)
-		{
-			if ($player->team == 0)
-			{
+		if ($this->teams->count()) {
+			return;
+		}
+
+		foreach ($this->players as $player) {
+
+			if ($player->team == 0) {
+
 				$found = false;
-				foreach ($this->teams as $team)
-				{
-					if ($team->getIndex () != $player->team)
-					{
+				foreach ($this->teams as $team) {
+
+					if ($team->getIndex() != $player->team) {
 						continue;
 					}
-					foreach ($team as $player_)
-					{
-						if ($player_->index == $player->index)
-						{
-							$team->addPlayer ($player);
+
+					foreach ($team as $player_) {
+
+						if ($player_->index == $player->index) {
+
+							$team->addPlayer($player);
 							$found = true;
 							break;
 						}
 					}
-					if ($found)
-					{
+					if ($found) {
 						break;
 					}
 				}
-				if (!$found)
-				{
-					$team = new Team ();
-					$team->addPlayer ($player);
-					$this->teams->addTeam ($team);
+				if (!$found) {
+					$team = new Team();
+					$team->addPlayer($player);
+					$this->teams->addTeam($team);
 				}
 			}
-			else
-			{
-				if ($team = $this->teams->getTeamByIndex ($player->team))
-				{
-					$team->addPlayer ($player);
+			else {
+				if ($team = $this->teams->getTeamByIndex($player->team)) {
+					$team->addPlayer($player);
 				}
-				else
-				{
-					$team = new Team ();
-					$team ->addPlayer ($player);
-					$this->teams->addTeam ($team);
+				else {
+					$team = new Team();
+					$team ->addPlayer($player);
+					$this->teams->addTeam($team);
 				}
 			}
 		}
+	}
+
+	/**
+	 * Performs post analyze actions.
+	 * @return void
+	 */
+	protected function postAnalyze() {
+
+		if (!$this->gameSettings->isScenario()) {
+
+			$lines = explode("\n", $this->gameInfo->objectivesString);
+			// get map
+			if (!$this->_isMgx || $this->gameSettings->_mapId == Map::CUSTOM) {
+
+				if (count($lines) > 2) {
+
+					$this->gameSettings->map = ltrim(strstr($lines[2], ': '), ': ');
+					if (!$this->_isMgx) {
+
+						$map_found = false;
+						//TODO get map from localized map strings
+					}
+				}
+			}
+			//TODO extract comment
+		}
+
+		$this->buildTeams();
+
+		// fix: player could click age advance, but game finished before reaching specific age
+		foreach ($this->players as $player) {
+
+			if ($player->feudalTime > $this->gameInfo->playTime)
+				$player->feudalTime = 0;
+
+			if ($player->castleTime > $this->gameInfo->playTime)
+				$player->castleTime = 0;
+
+			if ($player->imperialTime > $this->gameInfo->playTime)
+				$player->imperialTime = 0;
+		}
+
+		//TODO: otestovat, ci je to OK
+		//units pole
+		if (!empty($this->ingameChat)) {
+			sort($this->ingameChat, SORT_NUMERIC);
+		}
+
+		if (!empty($this->buildings)) {
+			ksort($this->buildings);
+		}
+
+		$this->gaiaObjects->sort(array('RecAnalyst', 'gaiaObjectsCompare'));
+	}
+
+	/**
+	 * Returns analyze time (in ms).
+	 * @return int
+	 */
+	public function getAnalyzeTime() {
+
+		return $this->_analyzeTime;
+	}
+
+	/**
+	 * Comparision callback function for sorting gaia objects.
+	 * @param UnitObject $item1
+	 * @param UnitObject $item2
+	 * @return int
+	 * @static
+	 */
+	public static function gaiaObjectsCompare($item1, $item2) {
+
+		if ($item1->id == Unit::RELIC && $item2->id != Unit::RELIC)
+			return 1;
+		if (in_array($item1->id, RecAnalystConst::$CLIFF_UNITS) &&
+			!in_array($item2->id, RecAnalystConst::$CLIFF_UNITS))
+			return -1;
+		if ($item2->id == Unit::RELIC && $item1->id != Unit::RELIC)
+			return -1;
+		if (in_array($item2->id, RecAnalystConst::$CLIFF_UNITS) &&
+			!in_array($item1->id, RecAnalystConst::$CLIFF_UNITS))
+			return 1;
+		return 0;
 	}
 }
 ?>
