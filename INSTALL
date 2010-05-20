@@ -7,7 +7,7 @@
 2)	Upload all files contained in this archive (retaining the directory structure)
 	to a web accessible directory on your server or hosting account.
 
-3)	You need to edit these configuration constants (you can edit them runtime or
+3)	You may need to edit these configuration constants (you can edit them runtime or
 	in RecAnalystConfig.php file):	
 	$mapsDir			point to directory where you wish to save generated maps
 	$researchesDir		point to to directory where you wish to save generated research timelines
