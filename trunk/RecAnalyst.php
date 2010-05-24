@@ -427,7 +427,7 @@ class RecAnalyst
 				if ($map_id == Map::CUSTOM) {
 					$this->gameSettings->_mapStyle = MAPSTYLE::CUSTOM;
 				}
-				elseif (isset(RecAnalystConst::$REAL_WORLD_MAPS[$map_id])) {
+				elseif (in_array($map_id, RecAnalystConst::$REAL_WORLD_MAPS)) {
 					$this->gameSettings->_mapStyle = MAPSTYLE::REALWORLD;
 				}
 				else {
