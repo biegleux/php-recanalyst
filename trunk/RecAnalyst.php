@@ -2105,7 +2105,7 @@ class RecAnalyst
 						$dst_x = $x_offsets[$min];
 					}
 					if ($im = imagecreatefromgif($config->resourcesDir . 'researches' . DIRECTORY_SEPARATOR .
-						RecAnalystConst::$RESEARCHES[$research_id][1]) . RecAnalystConst::IMG_EXT)
+						RecAnalystConst::$RESEARCHES[$research_id][1] . RecAnalystConst::IMG_EXT))
 					{
 						imagecopyresampled($gd, $im, $dst_x, $dst_y, 0, 0, $rw, $rh, $orw, $orh);
 						imagedestroy($im);
