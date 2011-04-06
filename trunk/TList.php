@@ -105,8 +105,9 @@ class TList implements Iterator {
 	 */
 	public function sort($compare) {
 
-		if ($this->_count > 0)
+		if ($this->_count > 0) {
 			usort($this->_list, $compare);
+		}
 	}
 
 	/**
@@ -127,8 +128,9 @@ class TList implements Iterator {
 	 */
 	public function rewind() {
 
-		if (is_array($this->_list) || is_object($this->_list))
+		if (is_array($this->_list) || is_object($this->_list)) {
 			reset($this->_list);
+		}
 	}
 
 	/**
@@ -139,8 +141,9 @@ class TList implements Iterator {
 	 */
 	public function current() {
 
-   		if (!is_array($this->_list) && !is_object($this->_list))
+   		if (!is_array($this->_list) && !is_object($this->_list)) {
    			return false;
+   		}
 
 		$var = current($this->_list);
 		return $var;

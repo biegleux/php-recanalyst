@@ -54,20 +54,23 @@ class Victory {
 	 */
 	public function getVictoryString() {
 
-		if (!isset(RecAnalystConst::$VICTORY_CONDITIONS[$this->_victoryCondition]))
+		if (!isset(RecAnalystConst::$VICTORY_CONDITIONS[$this->_victoryCondition])) {
 			return '';
+		}
 
 		$result = RecAnalystConst::$VICTORY_CONDITIONS[$this->_victoryCondition];
 
 		switch ($this->_victoryCondition) {
 
 			case VictoryCondition::TIMELIMIT:
-				if ($this->_timeLimit)
+				if ($this->_timeLimit) {
 					return sprintf('%s (%d years)', $result, $this->_timeLimit);
+				}
 				break;
 			case VictoryCondition::SCORELIMIT:
-				if ($this->_scoreLimit)
+				if ($this->_scoreLimit) {
 					return sprintf('%s (%d)', $result, $this->_scoreLimit);
+				}
 				break;
 		}
 

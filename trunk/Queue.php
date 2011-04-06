@@ -19,6 +19,7 @@
  * @subpackage basics
  */
 class Queue {
+
 	/**
 	 * Internal queue representation.
 	 * @var array

@@ -107,8 +107,9 @@ abstract class Stream {
 	 */
 	public function readBuffer(&$buffer, $count) {
 
-		if ($count != 0 && $this->read($buffer, $count) != $count)
-			throw new Exception("Stream read error");
+		if ($count != 0 && $this->read($buffer, $count) != $count) {
+			throw new Exception('Stream read error');
+		}
 	}
 
 	/**
@@ -120,8 +121,9 @@ abstract class Stream {
 	 */
 	public function writeBuffer($buffer) {
 
-		if (($count = strlen($buffer)) != 0 && $this->write($buffer) != $count)
-			throw new Exception("Stream write error");
+		if (($count = strlen($buffer)) != 0 && $this->write($buffer) != $count) {
+			throw new Exception('Stream write error');
+		}
 	}
 
 	/**

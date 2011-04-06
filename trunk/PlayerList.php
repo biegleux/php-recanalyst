@@ -50,8 +50,9 @@ class PlayerList extends TList {
 	public function getPlayerByIndex($index) {
 
 		for ($i = 0; $i < $this->_count; $i++) {
-			if ($this->_list[$i]->index == $index)
+			if ($this->_list[$i]->index == $index) {
 				return $this->_list[$i];
+			}
 		}
 
 		return false;
