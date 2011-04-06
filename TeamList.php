@@ -50,8 +50,9 @@ class TeamList extends TList {
 	public function getTeamByIndex($index) {
 
 		for ($i = 0; $i < $this->_count; $i++) {
-			if ($this->_list[$i]->getIndex() == $index)
+			if ($this->_list[$i]->getIndex() == $index) {
 				return $this->_list[$i];
+			}
 		}
 
 		return false;

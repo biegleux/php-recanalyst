@@ -92,10 +92,12 @@ class GameInfo {
 			$idx++;
 		}
 		$team_ary = array_diff($team_ary, array(0));
-		if (array_sum($team_ary) == $this->_owner->teams->count() && $this->_owner->teams->count() > 2)
+		if (array_sum($team_ary) == $this->_owner->teams->count() && $this->_owner->teams->count() > 2) {
 			return 'FFA';
-		else
+		}
+		else {
 			return implode($team_ary, 'v');
+		}
 	}
 
 	/**

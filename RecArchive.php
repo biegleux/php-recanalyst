@@ -31,6 +31,12 @@ class RecArchive {
 	 */
 	protected $_zip;
 
+	/**
+	 * Determines if the archive is open.
+	 * @var bool
+	 */
+	protected $_open;
+
 	const MGX_EXT = 'mgx';
 	const MGL_EXT = 'mgl';
 
@@ -42,6 +48,7 @@ class RecArchive {
 
 		$this->_stats = array();
 		$this->_zip = new ZipArchive();
+		$this->_open = false;
 	}
 
 	/**
@@ -52,9 +59,11 @@ class RecArchive {
 	 */
 	public function open($filename) {
 
-		if ($this->_zip->open($filename) !== true)
+		if ($this->_zip->open($filename) !== true) {
 			throw new Exception(sprintf('Unable to open zip archive %s.', $filename));
+		}
 
+		$this->_open = true;
 		$this->getDetails();
 	}
 
@@ -64,17 +73,8 @@ class RecArchive {
 	 */
 	public function close() {
 
-		if ($this->isOpen())
+		if ($this->_open)
 			$this->_zip->close();
-	}
-
-	/**
-	 * Determines if the archive is open.
-	 * @return bool
-	 */
-	protected function isOpen() {
-
-		return ($this->_zip->filename != '');
 	}
 
 	/**
@@ -85,8 +85,9 @@ class RecArchive {
 	 */
 	public function getFileHandler($name) {
 
-		if (!$this->isOpen())
+		if (!$this->_open) {
 			throw new Exception('No archive has been opened.');
+		}
 
 		return $this->_zip->getStream($name);
 	}
@@ -99,8 +100,9 @@ class RecArchive {
 	 */
 	public function getFileContents($name) {
 
-		if (!$this->isOpen())
+		if (!$this->_open) {
 			throw new Exception('No archive has been opened.');
+		}
 
 		return $this->_zip->getFromName($name);
 	}
@@ -112,19 +114,22 @@ class RecArchive {
 	 */
 	protected function getDetails() {
 
-		if (!$this->isOpen())
+		if (!$this->_open) {
 			throw new Exception('No archive has been opened.');
+		}
 
 		for ($i = 0; false !== ($stat = $this->_zip->statIndex($i)); $i++) {
 
 			// skip directories and 0-bytes files
-			if (!$stat['size'])
+			if (!$stat['size']) {
 				continue;
+			}
 
 			// skip useless files
 			$ext = strtolower(pathinfo($stat['name'], PATHINFO_EXTENSION));
-			if ($ext != self::MGX_EXT && $ext != self::MGL_EXT)
+			if ($ext != self::MGX_EXT && $ext != self::MGL_EXT) {
 				continue;
+			}
 
 			$this->_stats[] = $stat;
 		}

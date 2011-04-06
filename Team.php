@@ -44,8 +44,9 @@ class Team extends PlayerList {
 
 		parent::addPlayer($player);
 
-		if ($this->index == -1)
+		if ($this->index == -1) {
 			$this->index = $player->team;
+		}
 	}
 
 	/**

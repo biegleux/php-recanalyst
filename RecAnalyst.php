@@ -3,7 +3,7 @@
  *                       AOC Recorded Games Analyzer
  *                       ---------------------------
  *    begin            : Monday, December 3, 2007
- *    copyright        : (c) 2007-2010 biegleux
+ *    copyright        : (c) 2007-2011 biegleux
  *    email            : biegleux(at)gmail(dot)com
  *
  *    recAnalyst v2.0.0 2010/05/20
@@ -46,8 +46,8 @@
  *
  * @package recAnalyst
  */
-class RecAnalyst
-{
+class RecAnalyst {
+
 	/**
 	 * Internal stream containing header information.
 	 * @var string
@@ -300,7 +300,7 @@ class RecAnalyst
 				RecAnalystException::HEADERLEN_READERROR);
 		}
 
-		$unpacked_data = unpack("V", $packed_data);
+		$unpacked_data = unpack('V', $packed_data);
 		$header_len = $unpacked_data[1];
 
 		if (!$header_len) {
@@ -997,10 +997,8 @@ class RecAnalyst
 									$player->imperialTime = ($player->civId == Civilization::PERSIANS) ?
 										$time_cnt + round(190000 / 1.15) : $time_cnt + 190000;
 									break;
-								default:
-									$player->researches[$research_id] = $time_cnt;
-									break;
 							}
+							$player->researches[$research_id] = $time_cnt;
 							$this->bodyStream->skip($length - 12);
 							break;
 						case 0x77: // training unit
@@ -1108,7 +1106,7 @@ class RecAnalyst
 			}
 			else {
 				$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
-				$unpacked_data = unpack("l", $packed_data);
+				$unpacked_data = unpack('l', $packed_data);
 				$od_type = $unpacked_data[1];
 			}
 
@@ -1119,7 +1117,7 @@ class RecAnalyst
 				case 0x04:
 				case 0x03:
 					$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
-					$unpacked_data = unpack("l", $packed_data);
+					$unpacked_data = unpack('l', $packed_data);
 					$command = $unpacked_data[1];
 					if ($command == 0x01F4) {
 
@@ -1128,7 +1126,7 @@ class RecAnalyst
 
 							$pos += 28;
 							$packed_data = substr($bodyStream, $pos, 1); $pos++;
-							$unpacked_data = unpack("C", $packed_data);
+							$unpacked_data = unpack('C', $packed_data);
 							$ver = $unpacked_data[1];
 							switch ($ver) {
 
@@ -1201,7 +1199,7 @@ class RecAnalyst
 						}
 
 						$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
-						$unpacked_data = unpack("l", $packed_data);
+						$unpacked_data = unpack('l', $packed_data);
 						$chat_len = $unpacked_data[1];
 						$chat = substr($bodyStream, $pos, $chat_len); $pos += $chat_len;
 
@@ -1227,10 +1225,10 @@ class RecAnalyst
 				// Sync
 				case 0x02:
 					$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
-					$unpacked_data = unpack("l", $packed_data);
+					$unpacked_data = unpack('l', $packed_data);
 					$time_cnt += $unpacked_data[1]; // time_cnt is in miliseconds
 					$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
-					$unpacked_data = unpack("l", $packed_data);
+					$unpacked_data = unpack('l', $packed_data);
 					$unknown = $unpacked_data[1];
 					if ($unknown == 0) {
 						$pos += 28;
@@ -1240,11 +1238,11 @@ class RecAnalyst
 				// Command
 				case 0x01:
 					$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
-					$unpacked_data = unpack("l", $packed_data);
+					$unpacked_data = unpack('l', $packed_data);
 					$length = $unpacked_data[1];
 
 					$packed_data = substr($bodyStream, $pos, 1); $pos++;
-					$unpacked_data = unpack("C", $packed_data);
+					$unpacked_data = unpack('C', $packed_data);
 					$command = $unpacked_data[1];
 					$pos--;
 
@@ -1253,7 +1251,7 @@ class RecAnalyst
 						case 0x0B: // player resign
 							$pos++;
 							$packed_data = substr($bodyStream, $pos, 1); $pos++;
-							$unpacked_data = unpack("C", $packed_data);
+							$unpacked_data = unpack('C', $packed_data);
 							$player_index = $unpacked_data[1];
 
 							if (($player = $this->players->getPlayerByIndex($player_index))
@@ -1272,11 +1270,11 @@ class RecAnalyst
 						case 0x65: // researches
 							$pos += 8;
 							$packed_data = substr($bodyStream, $pos, 2); $pos += 2;
-							$unpacked_data = unpack("v", $packed_data);
+							$unpacked_data = unpack('v', $packed_data);
 							$player_id = $unpacked_data[1];
 
 							$packed_data = substr($bodyStream, $pos, 2); $pos += 2;
-							$unpacked_data = unpack("v", $packed_data);
+							$unpacked_data = unpack('v', $packed_data);
 							$research_id = $unpacked_data[1];
 
 							if (!($player = $this->players->getPlayerByIndex($player_id))) {
@@ -1296,20 +1294,18 @@ class RecAnalyst
 									$player->imperialTime = ($player->civId == Civilization::PERSIANS) ?
 										$time_cnt + round(190000 / 1.15) : $time_cnt + 190000;
 									break;
-								default:
-									$player->researches[$research_id] = $time_cnt;
-									break;
 							}
+							$player->researches[$research_id] = $time_cnt;
 							$pos += $length - 12;
 							break;
 						case 0x77: // training unit
 							$pos += 8;
 							$packed_data = substr($bodyStream, $pos, 2); $pos += 2;
-							$unpacked_data = unpack("v", $packed_data);
+							$unpacked_data = unpack('v', $packed_data);
 							$unit_type_id = $unpacked_data[1];
 
 							$packed_data = substr($bodyStream, $pos, 2); $pos += 2;
-							$unpacked_data = unpack("v", $packed_data);
+							$unpacked_data = unpack('v', $packed_data);
 							$unit_num = $unpacked_data[1];
 
 							if (!isset($this->units[$unit_type_id])) {
@@ -1323,7 +1319,7 @@ class RecAnalyst
 						case 0x64: // pc trains unit
 							$pos += 10;
 							$packed_data = substr($bodyStream, $pos, 2); $pos += 2;
-							$unpacked_data = unpack("v", $packed_data);
+							$unpacked_data = unpack('v', $packed_data);
 							$unit_type_id = $unpacked_data[1];
 							$unit_num = 1; // always for pc?
 							if (!isset($this->units[$unit_type_id])) {
@@ -1337,11 +1333,11 @@ class RecAnalyst
 						case 0x66: // building
 							$pos += 2;
 							$packed_data = substr($bodyStream, $pos, 2); $pos += 2;
-							$unpacked_data = unpack("v", $packed_data);
+							$unpacked_data = unpack('v', $packed_data);
 							$player_id = $unpacked_data[1];
 							$pos += 8;
 							$packed_data = substr($bodyStream, $pos, 2); $pos += 2;
-							$unpacked_data = unpack("v", $packed_data);
+							$unpacked_data = unpack('v', $packed_data);
 							$building_type_id = $unpacked_data[1];
 
 							if (in_array($building_type_id, RecAnalystConst::$GATE_UNITS)) {
@@ -1359,23 +1355,23 @@ class RecAnalyst
 							$pos++;
 							// player_id_from
 							$packed_data = substr($bodyStream, $pos, 1); $pos++;
-							$unpacked_data = unpack("C", $packed_data);
+							$unpacked_data = unpack('C', $packed_data);
 							$player_id_from = $unpacked_data[1];
 							// player_id_to
 							$packed_data = substr($bodyStream, $pos, 1); $pos++;
-							$unpacked_data = unpack("C", $packed_data);
+							$unpacked_data = unpack('C', $packed_data);
 							$player_id_to = $unpacked_data[1];
 							// resource_id
 							$packed_data = substr($bodyStream, $pos, 1); $pos++;
-							$unpacked_data = unpack("C", $packed_data);
+							$unpacked_data = unpack('C', $packed_data);
 							$resource_id = $unpacked_data[1];
 							// amount_tributed
 							$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
-							$unpacked_data = unpack("f", $packed_data);
+							$unpacked_data = unpack('f', $packed_data);
 							$amount_tributed = $unpacked_data[1];
 							// market_fee
 							$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
-							$unpacked_data = unpack("f", $packed_data);
+							$unpacked_data = unpack('f', $packed_data);
 							$market_fee = $unpacked_data[1];
 
 							$playerFrom = $this->players->getPlayerByIndex($player_id_from);
@@ -1855,15 +1851,16 @@ class RecAnalyst
 	 * @todo implement use of custom fonts
 	 * @todo jpg, gif output support
 	 */
-	public function generateResearches($researchesFileName)
-	{
+	public function generateResearches($researchesFileName) {
+
 		$config = RecAnalystConfig::getInstance();
 
 		// We rely on researches to be logically time-sorted, but there are recorded games,
 		// where it doesn't need to be true, that's why asort() is used
 		// to use a better structure to avoid using asort()?
-		foreach ($this->players as $player)
+		foreach ($this->players as $player) {
 			asort($player->researches, SORT_NUMERIC);
+		}
 
 		$total_mins = ceil($this->gameInfo->playTime / 1000 / 60);
 		// original width / height of image representing one research
@@ -1879,20 +1876,20 @@ class RecAnalyst
 		$mins = array();
 		$mins = array_fill(0, $total_mins, 0);
 
-		foreach ($this->players as $player)
-		{
+		foreach ($this->players as $player) {
+
 			$prev_min = -1;
 			$tmp_mins = array_fill(0, $total_mins, 0);
-			foreach ($player->researches as $research_id => $min)
-			{
-				if (array_key_exists($research_id, RecAnalystConst::$RESEARCHES))
-				{
+			foreach ($player->researches as $research_id => $min) {
+
+				if (array_key_exists($research_id, RecAnalystConst::$RESEARCHES)) {
+
 					$min = floor($min / 1000 / 60); // in minutes
 					$tmp_mins[$min]++;
 				}
 			}
-			foreach ($mins as $min => &$cnt)
-			{
+			foreach ($mins as $min => &$cnt) {
+
 				if ($cnt < $tmp_mins[$min])
 					$cnt = $tmp_mins[$min];
 			}
@@ -1902,12 +1899,14 @@ class RecAnalyst
 		$max_username_width = 0; // max width for username
 		$font = 3; // font used for usernames
 		$real_cnt = 0;
-		foreach ($this->players as $player)
-		{
-			if (empty($player->researches))
+		foreach ($this->players as $player) {
+
+			if (empty($player->researches)) {
 				continue;
-			if (strlen($player->name) * imagefontwidth($font) > $max_username_width)
-			$max_username_width = strlen($player->name) * imagefontwidth($font);
+			}
+			if (strlen($player->name) * imagefontwidth($font) > $max_username_width) {
+				$max_username_width = strlen($player->name) * imagefontwidth($font);
+			}
 			$real_cnt++;
 		}
 
@@ -1919,13 +1918,13 @@ class RecAnalyst
 		$gd_width = array_sum($mins) * $rw + 2 * $padding + $max_username_width;
 		$gd_height = ($rw + $spacing) * $real_cnt + 50;
 
-		if (!($gd = imagecreatetruecolor($gd_width, $gd_height)))
+		if (!($gd = imagecreatetruecolor($gd_width, $gd_height))) {
 			return false;
+		}
 
 		// fill gd with background
 		// TODO: fciu volat podla koncovky
-		if (!($bkgim = imagecreatefromjpeg($config->researchBackgroundImage)))
-		{
+		if (!($bkgim = imagecreatefromjpeg($config->researchBackgroundImage))) {
 			imagedestroy($gd);
 			return false;
 		}
@@ -1934,10 +1933,8 @@ class RecAnalyst
 		$bkgim_h = imagesy($bkgim);
 
 		$dst_x = $dst_y = 0;
-		while ($dst_y < $gd_height)
-		{
-			while ($dst_x < $gd_width)
-			{
+		while ($dst_y < $gd_height) {
+			while ($dst_x < $gd_width) {
 				imagecopy($gd, $bkgim, $dst_x, $dst_y, 0, 0, $bkgim_w, $bkgim_h);
 				$dst_x += $bkgim_w;
 			}
@@ -1949,10 +1946,10 @@ class RecAnalyst
 		// fill gd with usernames
 		$idx = 0;
 		$black = imagecolorallocate($gd, 0x00, 0x00, 0x00);
-		foreach ($this->players as $player)
-		{
-			if (empty($player->researches))
+		foreach ($this->players as $player) {
+			if (empty($player->researches)) {
 				continue;
+			}
 
 			$dst_y = $idx * ($rh + $spacing) + $padding + round(imagefontheight($font) / 2); $dst_x = 0 + $padding;
 			$idx++;
@@ -1973,8 +1970,7 @@ class RecAnalyst
 		// x_offsets will contain x-offset of first research in particular minute (variable length of minute)
 		$x_offsets = array();
 		$sum = 0 + $padding + $max_username_width;
-		foreach ($mins as $min => $cnt)
-		{
+		foreach ($mins as $min => $cnt) {
 			$x_offsets[$min] = $sum;
 			$sum += $cnt * $rw;
 		}
@@ -1990,33 +1986,29 @@ class RecAnalyst
 		$imperialage_color = imagecolorallocatealpha($gd, $r, $g, $b, $a);
 
 		$idx = 0;
-		foreach ($this->players as $player)
-		{
-			if (empty ($player->researches))
+		foreach ($this->players as $player) {
+			if (empty ($player->researches)) {
 				continue;
+			}
 			$dst_y = $idx * ($rh + $spacing) + $padding; $dst_x = 0; $prev_min = -1; $cnt = 0;
 			$idx++;
 
 			$age_flag = array(0, 0, 0);
 			$age_x = array(0, 0, 0);
-			foreach ($player->researches as $research_id => $min)
-			{
+			foreach ($player->researches as $research_id => $min) {
 				// if (array_key_exists ($research_id, RecAnalystConst::$RESEARCHES))
 				{
 					$min = floor($min / 1000 / 60); // in minutes
-					if ($prev_min == $min)
-					{
+					if ($prev_min == $min) {
 						$cnt ++;
 						$dst_x = $x_offsets[$min] + ($cnt * $rw);
 					}
-					else
-					{
+					else {
 						$cnt = 0;
 						$dst_x = $x_offsets[$min];
 					}
 					$prev_min = $min;
-					if ($research_id == 101)
-					{
+					if ($research_id == 101) { // feudal age
 						$age_flag[0] = 1;
 						$x1 = 0 + $padding + $max_username_width;
 						$y1 = $dst_y - 2;
@@ -2025,8 +2017,7 @@ class RecAnalyst
 						imagefilledrectangle($gd, $x1, $y1, $x2, $y2, $darkage_color);
 						$age_x[0] = $x2;
 					}
-					elseif ($research_id == 102)
-					{
+					elseif ($research_id == 102) { // castle age
 						$age_flag[1] = 1;
 						$x1 = $x2;// + $rw;
 						$y1 = $dst_y - 2;
@@ -2035,8 +2026,7 @@ class RecAnalyst
 						imagefilledrectangle($gd, $x1, $y1, $x2, $y2, $feudalage_color);
 						$age_x[1] = $x2;
 					}
-					elseif ($research_id == 103)
-					{
+					elseif ($research_id == 103) { // imperial age
 						$age_flag[2] = 1;
 						$x1 = $x2;// + $rw;
 						$y1 = $dst_y - 2;
@@ -2053,24 +2043,21 @@ class RecAnalyst
 					}
 				}
 			}
-			if (!$age_flag[0])
-			{
+			if (!$age_flag[0]) {
 				$x1 = 0 + $padding + $max_username_width;
 				$y1 = $dst_y - 2;
 				$x2 = $gd_width - $padding;
 				$y2 = $dst_y + $rh + 2;
 				imagefilledrectangle($gd, $x1, $y1, $x2, $y2, $darkage_color);
 			}
-			elseif (!$age_flag[1])
-			{
+			elseif (!$age_flag[1]) {
 				$x1 = $age_x[0];
 				$y1 = $dst_y - 2;
 				$x2 = $gd_width - $padding;
 				$y2 = $dst_y + $rh + 2;
 				imagefilledrectangle($gd, $x1, $y1, $x2, $y2, $feudalage_color);
 			}
-			elseif (!$age_flag[2])
-			{
+			elseif (!$age_flag[2]) {
 				$x1 = $age_x[1];
 				$y1 = $dst_y - 2;
 				$x2 = $gd_width - $padding;
@@ -2081,32 +2068,27 @@ class RecAnalyst
 
 		// fill gd with researches
 		$idx = 0;
-		foreach ($this->players as $player)
-		{
+		foreach ($this->players as $player) {
 			// skip cooping player
-			if (empty($player->researches))
+			if (empty($player->researches)) {
 				continue;
+			}
 			$dst_y = $idx * ($rh + $spacing) + $padding; $dst_x = 0; $prev_min = -1; $cnt = 0;
 			$idx++;
 
-			foreach ($player->researches as $research_id => $min)
-			{
-				if (array_key_exists($research_id, RecAnalystConst::$RESEARCHES))
-				{
+			foreach ($player->researches as $research_id => $min) {
+				if (array_key_exists($research_id, RecAnalystConst::$RESEARCHES)) {
 					$min = floor($min / 1000 / 60); // in minutes
-					if ($prev_min == $min)
-					{
+					if ($prev_min == $min) {
 						$cnt ++;
 						$dst_x = $x_offsets[$min] + ($cnt * $rw);
 					}
-					else
-					{
+					else {
 						$cnt = 0;
 						$dst_x = $x_offsets[$min];
 					}
 					if ($im = imagecreatefromgif($config->resourcesDir . 'researches' . DIRECTORY_SEPARATOR .
-						RecAnalystConst::$RESEARCHES[$research_id][1] . RecAnalystConst::IMG_EXT))
-					{
+						RecAnalystConst::$RESEARCHES[$research_id][1] . RecAnalystConst::IMG_EXT)) {
 						imagecopyresampled($gd, $im, $dst_x, $dst_y, 0, 0, $rw, $rh, $orw, $orh);
 						imagedestroy($im);
 					}
@@ -2118,10 +2100,10 @@ class RecAnalyst
 		// fill gd with timeline
 		$white = imagecolorallocate($gd, 0xff, 0xff, 0xff);
 		$shift = round(floor($rw / 2) - imagefontheight(1) / 2);
-		foreach ($mins as $min => $cnt)
-		{
-			if ($cnt == 0)
+		foreach ($mins as $min => $cnt) {
+			if ($cnt == 0) {
 				continue;
+			}
 			$x = $x_offsets[$min] + $shift;
 			$y = $real_cnt * ($rh + $spacing) + $padding + 30;
 			$label = sprintf('%d min', $min);
@@ -2139,12 +2121,11 @@ class RecAnalyst
 	 * Generates image map for research timelines.
 	 * @return string Generated image map.
 	 */
-	public function generateResearchesImageMap ()
-	{
+	public function generateResearchesImageMap () {
+
 		$config = RecAnalystConfig::getInstance ();
 
-		foreach ($this->players as $player)
-		{
+		foreach ($this->players as $player) {
 			asort ($player->researches, SORT_NUMERIC);
 		}
 
@@ -2161,22 +2142,17 @@ class RecAnalyst
 		$mins = array();
 		$mins = array_fill(0, $total_mins, 0);
 
-		foreach ($this->players as $player)
-		{
+		foreach ($this->players as $player) {
 			$prev_min = -1;
 			$tmp_mins = array_fill(0, $total_mins, 0);
-			foreach ($player->researches as $research_id => $min)
-			{
-				if (array_key_exists($research_id, RecAnalystConst::$RESEARCHES))
-				{
+			foreach ($player->researches as $research_id => $min) {
+				if (array_key_exists($research_id, RecAnalystConst::$RESEARCHES)) {
 					$min = floor($min / 1000 / 60); // in minutes
 					$tmp_mins[$min]++;
 				}
 			}
-			foreach ($mins as $min => &$cnt)
-			{
-				if ($cnt < $tmp_mins[$min])
-				{
+			foreach ($mins as $min => &$cnt) {
+				if ($cnt < $tmp_mins[$min]) {
 					$cnt = $tmp_mins[$min];
 				}
 			}
@@ -2186,13 +2162,14 @@ class RecAnalyst
 		$max_username_width = 0; // max width for username
 		$font = 3; // font used for usernames
 		$real_cnt = 0;
-		foreach ($this->players as $player)
-		{
+		foreach ($this->players as $player) {
 			// skip cooping players
-			if (empty ($player->researches))
+			if (empty ($player->researches)) {
 				continue;
-			if (strlen ($player->name) * imagefontwidth ($font) > $max_username_width)
-			$max_username_width = strlen ($player->name) * imagefontwidth ($font);
+			}
+			if (strlen ($player->name) * imagefontwidth ($font) > $max_username_width) {
+				$max_username_width = strlen ($player->name) * imagefontwidth ($font);
+			}
 			$real_cnt++;
 		}
 
@@ -2208,41 +2185,36 @@ class RecAnalyst
 		// x_offsets will contain x-offset of first research in particular minute (variable length of minute)
 		$x_offsets = array();
 		$sum = 0 + $padding + $max_username_width;
-		foreach ($mins as $min => $cnt)
-		{
+		foreach ($mins as $min => $cnt) {
 			$x_offsets[$min] = $sum;
 			$sum += $cnt * $rw;
 		}
 
 		$imageMap = array();
 		$idx = 0;
-		foreach ($this->players as $player)
-		{
-			if (empty($player->researches))
+		foreach ($this->players as $player) {
+			if (empty($player->researches)) {
 				continue;
+			}
 			$dst_y = $idx * ($rh + $spacing) + $padding; $dst_x = 0; $prev_min = -1; $cnt = 0;
 			$idx++;
 
-			foreach ($player->researches as $research_id => $min)
-			{
-				if (array_key_exists($research_id, RecAnalystConst::$RESEARCHES))
-				{
+			foreach ($player->researches as $research_id => $min) {
+				if (array_key_exists($research_id, RecAnalystConst::$RESEARCHES)) {
 					$time = $min;
 					$min = floor($min / 1000 / 60); // in minutes
 
-					if ($prev_min == $min)
-					{
+					if ($prev_min == $min) {
 						$cnt ++;
 						$dst_x = $x_offsets[$min] + ($cnt * $rw);
 					}
-					else
-					{
+					else {
 						$cnt = 0;
 						$dst_x = $x_offsets[$min];
 					}
 					$imageMap[] = array(
-											0 => sprintf('%d,%d,%d,%d', $dst_x, $dst_y, $dst_x + $rw, $dst_y + $rh),
-											1 => sprintf('%s %s', RecAnalystConst::$RESEARCHES[$research_id][0], self::gameTimeToString ($time, '(%02d:%02d:%02d)'))
+						0 => sprintf('%d,%d,%d,%d', $dst_x, $dst_y, $dst_x + $rw, $dst_y + $rh),
+						1 => sprintf('%s %s', RecAnalystConst::$RESEARCHES[$research_id][0], self::gameTimeToString ($time, '(%02d:%02d:%02d)'))
 					);
 					$prev_min = $min;
 				}
@@ -2335,14 +2307,15 @@ class RecAnalyst
 		// fix: player could click age advance, but game finished before reaching specific age
 		foreach ($this->players as $player) {
 
-			if ($player->feudalTime > $this->gameInfo->playTime)
+			if ($player->feudalTime > $this->gameInfo->playTime) {
 				$player->feudalTime = 0;
-
-			if ($player->castleTime > $this->gameInfo->playTime)
+			}
+			if ($player->castleTime > $this->gameInfo->playTime) {
 				$player->castleTime = 0;
-
-			if ($player->imperialTime > $this->gameInfo->playTime)
+			}
+			if ($player->imperialTime > $this->gameInfo->playTime) {
 				$player->imperialTime = 0;
+			}
 		}
 
 		//TODO: otestovat, ci je to OK
@@ -2376,16 +2349,20 @@ class RecAnalyst
 	 */
 	public static function gaiaObjectsCompare($item1, $item2) {
 
-		if ($item1->id == Unit::RELIC && $item2->id != Unit::RELIC)
+		if ($item1->id == Unit::RELIC && $item2->id != Unit::RELIC) {
 			return 1;
+		}
 		if (in_array($item1->id, RecAnalystConst::$CLIFF_UNITS) &&
-			!in_array($item2->id, RecAnalystConst::$CLIFF_UNITS))
+			!in_array($item2->id, RecAnalystConst::$CLIFF_UNITS)) {
 			return -1;
-		if ($item2->id == Unit::RELIC && $item1->id != Unit::RELIC)
+		}
+		if ($item2->id == Unit::RELIC && $item1->id != Unit::RELIC) {
 			return -1;
+		}
 		if (in_array($item2->id, RecAnalystConst::$CLIFF_UNITS) &&
-			!in_array($item1->id, RecAnalystConst::$CLIFF_UNITS))
+			!in_array($item1->id, RecAnalystConst::$CLIFF_UNITS)) {
 			return 1;
+		}
 		return 0;
 	}
 }

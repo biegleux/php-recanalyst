@@ -67,8 +67,9 @@ class MemoryStream extends Stream {
 
 		if ($count > 0 && ($len = $this->_size - $this->_position) > 0) {
 
-			if ($len > $count)
+			if ($len > $count) {
 				$len = $count;
+			}
 
 			$buffer = substr($this->_dataString, $this->_position, $len);
 			$this->_position += $len;
@@ -84,10 +85,12 @@ class MemoryStream extends Stream {
 	 */
 	public function write($buffer) {
 
-		if ($this->_position == $this->_size)
+		if ($this->_position == $this->_size) {
 			$this->_dataString .= $buffer;
-		else
+		}
+		else {
 			$this->_dataString = substr_replace($this->_dataString, $buffer, $this->_position, 0);
+		}
 
 		$this->_size += ($len = strlen($buffer));
 		$this->_position += $len;
@@ -112,10 +115,12 @@ class MemoryStream extends Stream {
 				$this->_position = $this->_size - $offset;
 				break;
 		}
-		if ($this->_position > $this->_size)
+		if ($this->_position > $this->_size) {
 			$this->_position = $this->_size;
-		elseif ($this->_position < 0)
+		}
+		elseif ($this->_position < 0) {
 			$this->_position = 0;
+		}
 
 		return $this->_position;
 	}
@@ -160,10 +165,12 @@ class MemoryStream extends Stream {
 				$this->readUInt($len);
 				break;
 		}
-		if ($len)
+		if ($len) {
 			$this->readBuffer($buffer, $len);
-		else
+		}
+		else {
 			$buffer = '';
+		}
 	}
 
 	/**
@@ -188,7 +195,7 @@ class MemoryStream extends Stream {
 
 		// !note: signed long (always 32 bit, machine byte order)
 		$this->readBuffer($bytes, 4);
-		$unpacked_data = unpack("l", $bytes);
+		$unpacked_data = unpack('l', $bytes);
 		$buffer = $unpacked_data[1];
 	}
 
@@ -225,7 +232,7 @@ class MemoryStream extends Stream {
 	public function readFloat(&$buffer) {
 
 		$this->readBuffer($bytes, 4);
-		$unpacked_data = unpack("f", $bytes);
+		$unpacked_data = unpack('f', $bytes);
 		$buffer = $unpacked_data[1];
 	}
 
@@ -249,10 +256,12 @@ class MemoryStream extends Stream {
 	public function find($needle) {
 
 		$pos = strpos($this->_dataString, $needle, $this->_position);
-		if ($pos === false)
+		if ($pos === false) {
 			$pos = -1;
-		else
+		}
+		else {
 			$this->_position = $pos;
+		}
 
 		return $pos;
 	}
@@ -265,10 +274,12 @@ class MemoryStream extends Stream {
 	public function rfind($needle, $offset = 0) {
 
 		$pos = strrpos($this->_dataString, $needle, ($offset < 0) ? $offset : $this->_position);
-		if ($pos == false)
+		if ($pos == false) {
 			$pos = -1;
-		else
+		}
+		else {
 			$this->_position = $pos;
+		}
 
 		return $pos;
 	}
