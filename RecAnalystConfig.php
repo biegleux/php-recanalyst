@@ -5,7 +5,7 @@
  * @package recAnalyst
  * @version $Id$
  * @author biegleux <biegleux[at]gmail[dot]com>
- * @copyright copyright (c) 2008-2010 biegleux
+ * @copyright copyright (c) 2008-2012 biegleux
  * @license http://www.opensource.org/licenses/gpl-3.0.html GNU General Public License version 3 (GPLv3)
  * @link http://recanalyst.sourceforge.net/
  * @filesource
@@ -149,7 +149,6 @@ class RecAnalystConfig {
 	public static function getInstance() {
 
 		if (!isset(self::$instance)) {
-
 			self::$instance = new self();
 		}
 

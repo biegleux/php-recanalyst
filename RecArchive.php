@@ -5,7 +5,7 @@
  * @package recAnalyst
  * @version $Id$
  * @author biegleux <biegleux[at]gmail[dot]com>
- * @copyright copyright (c) 2008-2010 biegleux
+ * @copyright copyright (c) 2008-2012 biegleux
  * @license http://www.opensource.org/licenses/gpl-3.0.html GNU General Public License version 3 (GPLv3)
  * @link http://recanalyst.sourceforge.net/
  * @filesource
@@ -73,8 +73,9 @@ class RecArchive {
 	 */
 	public function close() {
 
-		if ($this->_open)
+		if ($this->_open) {
 			$this->_zip->close();
+		}
 	}
 
 	/**
