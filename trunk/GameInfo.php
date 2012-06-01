@@ -5,7 +5,7 @@
  * @package recAnalyst
  * @version $Id$
  * @author biegleux <biegleux[at]gmail[dot]com>
- * @copyright copyright (c) 2008-2010 biegleux
+ * @copyright copyright (c) 2008-2012 biegleux
  * @license http://www.opensource.org/licenses/gpl-3.0.html GNU General Public License version 3 (GPLv3)
  * @link http://recanalyst.sourceforge.net/
  * @filesource
@@ -83,7 +83,6 @@ class GameInfo {
 		$idx = 0;
 		$team_ary = array(0, 0, 0, 0, 0, 0, 0, 0);
 		foreach ($this->_owner->teams as $team) {
-
 			foreach ($team as $player) {
 				if (!$player->isCooping) {
 					$team_ary[$idx]++;
@@ -94,8 +93,7 @@ class GameInfo {
 		$team_ary = array_diff($team_ary, array(0));
 		if (array_sum($team_ary) == $this->_owner->teams->count() && $this->_owner->teams->count() > 2) {
 			return 'FFA';
-		}
-		else {
+		} else {
 			return implode($team_ary, 'v');
 		}
 	}
@@ -123,9 +121,7 @@ class GameInfo {
 
 		$owner = null;
 		foreach ($this->_owner->players as $player) {
-
 			if ($this->_owner->player->owner) {
-
 				$owner = $this->_owner->player;
 				break;
 			}
@@ -136,7 +132,6 @@ class GameInfo {
 
 		$names = array();
 		foreach ($this->_owner->players as $player) {
-
 			if ($player === $owner) {
 				continue;
 			}

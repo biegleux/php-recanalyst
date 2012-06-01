@@ -5,7 +5,7 @@
  * @package recAnalyst
  * @version $Id$
  * @author biegleux <biegleux[at]gmail[dot]com>
- * @copyright copyright (c) 2008-2010 biegleux
+ * @copyright copyright (c) 2008-2012 biegleux
  * @license http://www.opensource.org/licenses/gpl-3.0.html GNU General Public License version 3 (GPLv3)
  * @link http://recanalyst.sourceforge.net/
  * @filesource
@@ -87,8 +87,7 @@ class MemoryStream extends Stream {
 
 		if ($this->_position == $this->_size) {
 			$this->_dataString .= $buffer;
-		}
-		else {
+		} else {
 			$this->_dataString = substr_replace($this->_dataString, $buffer, $this->_position, 0);
 		}
 
@@ -117,8 +116,7 @@ class MemoryStream extends Stream {
 		}
 		if ($this->_position > $this->_size) {
 			$this->_position = $this->_size;
-		}
-		elseif ($this->_position < 0) {
+		} elseif ($this->_position < 0) {
 			$this->_position = 0;
 		}
 
@@ -167,8 +165,7 @@ class MemoryStream extends Stream {
 		}
 		if ($len) {
 			$this->readBuffer($buffer, $len);
-		}
-		else {
+		} else {
 			$buffer = '';
 		}
 	}
@@ -258,8 +255,7 @@ class MemoryStream extends Stream {
 		$pos = strpos($this->_dataString, $needle, $this->_position);
 		if ($pos === false) {
 			$pos = -1;
-		}
-		else {
+		} else {
 			$this->_position = $pos;
 		}
 
@@ -276,8 +272,7 @@ class MemoryStream extends Stream {
 		$pos = strrpos($this->_dataString, $needle, ($offset < 0) ? $offset : $this->_position);
 		if ($pos == false) {
 			$pos = -1;
-		}
-		else {
+		} else {
 			$this->_position = $pos;
 		}
 

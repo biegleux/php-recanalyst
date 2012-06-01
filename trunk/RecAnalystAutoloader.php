@@ -5,7 +5,7 @@
  * @package recAnalyst
  * @version $Id$
  * @author biegleux <biegleux[at]gmail[dot]com>
- * @copyright copyright (c) 2008-2010 biegleux
+ * @copyright copyright (c) 2008-2012 biegleux
  * @license http://www.opensource.org/licenses/gpl-3.0.html GNU General Public License version 3 (GPLv3)
  * @link http://recanalyst.sourceforge.net/
  * @filesource
@@ -45,7 +45,6 @@ class RecAnalystAutoloader {
 	static public function getInstance() {
 
 		if (!isset(self::$instance)) {
-
 			self::$instance = new self();
 		}
 
@@ -59,14 +58,12 @@ class RecAnalystAutoloader {
 	static public function register() {
 
 		if (self::$registered) {
-
 			return;
 		}
 
 		ini_set('unserialize_callback_func', 'spl_autoload_call');
 
 		if (false === spl_autoload_register(array(self::getInstance(), 'autoload'))) {
-
 			throw new Exception(sprintf('Unable to register %s::autoload as an autoloading method.',
 			get_class(self::getInstance())));
 		}
@@ -81,7 +78,6 @@ class RecAnalystAutoloader {
 	static public function unregister() {
 
 		if (true === spl_autoload_unregister(array(self::getInstance(), 'autoload'))) {
-
 			self::$registered = false;
 		}
 	}
@@ -98,8 +94,7 @@ class RecAnalystAutoloader {
 			foreach ($class as $c) {
 				$this->classes[$c] = $filename;
 			}
-		}
-		else {
+		} else {
 			$this->classes[$class] = $filename;
 		}
 	}
@@ -113,16 +108,13 @@ class RecAnalystAutoloader {
 	public function autoload($class) {
 
 		if (class_exists($class, false) || interface_exists($class, false)) {
-
 			return true;
 		}
 
 		$file = $this->baseDir . (isset($this->classes[$class]) ? $this->classes[$class] : $class) . '.php';
 
 		if (file_exists($file)) {
-
 			require($file);
-
 			return true;
 		}
 

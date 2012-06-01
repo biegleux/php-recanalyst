@@ -3,10 +3,10 @@
  *                       AOC Recorded Games Analyzer
  *                       ---------------------------
  *    begin            : Monday, December 3, 2007
- *    copyright        : (c) 2007-2011 biegleux
+ *    copyright        : (c) 2007-2012 biegleux
  *    email            : biegleux(at)gmail(dot)com
  *
- *    recAnalyst v2.0.0 2010/05/20
+ *    recAnalyst v2.1.0 2012/06/21
  *
  *    This program is free software: you can redistribute it and/or modify
  *    it under the terms of the GNU General Public License as published by
@@ -42,7 +42,7 @@
 /**
  * Class RecAnalyst.
  *
- * RecAnalyst implements analyzing of recorded games.
+ * RecAnalyst implements analyzing of recorded games for both AOK and AOC.
  *
  * @package recAnalyst
  */
@@ -104,12 +104,14 @@ class RecAnalyst {
 
 	/**
 	 * An array containing pre-game chat.
+	 * Pre-game chat is also stored in @see RecAnalyst::$pregameChatMessages as a list.
 	 * @var array
 	 */
 	public $pregameChat;
 
 	/**
 	 * An array containing in-game chat.
+	 * In-game chat is also stored in @see RecAnalyst::$ingameChatMessages as a list.
 	 * @var array
 	 */
 	public $ingameChat;
@@ -145,6 +147,12 @@ class RecAnalyst {
 	protected $_isMgx;
 
 	/**
+	 * True, if the file being analyzed is mgl. False otherwise.
+	 * @var bool
+	 */
+	protected $_isMgl;
+
+	/**
 	 * List of GAIA objects.
 	 * @var TList
 	 */
@@ -158,12 +166,14 @@ class RecAnalyst {
 
 	/**
 	 * Pre-game chat messages.
+	 * Pre-game chat is also stored in @see RecAnalyst::$pregameChat as an array.
 	 * @var TList
 	 */
 	public $pregameChatMessages;
 
 	/**
 	 * In-game chat messages.
+	 * In-game chat is also stored in @see RecAnalyst::$ingameChat as an array.
 	 * @var TList
 	 */
 	public $ingameChatMessages;
@@ -176,30 +186,12 @@ class RecAnalyst {
 
 	/**
 	 * Class constructor.
+	 * @see RecAnalyst::reset().
 	 * @return void
 	 */
 	public function __construct() {
 
-		$this->headerStream = new MemoryStream();
-		$this->bodyStream = new MemoryStream();
-		$this->gameSettings = new GameSettings($this);
-		$this->gameInfo = new GameInfo($this);
-		$this->players = new PlayerList();
-		$this->teams = new TeamList();
-		$this->pregameChat = array();
-		$this->ingameChat = array();
-		$this->units = array();
-		$this->buildings = array();
-		$this->_mapData = array();
-		$this->_mapWidth = $this->_mapHeight = 0;
-		$this->_analyzeTime = 0;
-		$this->_queue = new Queue();
-		$this->_isMgx = false;
-		$this->gaiaObjects = new TList();
-		$this->playerObjects = new TList();
-		$this->pregameChatMessages = new TList();
-		$this->ingameChatMessages = new TList();
-		$this->tributes = new TList();
+		$this->reset();
 	}
 
 	/**
@@ -223,6 +215,7 @@ class RecAnalyst {
 		$this->_analyzeTime = 0;
 		$this->_queue = new Queue();
 		$this->_isMgx = false;
+		$this->_isMgl = false;
 		$this->gaiaObjects = new TList();
 		$this->playerObjects = new TList();
 		$this->pregameChatMessages = new TList();
@@ -278,10 +271,12 @@ class RecAnalyst {
 		}
 
 		if ($ext == 'mgl') {
+			$this->_isMgl = true;
 			$this->_isMgx = false;
 		}
 		elseif ($ext == 'mgx') {
 			$this->_isMgx = true;
+			$this->_isMgl = false;
 		}
 		else {
 			throw new RecAnalystException('Wrong file extension, file format is not supported',
@@ -308,7 +303,7 @@ class RecAnalyst {
 				RecAnalystException::EMPTY_HEADER);
 		}
 
-		/* skip next_pos */
+		/* skip next_pos if AOC (doesn't exist in AOK) */
 		if ($this->_isMgx) {
 			fread($fp, 4);
 		}
@@ -358,7 +353,6 @@ class RecAnalyst {
 		$this->headerStream->readBuffer($version, 8);
 		$version = rtrim($version); // throw null-termination character
 		switch ($version) {
-
 			case RecAnalystConst::VER_94:
 				$this->gameInfo->_gameVersion = GameVersion::AOC;
 				break;
@@ -374,14 +368,15 @@ class RecAnalyst {
 		}
 
 		switch ($this->gameInfo->_gameVersion) {
-
 			case GameVersion::AOK:
 			case GameVersion::AOKTRIAL:
+				$this->_isMgl = true;
 				$this->_isMgx = false;
 				break;
 			case GameVersion::AOC:
 			case GameVersion::AOCTRIAL:
 				$this->_isMgx = true;
+				$this->_isMgl = false;
 				break;
 		}
 
@@ -414,15 +409,14 @@ class RecAnalyst {
 		/* skip negative[2] */
 		$this->headerStream->setPosition($game_setting_pos + 8);
 		if ($this->_isMgx) {
+			// doesn't exist in AOK
 			$this->headerStream->readInt($map_id);
 		}
 		$this->headerStream->readInt($difficulty);
 		$this->headerStream->readBool($lock_teams);
 
 		if ($this->_isMgx) {
-
 			if (isset(RecAnalystConst::$MAPS[$map_id])) {
-
 				$this->gameSettings->map = RecAnalystConst::$MAPS[$map_id][0];
 				if ($map_id == Map::CUSTOM) {
 					$this->gameSettings->_mapStyle = MAPSTYLE::CUSTOM;
@@ -443,7 +437,6 @@ class RecAnalyst {
 
 		/* getting Player_info data */
 		for ($i = 0; $i < 9; $i++) {
-
 			$this->headerStream->readInt($player_data_index);
 			$this->headerStream->readInt($human);
 			$this->headerStream->readString($playername);
@@ -454,7 +447,6 @@ class RecAnalyst {
 			}
 
 			if ($i) {
-
 				$player = new Player();
 				$player->name  = $playername;
 				$player->index = $player_data_index;
@@ -463,15 +455,13 @@ class RecAnalyst {
 			}
 		}
 
-		/* getting game type for aok */
-		if (!$this->_isMgx) {
-
+		/* getting game type for AOK */
+		if ($this->_isMgl) {
 			$this->headerStream->setPosition($trigger_info_pos - strlen($constant2));
 			$this->headerStream->skip(-6);
 			// unknown25
 			$this->headerStream->readInt($unknown25);
 			switch ($unknown25) {
-
 				case 1:
 					$this->gameSettings->_gameType = GameType::DEATHMATCH;
 					break;
@@ -505,18 +495,16 @@ class RecAnalyst {
 		// always zero in mgl? or not a really trigger_info here for aok
 		$this->headerStream->readInt($num_trigger);
 		if ($num_trigger) {
-
 			/* skip Trigger_info data */
 			for ($i = 0; $i < $num_trigger; $i++) {
-
 				$this->headerStream->skip(18);
 				$this->headerStream->readInt($desc_len);
 				$this->headerStream->skip($desc_len);
 				$this->headerStream->readInt($name_len);
 				$this->headerStream->skip($name_len);
 				$this->headerStream->readInt($num_effect);
-				for ($j = 0; $j < $num_effect; $j++) {
 
+				for ($j = 0; $j < $num_effect; $j++) {
 					$this->headerStream->skip(24);
 					$this->headerStream->readInt($num_selected_object);
 					if ($num_selected_object == -1) {
@@ -559,32 +547,29 @@ class RecAnalyst {
 		$this->headerStream->readInt($map_size);
 		$this->headerStream->readInt($pop_limit);
 		if ($this->_isMgx) {
-
 			$this->headerStream->readChar($game_type);
 			$this->headerStream->readChar($lock_diplomacy);
 		}
-
 		$this->gameSettings->_revealMap = $reveal_map;
 		$this->gameSettings->_mapSize = $map_size;
 		$this->gameSettings->popLimit = $pop_limit;
 		if ($this->_isMgx) {
-
 			$this->gameSettings->lockDiplomacy = ($lock_diplomacy == 0x01);
 			$this->gameSettings->_gameType = $game_type;
 		}
 
 	    // here comes pre-game chat (mgl doesn't keep this information)
 	    if ($this->_isMgx) {
-
 	    	$this->headerStream->readInt($num_chat);
 	    	for ($i = 0; $i < $num_chat; $i++) {
-
 	    		$this->headerStream->readString($chat);
 	    		// 0-length chat exists
 	    		if ($chat == '') {
 	    			continue;
 	    		}
 
+				// pre-game chat messages are stored as @#%dPlayerName: Message, where %d is a digit from 1 to 8 indicating player's index,
+				// "PlayerName" is a name of the player, "Message" is a chat message itself, messages usually ends with #0, but not always
 				if ($chat[0] == '@' && $chat[1] == '#' && $chat[2] >= '1' && $chat[2] <= '8') {
 
 					$chat = rtrim($chat);  // throw null-termination character
@@ -603,18 +588,15 @@ class RecAnalyst {
 		$this->headerStream->setPosition(0x0C);
 		$this->headerStream->readBool($include_ai);
 		if ($include_ai) {
-
 			$this->headerStream->skip(2);
 			$this->headerStream->readWord($num_string);
 			$this->headerStream->skip(4);
 			for ($i = 0; $i < $num_string; $i++) {
-
 				$this->headerStream->readInt($string_length);
 				$this->headerStream->skip($string_length);
 			}
 			$this->headerStream->skip(6);
 			for ($i = 0; $i < 8; $i++) {
-
 				$this->headerStream->skip(10);
 				$this->headerStream->readWord($num_rule);
 				$this->headerStream->skip(4);
@@ -636,17 +618,14 @@ class RecAnalyst {
 		$this->gameSettings->_gameSpeed = $game_speed;
 
 		if ($player = $this->players->getPlayer($rec_player_ref)) {
-
 			$player->owner = true;
-			//$this->gameSettings->playingPlayers = $num_player;
 		}
-		//$this->gameSettings->inGameCoop = ($num_player < $this->players->count());
 
 		$num_player++;
 
 		/* getting map */
 		$this->headerStream->skip(62);
-		if (!$this->_isMgx) {
+		if ($this->_isMgl) {
 			$this->headerStream->skip(-2);
 		}
 		$this->headerStream->readInt($map_size_x);
@@ -657,7 +636,6 @@ class RecAnalyst {
 		$this->headerStream->readInt($num_unknown_data);
 		/* unknown data */
 		for ($i = 0; $i < $num_unknown_data; $i++) {
-
 			$this->headerStream->skip(1275 + $map_size_x * $map_size_y);
 			$this->headerStream->readInt($num_float);
 			$this->headerStream->skip(($num_float << 2) + 4);
@@ -666,19 +644,16 @@ class RecAnalyst {
 
 		/* map data */
 		for ($y = 0; $y < $map_size_y; $y++) {
-
 			for ($x = 0; $x < $map_size_x; $x++) {
-
 				$this->headerStream->readChar($terrain_id);
 				$this->headerStream->readChar($elevation);
-				$this->_mapData[$x][$y] = $terrain_id + 1000 * ($elevation + 1); // hack
+				$this->_mapData[$x][$y] = $terrain_id + 1000 * ($elevation + 1); // hack to save memory
 			}
 		}
 
 		$this->headerStream->readInt($num_data);
 		$this->headerStream->skip(4 + ($num_data << 2));
 		for ($i = 0; $i < $num_data; $i++) {
-
 			$this->headerStream->readInt($num_couples);
 			$this->headerStream->skip($num_couples << 2);
 		}
@@ -689,22 +664,18 @@ class RecAnalyst {
 		$this->headerStream->skip(27 * $num_unknown_data2 + 4);
 
 		$this->_queue->push($num_player);
-		$this->_queue->push($map_size_x);
-		$this->_queue->push($map_size_y);
 		$this->_queue->push($this->headerStream->getPosition());
 
 		/* getting Player_info */
 		if (!$this->readPlayerInfoBlockEx()) {
 
+			// something gone wrong with extended analysis, use this older one
 			$this->gaiaObjects->clear();
 			$this->playerObjects->clear();
 
 			$this->_queue->pop();
-			$this->_queue->pop();
-			$this->_queue->pop();
-
-			$this->headerStream->getPosition($this->_queue->pop());
-			/* first is GAIA, skip some useless bytes */
+			$this->headerStream->setPosition($this->_queue->pop());
+			// first is GAIA, skip some useless bytes
 			if ($this->gameInfo->_gameVersion == GameVersion::AOKTRIAL || $this->gameInfo->_gameVersion == GameVersion::AOCTRIAL) {
 				$this->headerStream->skip(4);
 			}
@@ -726,7 +697,7 @@ class RecAnalyst {
 					continue;
 				}
 
-				if ($this->_queue->atLeast(1)) {
+				if ($this->_queue->atLeast(1)) {  // we have already found a position in the extended analysis, saves us from re-searching it again
 					$this->headerStream->setPosition($this->_queue->pop());
 				}
 				else {
@@ -784,18 +755,16 @@ class RecAnalyst {
 					($player->initialState->civilianPop + $player->initialState->militaryPop);
 
 				$this->headerStream->skip($this->_isMgx ? 41249 : 34277);
-				$this->headerStream->skip(map_size_x * map_size_y);
+				$this->headerStream->skip($map_size_x * $map_size_y);
 			}
 		}
 
 		/* getting objectives or instructions */
 		if ($scenario_header_pos > 0) {
-
 			$this->headerStream->setPosition($scenario_header_pos + 4433);
 			/* original scenario file name */
 			$this->headerStream->readString($original_sc_filename, 2);
 			if ($original_sc_filename != '') {
-
 				$this->gameInfo->scFileName = $original_sc_filename;
 				if (!$this->_Mgx) {
 					$this->gameSettings->gameType = GameType::SCENARIO;  // this way we detect scenarios in mgl, is there any other way?
@@ -818,6 +787,8 @@ class RecAnalyst {
 	 * Analyzes body stream.
 	 * This method is slower and is not used, just for demonstration.
 	 * @see RecAnalyst::analyzeBodyStreamF()
+	 * Both methods have same functionality, but analyzeBodyStream() uses MemoryStream() methods to read bodyStream,
+	 * and analyzeBodyStreamF() uses raw string manipulation
 	 * @return bool True if the stream was successfully analyzed, false otherwise.
 	 */
 	protected function analyzeBodyStream() {
@@ -839,20 +810,16 @@ class RecAnalyst {
 			}
 			// ope_data types: 4(Game_start or Chat), 2(Sync), or 1(Command)
 			switch ($od_type) {
-
 				// Game_start or Chat command
 				case 0x04:
 				case 0x03:
 					$this->bodyStream->readInt($command);
 					if ($command == 0x01F4) {
-
 						// Game_start
-						if (!$this->_isMgx) {
-
+						if ($this->_isMgl) {
 							$this->bodyStream->skip(28);
 							$this->bodyStream->readChar($ver);
 							switch ($ver) {
-
 								case 0:
 									if ($this->gameInfo->_gameVersion != GameVersion::AOKTRIAL) {
 										$this->gameInfo->_gameVersion = GameVersion::AOK20;
@@ -865,9 +832,7 @@ class RecAnalyst {
 							$this->bodyStream->skip(3);
 						}
 						else {
-
 							switch ($od_type) {
-
 								case 0x03:
 									if ($this->gameInfo->_gameVersion != GameVersion::AOCTRIAL) {
 										$this->gameInfo->_gameVersion = GameVersion::AOC10;
@@ -881,26 +846,23 @@ class RecAnalyst {
 						}
 					}
 					elseif ($command == -1) {
-
 						// Chat
 						for ($i = 0; $i < $this->players->count(); $i++) {
-
 							if (!($player = $this->players->getPlayer($i))) {
 								continue;
 							}
 
 							if ($player->feudalTime != 0 && $player->feudalTime < $time_cnt && $age_flag[$i] < 1) {
-
 								$chatmessage = new ChatMessage();
 								$chatmessage->time = $player->feudalTime;
 								$chatmessage->msg = sprintf('%s advanced to Feudal Age', $player->name);
 								$this->ingameChatMessages->add($chatmessage);
 
+								// see reading pre-game messages, 0 indicates game's message
 								$this->ingameChat[] = sprintf('%d@#0%s advanced to Feudal Age', $player->feudalTime, $player->name);
 								$age_flag[$i] = 1;
 							}
 							if ($player->castleTime != 0 && $player->castleTime < $time_cnt && $age_flag[$i] < 2) {
-
 								$chatmessage = new ChatMessage();
 								$chatmessage->time = $player->castleTime;
 								$chatmessage->msg = sprintf('%s advanced to Castle Age', $player->name);
@@ -910,7 +872,6 @@ class RecAnalyst {
 								$age_flag[$i] = 2;
 							}
 							if ($player->imperialTime != 0 && $player->imperialTime < $time_cnt && $age_flag[$i] < 3) {
-
 								$chatmessage = new ChatMessage();
 								$chatmessage->time =$player->imperialTime;
 								$chatmessage->msg = sprintf('%s advanced to Imperial Age', $player->name);
@@ -922,14 +883,13 @@ class RecAnalyst {
 						}
 
 						$this->bodyStream->readString($chat);
+						// see reading pre-game messages
 						if ($chat[0] == '@' && $chat[1] == '#' && $chat[2] >= '1' && $chat[2] <= '8') {
-
 							$chat = rtrim($chat); // throw null-termination character
 							if (substr($chat, 3, 2) == '--' && substr($chat, -2) == '--') {
-
+								// skip messages like "--Warning: You are being under attack... --"
 							}
 							else {
-
 								$chatmessage = new ChatMessage();
 								$chatmessage->time = $time_cnt;
 								$chatmessage->player = $this->players->getPlayerByIndex($chat[2]);
@@ -957,14 +917,10 @@ class RecAnalyst {
 					$this->bodyStream->readChar($command);
 					$this->bodyStream->skip(-1);
 					switch ($command) {
-
 						case 0x0B: // player resign
 							$this->bodyStream->skip(1);
 							$this->bodyStream->readChar($player_index);
-							//$this->bodyStream->skip(1);
-							if (($player = $this->players->getPlayerByIndex($player_index))
-								&& $player->resignTime == 0) {
-
+							if (($player = $this->players->getPlayerByIndex($player_index)) && $player->resignTime == 0) {
 								$player->resignTime = $time_cnt;
 								$chatmessage = new ChatMessage();
 								$chatmessage->time = $time_cnt;
@@ -985,15 +941,16 @@ class RecAnalyst {
 								break;
 							}
 							switch ($research_id) {
-
 								case 101:
-									$player->feudalTime = $time_cnt + 130000;
+									$player->feudalTime = $time_cnt + 130000; // + research time
 									break;
 								case 102:
+									// persians have faster research time
 									$player->castleTime = ($player->civId == Civilization::PERSIANS) ?
 										$time_cnt + round(160000 / 1.10) : $time_cnt + 160000;
 									break;
 								case 103:
+									// persians have faster research time
 									$player->imperialTime = ($player->civId == Civilization::PERSIANS) ?
 										$time_cnt + round(190000 / 1.15) : $time_cnt + 190000;
 									break;
@@ -1054,8 +1011,8 @@ class RecAnalyst {
 
 							$playerFrom = $this->players->getPlayerFromIndex($player_id_from);
 							$playerTo = $this->players->getPlayerFromIndex($player_id_to);
-							if ($playerFrom && $playerTo) {
 
+							if ($playerFrom && $playerTo) {
 								$tribute = new Tribute();
 								$tribute->time = $time_cnt;
 								$tribute->playerFrom = $playerFrom;
@@ -1112,7 +1069,6 @@ class RecAnalyst {
 
 			// ope_data types: 4(Game_start or Chat), 2(Sync), or 1(Command)
 			switch ($od_type) {
-
 				// Game_start or Chat command
 				case 0x04:
 				case 0x03:
@@ -1120,16 +1076,13 @@ class RecAnalyst {
 					$unpacked_data = unpack('l', $packed_data);
 					$command = $unpacked_data[1];
 					if ($command == 0x01F4) {
-
 						// Game_start
-						if (!$this->_isMgx) {
-
+						if ($this->_isMgl) {
 							$pos += 28;
 							$packed_data = substr($bodyStream, $pos, 1); $pos++;
 							$unpacked_data = unpack('C', $packed_data);
 							$ver = $unpacked_data[1];
 							switch ($ver) {
-
 								case 0:
 									if ($this->gameInfo->_gameVersion != GameVersion::AOKTRIAL) {
 										$this->gameInfo->_gameVersion = GameVersion::AOK20;
@@ -1142,9 +1095,7 @@ class RecAnalyst {
 							$pos += 3;
 						}
 						else {
-
 							switch ($od_type) {
-
 								case 0x03:
 									if ($this->gameInfo->_gameVersion != GameVersion::AOCTRIAL) {
 										$this->gameInfo->_gameVersion = GameVersion::AOC10;
@@ -1158,16 +1109,13 @@ class RecAnalyst {
 						}
 					}
 					elseif ($command == -1) {
-
 						// Chat
 						for ($i = 0; $i < $this->players->count(); $i++) {
-
 							if (!($player = $this->players->getPlayer($i))) {
 								continue;
 							}
 
 							if ($player->feudalTime != 0 && $player->feudalTime < $time_cnt && $age_flag[$i] < 1) {
-
 								$chatmessage = new ChatMessage();
 								$chatmessage->time = $player->feudalTime;
 								$chatmessage->msg = sprintf('%s advanced to Feudal Age', $player->name);
@@ -1177,7 +1125,6 @@ class RecAnalyst {
 								$age_flag[$i] = 1;
 							}
 							if ($player->castleTime != 0 && $player->castleTime < $time_cnt && $age_flag[$i] < 2) {
-
 								$chatmessage = new ChatMessage();
 								$chatmessage->time = $player->castleTime;
 								$chatmessage->msg = sprintf('%s advanced to Castle Age', $player->name);
@@ -1187,7 +1134,6 @@ class RecAnalyst {
 								$age_flag[$i] = 2;
 							}
 							if ($player->imperialTime != 0 && $player->imperialTime < $time_cnt && $age_flag[$i] < 3) {
-
 								$chatmessage = new ChatMessage();
 								$chatmessage->time = $player->imperialTime;
 								$chatmessage->msg = sprintf('%s advanced to Imperial Age', $player->name);
@@ -1204,13 +1150,11 @@ class RecAnalyst {
 						$chat = substr($bodyStream, $pos, $chat_len); $pos += $chat_len;
 
 						if ($chat[0] == '@' && $chat[1] == '#' && $chat[2] >= '1' && $chat[2] <= '8') {
-
 							$chat = rtrim($chat); // throw null-termination character
 							if (substr($chat, 3, 2) == '--' && substr($chat, -2) == '--') {
 
 							}
 							else {
-
 								$chatmessage = new ChatMessage();
 								$chatmessage->time = $time_cnt;
 								$chatmessage->player = $this->players->getPlayerByIndex($chat[2]);
@@ -1247,16 +1191,13 @@ class RecAnalyst {
 					$pos--;
 
 					switch ($command) {
-
 						case 0x0B: // player resign
 							$pos++;
 							$packed_data = substr($bodyStream, $pos, 1); $pos++;
 							$unpacked_data = unpack('C', $packed_data);
 							$player_index = $unpacked_data[1];
 
-							if (($player = $this->players->getPlayerByIndex($player_index))
-								&& $player->resignTime == 0) {
-
+							if (($player = $this->players->getPlayerByIndex($player_index)) && $player->resignTime == 0) {
 								$player->resignTime = $time_cnt;
 								$chatmessage = new ChatMessage();
 								$chatmessage->time = $time_cnt;
@@ -1282,7 +1223,6 @@ class RecAnalyst {
 								break;
 							}
 							switch ($research_id) {
-
 								case 101:
 									$player->feudalTime = $time_cnt + 130000;
 									break;
@@ -1376,8 +1316,8 @@ class RecAnalyst {
 
 							$playerFrom = $this->players->getPlayerByIndex($player_id_from);
 							$playerTo = $this->players->getPlayerByIndex($player_id_to);
-							if ($playerFrom && $playerTo) {
 
+							if ($playerFrom && $playerTo) {
 								$tribute = new Tribute();
 								$tribute->time = $time_cnt;
 								$tribute->playerFrom = $playerFrom;
@@ -1432,6 +1372,10 @@ class RecAnalyst {
 		return true;
 	}
 
+	/**
+	 * Extended analysis of the PlayerInfo block.
+	 *
+	 */
 	protected function readPlayerInfoBlockEx() {
 
 		$exist_object_separator = pack('c*', 0x0B, 0x00, 0x08, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00);
@@ -1445,20 +1389,17 @@ class RecAnalyst {
 		$objects_mid_separator_gaia = pack('c*', 0x00, 0x0B, 0x00, 0x40, 0x00, 0x00, 0x00, 0x20, 0x00, 0x00);
 
 		$num_player = $this->_queue->pop();
-  		$map_size_x = $this->_queue->pop();
-  		$map_size_y = $this->_queue->pop();
+		$map_size_x = $this->_mapWidth;
+		$map_size_y = $this->_mapHeight;
 
   		for ($i = 0; $i <= $this->players->count(); $i++) { // first is GAIA
-
 			if ($i) {
-
 				// skip GAIA player
 				$player = $this->players->getPlayer($i - 1);
 				// skip cooping player, she/he has no data in Player_info
 				$player_ = $this->players->getPlayerByIndex($player->index);
 
 				if ($player_ && ($player_ !== $player) && $player_->civId) {
-
 					$player->civId = $player_->civId;
 					$player->colorId = $player_->colorId;
 					$player->team = $player_->team;
@@ -1475,6 +1416,7 @@ class RecAnalyst {
 				$this->headerStream->readWord($player_name_len);
 				$this->headerStream->skip($player_name_len + 6);
 
+				// save position of PlayerInfo block, so we don't need to re-search it again in case this analysis fails
 				$this->_queue->push($this->headerStream->getPosition());
 				// Civ header
 				$this->headerStream->readFloat($food);
@@ -1519,7 +1461,6 @@ class RecAnalyst {
 					($player->initialState->civilianPop + $player->initialState->militaryPop);
 			}
 			if (!$i) {
-
 				// GAIA
 				if ($this->gameInfo->_gameVersion == GameVersion::AOKTRIAL ||
 					$this->gameInfo->_gameVersion == GameVersion::AOCTRIAL) {
@@ -1539,16 +1480,13 @@ class RecAnalyst {
 
 			$breakflag = false;
 			while (true) {
-
 				$this->headerStream->readChar($object_type);
 				$this->headerStream->readChar($owner);
 				$this->headerStream->readWord($unit_id);
 
 				switch ($object_type) {
-
 					case 10:
 						switch ($unit_id) {
-
 							case Unit::GOLDMINE:
 							case Unit::STONEMINE:
 							case Unit::CLIFF1:
@@ -1573,13 +1511,12 @@ class RecAnalyst {
 								break;
 						}
 						$this->headerStream->skip(63-4);
-						if (!$this->_isMgx) {
+						if ($this->_isMgl) {
 							$this->headerStream->skip(1);
 						}
 						break;
 					case 20:
 						if ($this->_isMgx) {
-
 							$this->headerStream->skip(59);
 							$this->headerStream->readChar($b);
 							$this->headerStream->skip(-60);
@@ -1593,7 +1530,6 @@ class RecAnalyst {
 						break;
 					case 30:
 						if ($this->_isMgx) {
-
 							$this->headerStream->skip(59);
 							$this->headerStream->readChar($b);
 							$this->headerStream->skip(-60);
@@ -1603,7 +1539,6 @@ class RecAnalyst {
 							}
 						}
 						else {
-
 							$this->headerStream->skip(60);
 							$this->headerStream->readChar($b);
 							$this->headerStream->skip(-61);
@@ -1624,7 +1559,6 @@ class RecAnalyst {
 						break;
 					case 70:
 						switch ($unit_id) {
-
 							case Unit::RELIC:
 							case Unit::DEER:
 							case Unit::BOAR:
@@ -1641,7 +1575,6 @@ class RecAnalyst {
 								break;
 						}
 						if ($owner && $unit_id != Unit::TURKEY && $unit_id != Unit::SHEEP) {
-
 							// exclude convertable objects
 							$this->headerStream->skip(19);
 							$this->headerStream->readFloat($pos_x);
@@ -1666,7 +1599,6 @@ class RecAnalyst {
 						break;
 					case 80:
 						if ($owner) {
-
 							$this->headerStream->skip(19);
 							$this->headerStream->readFloat($pos_x);
 							$this->headerStream->readFloat($pos_y);
@@ -1723,7 +1655,6 @@ class RecAnalyst {
   		return true;
 	}
 
-
 	/**
 	 * Generates a map image.
 	 *
@@ -1759,7 +1690,7 @@ class RecAnalyst {
 				if (isset($colors[$terrain_id])) {
 					imagesetpixel($gd, $x, $y, $colors[$terrain_id]);
 				}
-				else { // fuchsia
+				else { // fuchsia, so we can see the unknown terrain id on a map and add it in the future updates
 					imagesetpixel($gd, $x, $y, imagecolorallocate($gd, 0xff, 0x00, 0xff));
 				}
 			}
@@ -1770,7 +1701,6 @@ class RecAnalyst {
 
 		// draw gaia objects
 		foreach ($this->gaiaObjects as $obj) {
-
 			$c = RecAnalystConst::$OBJECT_COLORS[$obj->id];
 			$c = imagecolorallocate($gd, $c[0], $c[1], $c[2]);
 			$x = $obj->position[0];
@@ -2246,14 +2176,13 @@ class RecAnalyst {
 					}
 
 					foreach ($team as $player_) {
-
 						if ($player_->index == $player->index) {
-
 							$team->addPlayer($player);
 							$found = true;
 							break;
 						}
 					}
+
 					if ($found) {
 						break;
 					}
@@ -2284,16 +2213,12 @@ class RecAnalyst {
 	protected function postAnalyze() {
 
 		if (!$this->gameSettings->isScenario()) {
-
 			$lines = explode("\n", $this->gameInfo->objectivesString);
 			// get map
 			if (!$this->_isMgx || $this->gameSettings->_mapId == Map::CUSTOM) {
-
 				if (count($lines) > 2) {
-
 					$this->gameSettings->map = ltrim(strstr($lines[2], ': '), ': ');
 					if (!$this->_isMgx) {
-
 						$map_found = false;
 						//TODO get map from localized map strings
 					}
@@ -2328,6 +2253,8 @@ class RecAnalyst {
 			ksort($this->buildings);
 		}
 
+		// we sort gaia objects, so we can draw first ciffs than relics,
+		// this ensures that relics will overlap cliffs and not vice versa
 		$this->gaiaObjects->sort(array('RecAnalyst', 'gaiaObjectsCompare'));
 	}
 

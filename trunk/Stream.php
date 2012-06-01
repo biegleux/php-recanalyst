@@ -5,7 +5,7 @@
  * @package recAnalyst
  * @version $Id$
  * @author biegleux <biegleux[at]gmail[dot]com>
- * @copyright copyright (c) 2008-2010 biegleux
+ * @copyright copyright (c) 2008-2012 biegleux
  * @license http://www.opensource.org/licenses/gpl-3.0.html GNU General Public License version 3 (GPLv3)
  * @link http://recanalyst.sourceforge.net/
  * @filesource
@@ -137,14 +137,12 @@ abstract class Stream {
 		$maxBufSize = 0xF000;
 
 		if ($count == 0) {
-
 			$source->position = 0;
 			$count = $source->size;
 		}
 		$result = $count;
 		$bufSize = ($count > $maxBufSize) ? $maxBufSize : $count;
 		while ($count != 0) {
-
 			$n = ($count > $bufSize) ? $bufSize : $count;
 			$source->readBuffer($buffer, $n);
 			$this->writeBuffer($buffer, $n);
