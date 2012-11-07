@@ -153,6 +153,12 @@ class RecAnalyst {
 	protected $_isMgl;
 
 	/**
+	 * True, if the file being analyzed is mgz. False otherwise.
+	 * @var bool
+	 */
+	protected $_isMgz;
+
+	/**
 	 * List of GAIA objects.
 	 * @var TList
 	 */
@@ -183,6 +189,10 @@ class RecAnalyst {
 	 * @var TList
 	 */
 	public $tributes;
+
+	const MGX_EXT = 'mgx';
+	const MGL_EXT = 'mgl';
+	const MGZ_EXT = 'mgz';
 
 	/**
 	 * Class constructor.
@@ -216,6 +226,7 @@ class RecAnalyst {
 		$this->_queue = new Queue();
 		$this->_isMgx = false;
 		$this->_isMgl = false;
+		$this->_isMgz = false;
 		$this->gaiaObjects = new TList();
 		$this->playerObjects = new TList();
 		$this->pregameChatMessages = new TList();
@@ -256,7 +267,7 @@ class RecAnalyst {
 	}
 
 	/**
-	 * Extracts header and body streams from an archive.
+	 * Extracts header and body streams from recorded game.
 	 * @param string $ext File extension.
 	 * @param mixed $input File handler or file contents.
 	 * @return void
@@ -270,15 +281,19 @@ class RecAnalyst {
 				RecAnalystException::FILE_NOT_SPECIFIED);
 		}
 
-		if ($ext == 'mgl') {
+		if ($ext == self::MGL_EXT) {
 			$this->_isMgl = true;
 			$this->_isMgx = false;
-		}
-		elseif ($ext == 'mgx') {
+			$this->_isMgz = false;
+		} elseif ($ext == self::MGX_EXT) {
 			$this->_isMgx = true;
 			$this->_isMgl = false;
-		}
-		else {
+			$this->_isMgz = false;
+		} elseif ($ext == self::MGZ_EXT) {
+			$this->_isMgx = true;
+			$this->_isMgl = false;
+			$this->_isMgz = true;
+		} else {
 			throw new RecAnalystException('Wrong file extension, file format is not supported',
 				RecAnalystException::FILEFORMAT_NOT_SUPPORTED);
 		}
@@ -354,7 +369,7 @@ class RecAnalyst {
 		$version = rtrim($version); // throw null-termination character
 		switch ($version) {
 			case RecAnalystConst::VER_94:
-				$this->gameInfo->_gameVersion = GameVersion::AOC;
+				$this->gameInfo->_gameVersion = $this->_isMgz? GameVersion::AOC11 : GameVersion::AOC;
 				break;
 			case RecAnalystConst::VER_93:
 				$this->gameInfo->_gameVersion = GameVersion::AOK;
@@ -372,11 +387,18 @@ class RecAnalyst {
 			case GameVersion::AOKTRIAL:
 				$this->_isMgl = true;
 				$this->_isMgx = false;
+				$this->_isMgz = false;
 				break;
 			case GameVersion::AOC:
 			case GameVersion::AOCTRIAL:
 				$this->_isMgx = true;
 				$this->_isMgl = false;
+				$this->_isMgz = false;
+				break;
+			case GameVersion::AOC11:
+				$this->_isMgx = true;
+				$this->_isMgl = false;
+				$this->_isMgz = true;
 				break;
 		}
 
@@ -420,11 +442,9 @@ class RecAnalyst {
 				$this->gameSettings->map = RecAnalystConst::$MAPS[$map_id][0];
 				if ($map_id == Map::CUSTOM) {
 					$this->gameSettings->_mapStyle = MAPSTYLE::CUSTOM;
-				}
-				elseif (in_array($map_id, RecAnalystConst::$REAL_WORLD_MAPS)) {
+				} elseif (in_array($map_id, RecAnalystConst::$REAL_WORLD_MAPS)) {
 					$this->gameSettings->_mapStyle = MAPSTYLE::REALWORLD;
-				}
-				else {
+				} else {
 					$this->gameSettings->_mapStyle = MAPSTYLE::STANDARD;
 				}
 
@@ -699,8 +719,7 @@ class RecAnalyst {
 
 				if ($this->_queue->atLeast(1)) {  // we have already found a position in the extended analysis, saves us from re-searching it again
 					$this->headerStream->setPosition($this->_queue->pop());
-				}
-				else {
+				} else {
 					$pos = $this->headerStream->find($player_info_end_separator);
 					$this->headerStream->skip(strlen($player_info_end_separator));
 
@@ -804,8 +823,7 @@ class RecAnalyst {
 
 			if ($this->bodyStream->getPosition() == 0 && !$this->_isMgx) {
 				$od_type = 0x04;
-			}
-			else {
+			} else {
 				$this->bodyStream->readInt($od_type);
 			}
 			// ope_data types: 4(Game_start or Chat), 2(Sync), or 1(Command)
@@ -830,22 +848,23 @@ class RecAnalyst {
 									break;
 							}
 							$this->bodyStream->skip(3);
-						}
-						else {
+						} else {
 							switch ($od_type) {
 								case 0x03:
-									if ($this->gameInfo->_gameVersion != GameVersion::AOCTRIAL) {
+									if ($this->gameInfo->_gameVersion != GameVersion::AOCTRIAL
+										&& $this->gameInfo->_gameVersion != GameVersion::AOC11) {
 										$this->gameInfo->_gameVersion = GameVersion::AOC10;
 									}
 									break;
 								case 0x04:
-									$this->gameInfo->_gameVersion = GameVersion::AOC10C;
+									if ($this->gameInfo->_gameVersion != GameVersion::AOC11) {
+										$this->gameInfo->_gameVersion = GameVersion::AOC10C;
+									}
 									break;
 							}
 							$this->bodyStream->skip(20);
 						}
-					}
-					elseif ($command == -1) {
+					} elseif ($command == -1) {
 						// Chat
 						for ($i = 0; $i < $this->players->count(); $i++) {
 							if (!($player = $this->players->getPlayer($i))) {
@@ -888,8 +907,7 @@ class RecAnalyst {
 							$chat = rtrim($chat); // throw null-termination character
 							if (substr($chat, 3, 2) == '--' && substr($chat, -2) == '--') {
 								// skip messages like "--Warning: You are being under attack... --"
-							}
-							else {
+							} else {
 								$chatmessage = new ChatMessage();
 								$chatmessage->time = $time_cnt;
 								$chatmessage->player = $this->players->getPlayerByIndex($chat[2]);
@@ -965,8 +983,7 @@ class RecAnalyst {
 
 							if (!isset($this->units[$unit_type_id])) {
 								$this->units[$unit_type_id] = $unit_num;
-							}
-							else {
+							} else {
 								$this->units[$unit_type_id] += $unit_num;
 							}
 							$this->bodyStream->skip($length - 12);
@@ -977,8 +994,7 @@ class RecAnalyst {
 							$unit_num = 1; // always for pc?
 							if (!isset($this->units[$unit_type_id])) {
 								$this->units[$unit_type_id] = $unit_num;
-							}
-							else {
+							} else {
 								$this->units[$unit_type_id] += $unit_num;
 							}
 							$this->bodyStream->skip($length - 12);
@@ -995,8 +1011,7 @@ class RecAnalyst {
 
 							if (!isset($this->buildings[$player_id][$building_type_id])) {
 								$this->buildings[$player_id][$building_type_id] = 1;
-							}
-							else {
+							} else {
 								$this->buildings[$player_id][$building_type_id]++;
 							}
 							$this->bodyStream->skip($length - 14);
@@ -1047,8 +1062,7 @@ class RecAnalyst {
 	 *
 	 * @return bool true if the stream was successfully analyzed, false otherwise
 	 */
-	protected function analyzeBodyStreamF()
-	{
+	protected function analyzeBodyStreamF() {
 		$time_cnt = $this->gameSettings->_gameSpeed;
 		$age_flag = array(0, 0, 0, 0, 0, 0, 0, 0);
 
@@ -1060,8 +1074,7 @@ class RecAnalyst {
 
 			if ($pos == 0 && !$this->_isMgx) {
 				$od_type = 0x04;
-			}
-			else {
+			} else {
 				$packed_data = substr($bodyStream, $pos, 4); $pos += 4;
 				$unpacked_data = unpack('l', $packed_data);
 				$od_type = $unpacked_data[1];
@@ -1093,22 +1106,23 @@ class RecAnalyst {
 									break;
 							}
 							$pos += 3;
-						}
-						else {
+						} else {
 							switch ($od_type) {
 								case 0x03:
-									if ($this->gameInfo->_gameVersion != GameVersion::AOCTRIAL) {
+									if ($this->gameInfo->_gameVersion != GameVersion::AOCTRIAL
+										&& $this->gameInfo->_gameVersion != GameVersion::AOC11) {
 										$this->gameInfo->_gameVersion = GameVersion::AOC10;
 									}
 									break;
 								case 0x04:
-									$this->gameInfo->_gameVersion = GameVersion::AOC10C;
+									if ($this->gameInfo->_gameVersion != GameVersion::AOC11) {
+										$this->gameInfo->_gameVersion = GameVersion::AOC10C;
+									}
 									break;
 							}
 							$pos += 20;
 						}
-					}
-					elseif ($command == -1) {
+					} elseif ($command == -1) {
 						// Chat
 						for ($i = 0; $i < $this->players->count(); $i++) {
 							if (!($player = $this->players->getPlayer($i))) {
@@ -1153,8 +1167,7 @@ class RecAnalyst {
 							$chat = rtrim($chat); // throw null-termination character
 							if (substr($chat, 3, 2) == '--' && substr($chat, -2) == '--') {
 
-							}
-							else {
+							} else {
 								$chatmessage = new ChatMessage();
 								$chatmessage->time = $time_cnt;
 								$chatmessage->player = $this->players->getPlayerByIndex($chat[2]);
@@ -1250,8 +1263,7 @@ class RecAnalyst {
 
 							if (!isset($this->units[$unit_type_id])) {
 								$this->units[$unit_type_id] = $unit_num;
-							}
-							else {
+							} else {
 								$this->units[$unit_type_id] += $unit_num;
 							}
 							$pos += $length - 12;
@@ -1264,8 +1276,7 @@ class RecAnalyst {
 							$unit_num = 1; // always for pc?
 							if (!isset($this->units[$unit_type_id])) {
 								$this->units[$unit_type_id] = $unit_num;
-							}
-							else {
+							} else {
 								$this->units[$unit_type_id] += $unit_num;
 							}
 							$pos += $length - 12;
@@ -1285,8 +1296,7 @@ class RecAnalyst {
 							}
 							if (!isset($this->buildings[$player_id][$building_type_id])) {
 								$this->buildings[$player_id][$building_type_id] = 1;
-							}
-							else {
+							} else {
 								$this->buildings[$player_id][$building_type_id]++;
 							}
 							$pos += $length - 14;
@@ -1588,8 +1598,7 @@ class RecAnalyst {
 						if ($this->_isMgx) {
 							$separator_pos = $this->headerStream->find($object_end_separator);
 							$this->headerStream->skip(strlen($object_end_separator));
-						}
-						else {
+						} else {
 							$separator_pos = $this->headerStream->find($aok_object_end_separator);
 							$this->headerStream->skip(strlen($aok_object_end_separator));
 						}
@@ -1611,8 +1620,7 @@ class RecAnalyst {
 						if ($this->_isMgx) {
 							$separator_pos = $this->headerStream->find($object_end_separator);
 							$this->headerStream->skip(strlen($object_end_separator));
-						}
-						else {
+						} else {
 							$separator_pos = $this->headerStream->find($aok_object_end_separator);
 							$this->headerStream->skip(strlen($aok_object_end_separator));
 						}
@@ -1637,8 +1645,7 @@ class RecAnalyst {
 						if ($buff[0] == $objects_mid_separator_gaia[0] &&
 							$buff[1] == $objects_mid_separator_gaia[1]) {
 							$this->headerStream->skip(strlen($objects_mid_separator_gaia));
-						}
-						else {
+						} else {
 							return false;
 						}
 						break;
@@ -1689,8 +1696,7 @@ class RecAnalyst {
 
 				if (isset($colors[$terrain_id])) {
 					imagesetpixel($gd, $x, $y, $colors[$terrain_id]);
-				}
-				else { // fuchsia, so we can see the unknown terrain id on a map and add it in the future updates
+				} else { // fuchsia, so we can see the unknown terrain id on a map and add it in the future updates
 					imagesetpixel($gd, $x, $y, imagecolorallocate($gd, 0xff, 0x00, 0xff));
 				}
 			}
@@ -1932,8 +1938,7 @@ class RecAnalyst {
 					if ($prev_min == $min) {
 						$cnt ++;
 						$dst_x = $x_offsets[$min] + ($cnt * $rw);
-					}
-					else {
+					} else {
 						$cnt = 0;
 						$dst_x = $x_offsets[$min];
 					}
@@ -1946,8 +1951,7 @@ class RecAnalyst {
 						$y2 = $dst_y + $rh + 2;
 						imagefilledrectangle($gd, $x1, $y1, $x2, $y2, $darkage_color);
 						$age_x[0] = $x2;
-					}
-					elseif ($research_id == 102) { // castle age
+					} elseif ($research_id == 102) { // castle age
 						$age_flag[1] = 1;
 						$x1 = $x2;// + $rw;
 						$y1 = $dst_y - 2;
@@ -1955,8 +1959,7 @@ class RecAnalyst {
 						$y2 = $dst_y + $rh + 2;
 						imagefilledrectangle($gd, $x1, $y1, $x2, $y2, $feudalage_color);
 						$age_x[1] = $x2;
-					}
-					elseif ($research_id == 103) { // imperial age
+					} elseif ($research_id == 103) { // imperial age
 						$age_flag[2] = 1;
 						$x1 = $x2;// + $rw;
 						$y1 = $dst_y - 2;
@@ -1979,15 +1982,13 @@ class RecAnalyst {
 				$x2 = $gd_width - $padding;
 				$y2 = $dst_y + $rh + 2;
 				imagefilledrectangle($gd, $x1, $y1, $x2, $y2, $darkage_color);
-			}
-			elseif (!$age_flag[1]) {
+			} elseif (!$age_flag[1]) {
 				$x1 = $age_x[0];
 				$y1 = $dst_y - 2;
 				$x2 = $gd_width - $padding;
 				$y2 = $dst_y + $rh + 2;
 				imagefilledrectangle($gd, $x1, $y1, $x2, $y2, $feudalage_color);
-			}
-			elseif (!$age_flag[2]) {
+			} elseif (!$age_flag[2]) {
 				$x1 = $age_x[1];
 				$y1 = $dst_y - 2;
 				$x2 = $gd_width - $padding;
@@ -2012,8 +2013,7 @@ class RecAnalyst {
 					if ($prev_min == $min) {
 						$cnt ++;
 						$dst_x = $x_offsets[$min] + ($cnt * $rw);
-					}
-					else {
+					} else {
 						$cnt = 0;
 						$dst_x = $x_offsets[$min];
 					}
@@ -2137,8 +2137,7 @@ class RecAnalyst {
 					if ($prev_min == $min) {
 						$cnt ++;
 						$dst_x = $x_offsets[$min] + ($cnt * $rw);
-					}
-					else {
+					} else {
 						$cnt = 0;
 						$dst_x = $x_offsets[$min];
 					}
@@ -2161,6 +2160,7 @@ class RecAnalyst {
 	public function buildTeams() {
 
 		if ($this->teams->count()) {
+			// already built
 			return;
 		}
 
@@ -2192,12 +2192,10 @@ class RecAnalyst {
 					$team->addPlayer($player);
 					$this->teams->addTeam($team);
 				}
-			}
-			else {
+			} else {
 				if ($team = $this->teams->getTeamByIndex($player->team)) {
 					$team->addPlayer($player);
-				}
-				else {
+				} else {
 					$team = new Team();
 					$team ->addPlayer($player);
 					$this->teams->addTeam($team);

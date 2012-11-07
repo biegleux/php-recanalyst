@@ -79,7 +79,8 @@ final class RecAnalystConst {
 		'AOC',
 		'AOC Trial',
 		'AOC 1.0',
-		'AOC 1.0c'
+		'AOC 1.0c',
+		'AOC 1.1'
 	);
 
 	/**
@@ -686,6 +687,7 @@ final class GameVersion {
 	const AOCTRIAL	= 6;
 	const AOC10		= 7;
 	const AOC10C	= 8;
+	const AOC11		= 9;
 
 	private function __construct(){}
 }
@@ -721,8 +723,8 @@ final class GameType {
 	private function __construct(){}
 }
 
-final class GameSpeed
-{
+final class GameSpeed {
+
 	const SLOW   = 100;
 	const NORMAL = 150;
 	const FAST   = 200;
@@ -730,8 +732,8 @@ final class GameSpeed
 	private function __construct(){}
 }
 
-final class RevealMap
-{
+final class RevealMap {
+
 	const NORMAL     = 0;
 	const EXPLORED   = 1;
 	const ALLVISIBLE = 2;
@@ -739,8 +741,8 @@ final class RevealMap
 	private function __construct(){}
 }
 
-final class MapSize
-{
+final class MapSize {
+
 	const TINY   = 0;
 	const SMALL  = 1;
 	const MEDIUM = 2;
