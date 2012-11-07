@@ -39,6 +39,7 @@ class RecArchive {
 
 	const MGX_EXT = 'mgx';
 	const MGL_EXT = 'mgl';
+	const MGZ_EXT = 'mgz';
 
 	/**
 	 * Class constructor.
@@ -128,7 +129,7 @@ class RecArchive {
 
 			// skip useless files
 			$ext = strtolower(pathinfo($stat['name'], PATHINFO_EXTENSION));
-			if ($ext != self::MGX_EXT && $ext != self::MGL_EXT) {
+			if ($ext != self::MGX_EXT && $ext != self::MGL_EXT && $ext != self::MGZ_EXT) {
 				continue;
 			}
 
