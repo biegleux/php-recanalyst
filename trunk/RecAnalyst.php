@@ -1009,6 +1009,10 @@ class RecAnalyst {
 								$building_type_id = Unit::GATE;
 							}
 
+							if (in_array($building_type_id, RecAnalystConst::PALISADE_GATE_UNITS)) {
+								$building_type_id = Unit::PALISADE_GATE;
+							}
+
 							if (!isset($this->buildings[$player_id][$building_type_id])) {
 								$this->buildings[$player_id][$building_type_id] = 1;
 							} else {
@@ -1294,6 +1298,11 @@ class RecAnalyst {
 							if (in_array($building_type_id, RecAnalystConst::$GATE_UNITS)) {
 								$building_type_id = Unit::GATE;
 							}
+
+							if (in_array($building_type_id, RecAnalystConst::PALISADE_GATE_UNITS)) {
+								$building_type_id = Unit::PALISADE_GATE;
+							}
+
 							if (!isset($this->buildings[$player_id][$building_type_id])) {
 								$this->buildings[$player_id][$building_type_id] = 1;
 							} else {
