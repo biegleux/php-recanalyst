@@ -213,7 +213,12 @@ final class RecAnalystConst {
 		array('Aztecs',		'aztecs'),
 		array('Mayans',		'mayans'),
 		array('Huns',		'huns'),
-		array('Koreans',	'koreans')
+		array('Koreans',	'koreans'),
+		array('Italians',	'italians'),
+		array('Indians',	'indians'),
+		array('Incas',		'incas'),
+		array('Magyars',	'magyars'),
+		array('Slavs',		'slavs')
 	);
 
 	public static $COLORS = array(
@@ -385,7 +390,43 @@ final class RecAnalystConst {
 		440 => array('Supremacy',				'unique_tech'),
 		 11 => array('Crenellations',			'unique_tech'),
 		 10 => array('Artillery',				'unique_tech'),
-		 49 => array('Berserkergang',			'unique_tech')
+		 49 => array('Berserkergang',			'unique_tech'),
+		// AoFE
+		526 => array('Hunting Dogs',			'hunting_dogs'),
+		521 => array('Imperial Camel',			'imperial_camel'),
+		517 => array('Couriers',				'unique_tech'),
+		516 => array('Andean Sling',			'unique_tech2'),
+		515 => array('Recurve Bow',				'unique_tech'),
+		514 => array('Mercenaries',				'unique_tech2'),
+		513 => array('Druzhina',				'unique_tech'),
+		512 => array('Orthodoxy',				'unique_tech2'),
+		507 => array('Shatagni',				'unique_tech'),
+		506 => array('Sultans',					'unique_tech2'),
+		499 => array('Silk Road',				'unique_tech'),
+		494 => array('Pavise',					'unique_tech2'),
+		493 => array('Chivalry',				'unique_tech2'),
+		492 => array('Inquisition',				'unique_tech2'),
+		491 => array('Sipahi',					'unique_tech2'),
+		490 => array('Madrasah',				'unique_tech2'),
+		489 => array('Ironclad',				'unique_tech2'),
+		488 => array('Boiling Oil',				'unique_tech2'),
+		487 => array('Nomads',					'unique_tech2'),
+		486 => array('Panokseon',				'unique_tech2'),
+		485 => array('Tlatoani',				'unique_tech2'),
+		484 => array('Marauders',				'unique_tech2'),
+		483 => array('Stronghold',				'unique_tech2'),
+		464 => array('Greek Fire',				'unique_tech2'),
+		463 => array('Chieftains',				'unique_tech2'),
+		462 => array('Great Wall',				'unique_tech2'),
+		461 => array('Warwolf',					'unique_tech2'),
+		460 => array('Atlatl',					'unique_tech2'),
+		384 => array('Eagle Warrior',			'heavy_eagle_warrior'),
+		494 => array('Gillnets',				'gillnets'),
+		509 => array('Elite Kamayuk',			'kamayuk'),
+		504 => array('Elite Boyar',				'boyar'),
+		481 => array('Elite Elephant Archer',	'elephant_archer'),
+		472 => array('Elite Magyar Huszar',		'magyar_huszar'),
+		468 => array('Elite Genoese Crossbowman',	'genoese_crossbowman')
 	);
 
 	/**
@@ -497,6 +538,24 @@ final class RecAnalystConst {
 		829	=> array('Elite War Wagon',			'war_wagon'),
 		831	=> array('Turtle Ship',				'turtle_ship'),
 		832	=> array('Elite Turtle Ship',		'turtle_ship'),
+		// AoFE
+		866 => array('Genoese Crossbowman',			'genoese_crossbowman'),
+		868 => array('Elite Genoese Crossbowman',	'genoese_crossbowman'),
+		886 => array('Tarkan',						'tarkan'),
+		887 => array('Elite Tarkan',				'tarkan'),
+		882 => array('Condottiero',					'condottiero'),
+		184 => array('Condottiero',					'condottiero'),
+		879 => array('Kamayuk',						'kamayuk'),
+		881 => array('Elite Kamayuk',				'kamayuk'),
+		876 => array('Boyar',						'boyar'),
+		878 => array('Elite Boyar',					'boyar'),
+		873 => array('Elephant Archer',				'elephant_archer'),
+		875 => array('Elite Elephant Archer',		'elephant_archer'),
+		869 => array('Magyar Huszar',				'magyar_huszar'),
+		871 => array('Elite Magyar Huszar',			'magyar_huszar'),
+		753 => array('Eagle Warrior',				'eagle_warrior'),
+		207 => array('Imperial Camel',				'imperial_camel'),
+		185 => array('Slinger',						'slinger')
 	);
 
 	/**
@@ -534,7 +593,11 @@ final class RecAnalystConst {
 		598	=> array('Outpost',			'outpost'),
 		621	=> array('Town Center',		'town_center'),
 		665 => array('Gate',			'gate'),
-		673	=> array('Gate',			'gate')
+		673	=> array('Gate',			'gate'),
+		792 => array('Palisade Gate',	'palisade_gate'),
+		796 => array('Palisade Gate',	'palisade_gate'),
+		800 => array('Palisade Gate',	'palisade_gate'),
+		804 => array('Palisade Gate',	'palisade_gate')
 	);
 
 	/**
@@ -671,6 +734,17 @@ final class RecAnalystConst {
 		Unit::GATE4
 	);
 
+	/**
+	 * Palisade gate units.
+	 * @var array
+	 */
+	public static $PALISADE_GATE_UNITS = array(
+		Unit::PALISADE_GATE,
+		Unit::PALISADE_GATE2,
+		Unit::PALISADE_GATE3,
+		Unit::PALISADE_GATE4
+	);
+
 	const VER_94 = 'VER 9.4';
 	const VER_93 = 'VER 9.3';
 	const TRL_93 = 'TRL 9.3';
@@ -774,6 +848,11 @@ final class Civilization {
 	const MAYANS     = 16;
 	const HUNS       = 17;
 	const KOREANS    = 18;
+	const ITALIANS   = 19;
+	const INDIANS    = 20;
+	const INCAS      = 21;
+	const MAGYARS    = 22;
+	const SLAVS      = 23;
 
 	private function __construct(){}
 }
@@ -879,5 +958,10 @@ final class Unit {
 	const GATE2	= 490;
 	const GATE3	= 665;
 	const GATE4	= 673;
+
+	const PALISADE_GATE  = 792;
+	const PALISADE_GATE2 = 796;
+	const PALISADE_GATE3 = 800;
+	const PALISADE_GATE4 = 804;
 }
 ?>
