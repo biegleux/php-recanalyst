@@ -632,16 +632,11 @@ class RecAnalyst {
 		$this->headerStream->readWord($rec_player_ref);
 		$this->headerStream->readChar($num_player);
 
-		$rec_player_ref--;  // 0 is GAIA, not appears in players
-		$num_player--;
-
 		$this->gameSettings->_gameSpeed = $game_speed;
 
-		if ($player = $this->players->getPlayer($rec_player_ref)) {
+		if ($player = $this->players->getPlayerByIndex($rec_player_ref)) {
 			$player->owner = true;
 		}
-
-		$num_player++;
 
 		/* getting map */
 		$this->headerStream->skip(62);
@@ -1005,11 +1000,11 @@ class RecAnalyst {
 							$this->bodyStream->skip(8);
 							$this->bodyStream->readWord($building_type_id);
 
-							if (in_array($building_type_id, RecAnalystConst::GATE_UNITS)) {
+							if (in_array($building_type_id, RecAnalystConst::$GATE_UNITS)) {
 								$building_type_id = Unit::GATE;
 							}
 
-							if (in_array($building_type_id, RecAnalystConst::PALISADE_GATE_UNITS)) {
+							if (in_array($building_type_id, RecAnalystConst::$PALISADE_GATE_UNITS)) {
 								$building_type_id = Unit::PALISADE_GATE;
 							}
 
@@ -1299,7 +1294,7 @@ class RecAnalyst {
 								$building_type_id = Unit::GATE;
 							}
 
-							if (in_array($building_type_id, RecAnalystConst::PALISADE_GATE_UNITS)) {
+							if (in_array($building_type_id, RecAnalystConst::$PALISADE_GATE_UNITS)) {
 								$building_type_id = Unit::PALISADE_GATE;
 							}
 
