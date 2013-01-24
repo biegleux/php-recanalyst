@@ -3,7 +3,7 @@
  *                       AOC Recorded Games Analyzer
  *                       ---------------------------
  *    begin            : Monday, December 3, 2007
- *    copyright        : (c) 2007-2012 biegleux
+ *    copyright        : (c) 2007-2013 biegleux
  *    email            : biegleux(at)gmail(dot)com
  *
  *    recAnalyst v2.1.0 2012/06/21
@@ -512,7 +512,7 @@ class RecAnalyst {
 		/* Trigger_info */
 		$this->headerStream->setPosition($trigger_info_pos + 1);
 
-		// always zero in mgl? or not a really trigger_info here for aok
+		// always zero in mgl? or not really a trigger_info here for aok
 		$this->headerStream->readInt($num_trigger);
 		if ($num_trigger) {
 			/* skip Trigger_info data */
@@ -684,7 +684,7 @@ class RecAnalyst {
 		/* getting Player_info */
 		if (!$this->readPlayerInfoBlockEx()) {
 
-			// something gone wrong with extended analysis, use this older one
+			// something went wrong with extended analysis, use this older one
 			$this->gaiaObjects->clear();
 			$this->playerObjects->clear();
 
@@ -1002,9 +1002,7 @@ class RecAnalyst {
 
 							if (in_array($building_type_id, RecAnalystConst::$GATE_UNITS)) {
 								$building_type_id = Unit::GATE;
-							}
-
-							if (in_array($building_type_id, RecAnalystConst::$PALISADE_GATE_UNITS)) {
+							} else if (in_array($building_type_id, RecAnalystConst::$PALISADE_GATE_UNITS)) {
 								$building_type_id = Unit::PALISADE_GATE;
 							}
 
@@ -1292,9 +1290,7 @@ class RecAnalyst {
 
 							if (in_array($building_type_id, RecAnalystConst::$GATE_UNITS)) {
 								$building_type_id = Unit::GATE;
-							}
-
-							if (in_array($building_type_id, RecAnalystConst::$PALISADE_GATE_UNITS)) {
+							} else if (in_array($building_type_id, RecAnalystConst::$PALISADE_GATE_UNITS)) {
 								$building_type_id = Unit::PALISADE_GATE;
 							}
 
@@ -1371,11 +1367,13 @@ class RecAnalyst {
 
 		$starttime = microtime(true);
 
-		if (!$this->analyzeheaderStream())
+		if (!$this->analyzeheaderStream()) {
 			return false;
+		}
 
-		if (!$this->analyzeBodyStreamF())
+		if (!$this->analyzeBodyStreamF()) {
 			return false;
+		}
 
 		//TODO: triedit units, buildings v post analyze?
 		$this->postAnalyze();
