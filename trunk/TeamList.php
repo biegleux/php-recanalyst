@@ -5,7 +5,7 @@
  * @package recAnalyst
  * @version $Id$
  * @author biegleux <biegleux[at]gmail[dot]com>
- * @copyright copyright (c) 2008-2012 biegleux
+ * @copyright copyright (c) 2008-2013 biegleux
  * @license http://www.opensource.org/licenses/gpl-3.0.html GNU General Public License version 3 (GPLv3)
  * @link http://recanalyst.sourceforge.net/
  * @filesource
@@ -19,43 +19,39 @@
  */
 class TeamList extends TList {
 
-	/**
-	 * Adds a team to the list
-	 *
-	 * @param Team $team the team we wish to add
-	 * @return void
-	 */
-	public function addTeam(Team $team) {
+    /**
+     * Adds a team to the list
+     *
+     * @param Team $team the team we wish to add
+     * @return void
+     */
+    public function addTeam(Team $team) {
+        parent::addItem($team);
+    }
 
-		parent::addItem($team);
-	}
+    /**
+     * Returns a team at the specified offset.
+     *
+     * @param int $index an index of the team
+     * @return Team|bool the team or false if the index is out of the range
+     */
+    public function getTeam($index) {
+        return parent::getItem($index);
+    }
 
-	/**
-	 * Returns a team at the specified offset.
-	 *
-	 * @param int $index an index of the team
-	 * @return Team|bool the team or false if the index is out of the range
-	 */
-	public function getTeam($index) {
-
-		return parent::getItem($index);
-	}
-
-	/**
-	 * Returns a team with its index equal as the one required.
-	 *
-	 * @param int $index team's index
-	 * @return Team|bool the team or false if no team has been found
-	 */
-	public function getTeamByIndex($index) {
-
-		for ($i = 0; $i < $this->_count; $i++) {
-			if ($this->_list[$i]->getIndex() == $index) {
-				return $this->_list[$i];
-			}
-		}
-
-		return false;
-	}
+    /**
+     * Returns a team with its index equal as the one required.
+     *
+     * @param int $index team's index
+     * @return Team|bool the team or false if no team has been found
+     */
+    public function getTeamByIndex($index) {
+        for ($i = 0; $i < $this->_count; $i++) {
+            if ($this->_list[$i]->getIndex() == $index) {
+                return $this->_list[$i];
+            }
+        }
+        return false;
+    }
 }
 ?>
